@@ -1,0 +1,14 @@
+# Environment variables
+.env
+
+# Docker volumes
+docker/
+
+# Database dumps
+*.sql
+*.sql.gz
+
+# OS files
+.DS_Store
+Thumbs.db
+

@@ -1,0 +1,70 @@
+version: "3.8"
+
+services:
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: seo_copywriter_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-wordpress_dev}
+      MYSQL_USER: ${MYSQL_USER:-wp_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wp_password}
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    networks:
+      - dev_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # phpMyAdmin for database management
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: seo_copywriter_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: ${MYSQL_USER:-root}
+      PMA_PASSWORD: ${MYSQL_PASSWORD:-root_password}
+      UPLOAD_LIMIT: 100M
+    ports:
+      - "${PHPMYADMIN_PORT:-8080}:80"
+    networks:
+      - dev_network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # SEO Backend (NestJS)
+  seo-backend:
+    build:
+      context: ./seo-backend
+      dockerfile: Dockerfile
+    container_name: seo_backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./seo-backend:/app
+      - /app/node_modules
+    networks:
+      - dev_network
+    command: npm run start:dev
+
+volumes:
+  db_data:
+    driver: local
+
+networks:
+  dev_network:
+    driver: bridge
