@@ -42,27 +42,49 @@ services:
       db:
         condition: service_healthy
 
-  # SEO Backend (NestJS)
-  seo-backend:
-    build:
-      context: ./seo-backend
-      dockerfile: Dockerfile
-    container_name: seo_backend
+  # MongoDB Database
+  mongodb:
+    image: mongo:8.0
+    container_name: seo_mongodb
     restart: unless-stopped
     environment:
-      - NODE_ENV=development
-      - PORT=4000
-    ports:
-      - "4000:4000"
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-admin_password}
+      MONGO_INITDB_DATABASE: ${MONGO_DATABASE:-seo_postifier}
     volumes:
-      - ./seo-backend:/app
-      - /app/node_modules
+      - mongodb_data:/data/db
+      - ./docker/mongodb/init:/docker-entrypoint-initdb.d
+    ports:
+      - "${MONGO_PORT:-27028}:27017"
     networks:
       - dev_network
-    command: npm run start:dev
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      timeout: 10s
+      retries: 5
+
+  # Mongo Express for MongoDB management
+  mongo-express:
+    image: mongo-express:latest
+    container_name: seo_mongo_express
+    restart: unless-stopped
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER:-admin}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD:-admin_password}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-admin_password}@mongodb:27017/
+      ME_CONFIG_BASICAUTH: false
+    ports:
+      - "${MONGO_EXPRESS_PORT:-8081}:8081"
+    networks:
+      - dev_network
+    depends_on:
+      mongodb:
+        condition: service_healthy
 
 volumes:
   db_data:
+    driver: local
+  mongodb_data:
     driver: local
 
 networks:
