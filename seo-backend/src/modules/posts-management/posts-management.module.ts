@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { LlmManagerModule } from '../llm-manager/llm-manager.module';
 import { PostsManagementController } from './controllers/post-interviews.controller';
 import {
   PostInterview,
@@ -21,6 +22,7 @@ import { PostsManagementService } from './services/posts-management.service';
         schema: PostSchema,
       },
     ]),
+    LlmManagerModule, // Import LlmManagerModule to use GroqService
   ],
   controllers: [PostsManagementController],
   providers: [PostInterviewsService, PostsManagementService],

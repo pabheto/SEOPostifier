@@ -39,8 +39,14 @@ export class PostsManagementService {
       );
     }
 
+    if (!postInterview.interviewId) {
+      throw new BadRequestException(
+        'Post interview does not have an interviewId',
+      );
+    }
+
     const post = new this.postModel({
-      interviewId: postInterview._id,
+      interviewId: postInterview.interviewId,
       status: PostStatus.DRAFT,
       title: postInterview.generatedScriptDefinition.head.h1,
       language: postInterview.language,

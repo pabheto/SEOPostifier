@@ -54,17 +54,20 @@ class SEO_Postifier {
      * Initialize WordPress hooks
      */
     private function init_hooks() {
-        add_action('admin_menu', array($this, 'add_admin_menu'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
+        // Only load in admin area to avoid frontend performance issues
+        if (is_admin()) {
+            add_action('admin_menu', array($this, 'add_admin_menu'));
+            add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_scripts'));
 
-        // AJAX handlers
-        add_action('wp_ajax_seo_postifier_test_connection', array($this, 'test_backend_connection'));
-        add_action('wp_ajax_seo_postifier_create_interview', array($this, 'create_interview'));
-        add_action('wp_ajax_seo_postifier_generate_script_text', array($this, 'generate_script_text'));
-        add_action('wp_ajax_seo_postifier_update_script_text', array($this, 'update_script_text'));
-        add_action('wp_ajax_seo_postifier_generate_script_definition', array($this, 'generate_script_definition'));
-        add_action('wp_ajax_seo_postifier_generate_post', array($this, 'generate_post'));
-        add_action('wp_ajax_seo_postifier_create_wp_draft', array($this, 'create_wp_draft'));
+            // AJAX handlers - only needed in admin
+            add_action('wp_ajax_seo_postifier_test_connection', array($this, 'test_backend_connection'));
+            add_action('wp_ajax_seo_postifier_create_interview', array($this, 'create_interview'));
+            add_action('wp_ajax_seo_postifier_generate_script_text', array($this, 'generate_script_text'));
+            add_action('wp_ajax_seo_postifier_update_script_text', array($this, 'update_script_text'));
+            add_action('wp_ajax_seo_postifier_generate_script_definition', array($this, 'generate_script_definition'));
+            add_action('wp_ajax_seo_postifier_generate_post', array($this, 'generate_post'));
+            add_action('wp_ajax_seo_postifier_create_wp_draft', array($this, 'create_wp_draft'));
+        }
     }
 
     /**
@@ -90,6 +93,7 @@ class SEO_Postifier {
             return;
         }
 
+        // Enqueue styles
         wp_enqueue_style(
             'seo-postifier-admin',
             SEO_POSTIFIER_PLUGIN_URL . 'assets/css/admin.css',
@@ -97,14 +101,53 @@ class SEO_Postifier {
             SEO_POSTIFIER_VERSION
         );
 
+        // Enqueue modular JavaScript files in dependency order
+        // 1. State Manager (no dependencies)
         wp_enqueue_script(
-            'seo-postifier-admin',
-            SEO_POSTIFIER_PLUGIN_URL . 'assets/js/admin.js',
+            'seo-postifier-state-manager',
+            SEO_POSTIFIER_PLUGIN_URL . 'assets/js/modules/state-manager.js',
+            array(),
+            SEO_POSTIFIER_VERSION,
+            true
+        );
+
+        // 2. API Handler (requires jQuery)
+        wp_enqueue_script(
+            'seo-postifier-api-handler',
+            SEO_POSTIFIER_PLUGIN_URL . 'assets/js/modules/api-handler.js',
             array('jquery'),
             SEO_POSTIFIER_VERSION,
             true
         );
 
+        // 3. UI Controller (requires jQuery)
+        wp_enqueue_script(
+            'seo-postifier-ui-controller',
+            SEO_POSTIFIER_PLUGIN_URL . 'assets/js/modules/ui-controller.js',
+            array('jquery'),
+            SEO_POSTIFIER_VERSION,
+            true
+        );
+
+        // 4. Workflow Orchestrator (requires jQuery, StateManager, APIHandler, UIController)
+        wp_enqueue_script(
+            'seo-postifier-workflow',
+            SEO_POSTIFIER_PLUGIN_URL . 'assets/js/modules/workflow-orchestrator.js',
+            array('jquery', 'seo-postifier-state-manager', 'seo-postifier-api-handler', 'seo-postifier-ui-controller'),
+            SEO_POSTIFIER_VERSION,
+            true
+        );
+
+        // 5. Main admin script (requires all modules)
+        wp_enqueue_script(
+            'seo-postifier-admin',
+            SEO_POSTIFIER_PLUGIN_URL . 'assets/js/admin.js',
+            array('jquery', 'seo-postifier-workflow'),
+            SEO_POSTIFIER_VERSION,
+            true
+        );
+
+        // Localize script data to the main admin script
         wp_localize_script('seo-postifier-admin', 'seoPostifierData', array(
             'ajaxUrl' => admin_url('admin-ajax.php'),
             'nonce' => wp_create_nonce('seo_postifier_nonce'),
@@ -161,7 +204,10 @@ class SEO_Postifier {
 
         $interview_data = isset($_POST['interview_data']) ? $_POST['interview_data'] : array();
 
-        $response = $this->make_backend_request('/posts-interviews/create', 'POST', $interview_data);
+        // Increase PHP execution time for this operation
+        set_time_limit(60); // 1 minute should be enough for creation
+
+        $response = $this->make_backend_request('/posts-interviews/create', 'POST', $interview_data, 30);
 
         if (is_wp_error($response)) {
             wp_send_json_error(array(
@@ -171,18 +217,18 @@ class SEO_Postifier {
         }
 
         $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
+        $interview = json_decode($body, true);
 
         if (wp_remote_retrieve_response_code($response) !== 201) {
             wp_send_json_error(array(
-                'message' => isset($data['message']) ? $data['message'] : 'Failed to create interview'
+                'message' => isset($interview['message']) ? $interview['message'] : 'Failed to create interview'
             ));
             return;
         }
 
         wp_send_json_success(array(
             'message' => 'Interview created successfully',
-            'interview' => $data
+            'interview' => $interview
         ));
     }
 
@@ -204,9 +250,12 @@ class SEO_Postifier {
             return;
         }
 
+        // Increase PHP execution time for this operation
+        set_time_limit(180); // 3 minutes
+
         $response = $this->make_backend_request('/posts-interviews/generate-script-text', 'POST', array(
             'interviewId' => $interview_id
-        ));
+        ), 120); // 2 minutes timeout
 
         if (is_wp_error($response)) {
             wp_send_json_error(array(
@@ -275,9 +324,12 @@ class SEO_Postifier {
             return;
         }
 
+        // Increase PHP execution time for this operation
+        set_time_limit(180); // 3 minutes
+
         $response = $this->make_backend_request('/posts-interviews/generate-script-definition', 'POST', array(
             'interviewId' => $interview_id
-        ));
+        ), 120); // 2 minutes timeout
 
         if (is_wp_error($response)) {
             wp_send_json_error(array(
@@ -425,28 +477,28 @@ class SEO_Postifier {
         }
 
         foreach ($blocks as $block) {
-            if (!isset($block['type']) || !isset($block['data'])) {
+            if (!isset($block['type'])) {
                 continue;
             }
 
             switch ($block['type']) {
-                case 'HEADING':
-                    $level = isset($block['data']['level']) ? $block['data']['level'] : 'h2';
-                    $title = isset($block['data']['title']) ? $block['data']['title'] : '';
+                case 'heading':
+                    $level = isset($block['level']) ? $block['level'] : 'h2';
+                    $title = isset($block['title']) ? $block['title'] : '';
                     $level_num = str_replace('h', '', $level);
                     $content .= sprintf('<%s>%s</%s>' . "\n\n", $level, esc_html($title), $level);
                     break;
 
-                case 'PARAGRAPH':
-                    $text = isset($block['data']['content']) ? $block['data']['content'] : '';
+                case 'paragraph':
+                    $text = isset($block['content']) ? $block['content'] : '';
                     $content .= sprintf('<p>%s</p>' . "\n\n", wp_kses_post($text));
                     break;
 
-                case 'IMAGE':
-                    if (isset($block['data']['url'])) {
-                        $url = $block['data']['url'];
-                        $alt = isset($block['data']['alt']) ? $block['data']['alt'] : '';
-                        $caption = isset($block['data']['caption']) ? $block['data']['caption'] : '';
+                case 'image':
+                    if (isset($block['image']['sourceValue'])) {
+                        $url = $block['image']['sourceValue'];
+                        $alt = isset($block['image']['suggestedAlt']) ? $block['image']['suggestedAlt'] : '';
+                        $caption = isset($block['image']['notes']) ? $block['image']['notes'] : '';
 
                         $img = sprintf('<img src="%s" alt="%s" class="aligncenter" />', esc_url($url), esc_attr($alt));
 
@@ -458,11 +510,11 @@ class SEO_Postifier {
                     }
                     break;
 
-                case 'FAQ':
-                    if (isset($block['data']['questions']) && isset($block['data']['answers'])) {
+                case 'faq':
+                    if (isset($block['questions']) && isset($block['answers'])) {
                         $content .= '<h2>FAQ</h2>' . "\n\n";
-                        $questions = $block['data']['questions'];
-                        $answers = $block['data']['answers'];
+                        $questions = $block['questions'];
+                        $answers = $block['answers'];
 
                         foreach ($questions as $index => $question) {
                             $content .= sprintf('<h3>%s</h3>' . "\n", esc_html($question));

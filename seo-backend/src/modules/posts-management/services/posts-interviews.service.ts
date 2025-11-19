@@ -16,6 +16,7 @@ import {
   PostInterview,
   PostInterviewDocument,
 } from '../schemas/post-interview.schema';
+import { randomUUID } from 'crypto';
 
 @Injectable()
 export class PostInterviewsService {
@@ -29,24 +30,34 @@ export class PostInterviewsService {
   async createPostInterview(
     createPostInterviewDto: CreatePostInterviewDto,
   ): Promise<PostInterviewDocument> {
-    const postInterview = new this.postInterviewModel(createPostInterviewDto);
+    // Import uuid if not already imported at the top:
+    // import { v4 as uuidv4 } from 'uuid';
+
+    const interviewId = randomUUID();
+    const postInterview = new this.postInterviewModel({
+      interviewId,
+      ...createPostInterviewDto,
+    });
     return postInterview.save();
   }
 
   async getPostInterviewById(
-    postInterviewId: string,
+    interviewId: string,
   ): Promise<PostInterviewDocument> {
-    const postInterview =
-      await this.postInterviewModel.findById(postInterviewId);
+    const postInterview = await this.postInterviewModel.findOne({
+      interviewId,
+    });
     if (!postInterview) {
-      throw new NotFoundException('Post interview not found');
+      throw new NotFoundException(
+        `Post interview not found with interviewId: ${interviewId}`,
+      );
     }
     return postInterview;
   }
 
   async generateAndUpdateScriptText(
     postInterview: PostInterviewDocument,
-  ): Promise<boolean> {
+  ): Promise<PostInterviewDocument> {
     const prompt = ScriptsPrompting.GENERATE_SEO_SCRIPT_PROMPT(postInterview);
 
     const script = await this.groqService.generate(prompt, {
@@ -58,12 +69,12 @@ export class PostInterviewsService {
     postInterview.status = InterviewStatus.SCRIPT_TEXT_GENERATED;
     await postInterview.save();
 
-    return true;
+    return postInterview;
   }
 
   async generateAndUpdateScriptDefinition(
     postInterview: PostInterviewDocument,
-  ): Promise<boolean> {
+  ): Promise<PostInterviewDocument> {
     if (
       !postInterview.generatedScriptText ||
       (postInterview.status !== InterviewStatus.SCRIPT_TEXT_GENERATED &&
@@ -88,6 +99,6 @@ export class PostInterviewsService {
     postInterview.status = InterviewStatus.SCRIPT_DEFINITION_GENERATED;
     await postInterview.save();
 
-    return true;
+    return postInterview;
   }
 }

@@ -60,6 +60,14 @@ const ImagesConfigSchema = SchemaFactory.createForClass(ImagesConfig);
 @Schema({ timestamps: true, collection: 'post_interviews' })
 export class PostInterview {
   // ============================================
+  // SECCIÓN 0: ID único de la entrevista
+  // ============================================
+
+  /** ID único de la entrevista (diferente al _id de MongoDB) */
+  @Prop({ required: true, unique: true, index: true })
+  interviewId: string;
+
+  // ============================================
   // SECCIÓN 1: Datos SEO y de contenido
   // ============================================
 
@@ -210,6 +218,19 @@ export class PostInterview {
 const PostInterviewSchema = SchemaFactory.createForClass(PostInterview);
 
 // ============================================
+// Pre-save hook para generar interviewId automáticamente
+// ============================================
+PostInterviewSchema.pre('save', function (next) {
+  if (this.isNew && !this.interviewId) {
+    // Generar un ID único: timestamp + random string
+    const timestamp = Date.now().toString(36);
+    const randomStr = Math.random().toString(36).substring(2, 9);
+    this.interviewId = `int_${timestamp}_${randomStr}`;
+  }
+  next();
+});
+
+// ============================================
 // ÍNDICES para optimización de consultas
 // ============================================
 
@@ -218,11 +239,18 @@ PostInterviewSchema.index({ status: 1, userId: 1, createdAt: -1 });
 PostInterviewSchema.index({ projectId: 1, status: 1 });
 
 // Índice de texto para búsqueda en contenido
-PostInterviewSchema.index({
-  mainKeyword: 'text',
-  tentativeTitle: 'text',
-  targetAudience: 'text',
-});
+// Note: We specify default_language: 'none' to avoid language-specific stemming
+// since we handle multiple languages dynamically
+PostInterviewSchema.index(
+  {
+    mainKeyword: 'text',
+    targetAudience: 'text',
+  },
+  {
+    default_language: 'none',
+    language_override: 'dummy_language_field', // Use non-existent field to disable language override
+  },
+);
 
 // Índice para búsquedas por fechas
 PostInterviewSchema.index({ createdAt: -1 });

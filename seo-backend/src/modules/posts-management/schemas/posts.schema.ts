@@ -1,7 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 import { PostBlock, PostStatus } from '../library/interfaces/posts.interface';
-import { PostInterview } from './post-interview.schema';
 
 @Schema({ timestamps: true, collection: 'posts' })
 export class Post {
@@ -9,13 +8,12 @@ export class Post {
   // Vínculos externos
   // ============================================
 
-  /** Referencia a la entrevista de origen */
+  /** ID de la entrevista de origen (string, no ObjectId) */
   @Prop({
-    type: MongooseSchema.Types.ObjectId,
-    ref: 'PostInterview',
+    type: String,
     index: true,
   })
-  interviewId?: PostInterview;
+  interviewId?: string;
 
   /** ID del post en WordPress (si está publicado/sincronizado) */
   @Prop({ index: true })
@@ -62,6 +60,13 @@ export const PostSchema = SchemaFactory.createForClass(Post);
 // Índices útiles
 PostSchema.index({ status: 1, createdAt: -1 });
 PostSchema.index({ wordpressPostId: 1 });
-PostSchema.index({ mainKeyword: 'text', title: 'text' });
+// Text index without language-specific stemming
+PostSchema.index(
+  { mainKeyword: 'text', title: 'text' },
+  {
+    default_language: 'none',
+    language_override: 'dummy_language_field', // Use non-existent field to disable language override
+  },
+);
 
 export type PostDocument = HydratedDocument<Post>;

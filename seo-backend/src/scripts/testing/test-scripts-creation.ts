@@ -23,6 +23,7 @@ async function bootstrap() {
   const groqService = app.get(GroqService);
 
   const testPostInterview: PostInterview = {
+    interviewId: 'testInterviewId',
     mainKeyword: 'online marketing',
     secondaryKeywords: ['digital marketing'],
     userDescription:
@@ -129,8 +130,7 @@ async function bootstrap() {
       formattedScriptObject.indexSummary,
       testPostInterview.targetAudience,
       testPostInterview.toneOfVoice,
-      sectionTitle,
-      sectionDescription,
+      section,
     );
 
     const paragraph = await groqService.generate(prompt, {
@@ -144,7 +144,6 @@ async function bootstrap() {
   // d. FAQ section if present
   if (formattedScriptObject.faq) {
     const sectionTitle = 'Frequently Asked Questions';
-    const sectionDescription = formattedScriptObject.faq.description;
 
     // Add FAQ section title
     fullArticleContent += `## ${sectionTitle}\n\n`;
@@ -154,8 +153,7 @@ async function bootstrap() {
         formattedScriptObject.indexSummary,
         testPostInterview.targetAudience,
         testPostInterview.toneOfVoice,
-        sectionTitle,
-        sectionDescription,
+        formattedScriptObject.faq,
       ),
       {
         model: MEDIUM_GENERATION_MODEL,

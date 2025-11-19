@@ -21,4 +21,3 @@ export class License extends Document {
 }
 
 export const LicenseSchema = SchemaFactory.createForClass(License);
-

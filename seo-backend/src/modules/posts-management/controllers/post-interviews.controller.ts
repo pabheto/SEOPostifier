@@ -1,7 +1,8 @@
-import { Body, Controller, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';
 import { GeneratePostFromInterviewDto } from '../dto/generate-post-from-interview.dto';
+import { GetInterviewByIdDto } from '../dto/get-interview-by-id.dto';
 import { PostInterviewsService } from '../services/posts-interviews.service';
 import { PostsManagementService } from '../services/posts-management.service';
 
@@ -14,33 +15,96 @@ export class PostsManagementController {
   ) {}
 
   @Post('create')
-  createPostInterview(@Body() createPostInterviewDto: CreatePostInterviewDto) {
-    return this.postInterviewsService.createPostInterview(
+  @HttpCode(201)
+  @ApiOperation({ summary: 'Create a new post interview' })
+  @ApiResponse({
+    status: 201,
+    description: 'Interview created successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error - invalid input data',
+  })
+  async createPostInterview(
+    @Body() createPostInterviewDto: CreatePostInterviewDto,
+  ) {
+    const interview = await this.postInterviewsService.createPostInterview(
       createPostInterviewDto,
     );
+    return interview;
   }
 
   @Post('generate-script-text')
-  async generateScriptText(@Body() postInterviewId: string) {
-    const postInterview =
-      await this.postInterviewsService.getPostInterviewById(postInterviewId);
-
-    return this.postInterviewsService.generateAndUpdateScriptText(
-      postInterview,
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Generate script text for an interview' })
+  @ApiResponse({
+    status: 200,
+    description: 'Script text generated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error - invalid interview ID',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Interview not found',
+  })
+  async generateScriptText(@Body() dto: GetInterviewByIdDto) {
+    const postInterview = await this.postInterviewsService.getPostInterviewById(
+      dto.interviewId,
     );
+
+    const updatedInterview =
+      await this.postInterviewsService.generateAndUpdateScriptText(
+        postInterview,
+      );
+
+    return { interview: updatedInterview };
   }
 
   @Post('generate-script-definition')
-  async generateScriptDefinition(@Body() postInterviewId: string) {
-    const postInterview =
-      await this.postInterviewsService.getPostInterviewById(postInterviewId);
-
-    return this.postInterviewsService.generateAndUpdateScriptDefinition(
-      postInterview,
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Generate script definition for an interview' })
+  @ApiResponse({
+    status: 200,
+    description: 'Script definition generated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error - invalid interview ID',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Interview not found',
+  })
+  async generateScriptDefinition(@Body() dto: GetInterviewByIdDto) {
+    const postInterview = await this.postInterviewsService.getPostInterviewById(
+      dto.interviewId,
     );
+
+    const updatedInterview =
+      await this.postInterviewsService.generateAndUpdateScriptDefinition(
+        postInterview,
+      );
+
+    return { interview: updatedInterview };
   }
 
   @Post('generate-post')
+  @HttpCode(201)
+  @ApiOperation({ summary: 'Generate a post from an interview' })
+  @ApiResponse({
+    status: 201,
+    description: 'Post generated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error - invalid interview ID',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Interview not found',
+  })
   async generatePostFromInterview(
     @Body() generatePostDto: GeneratePostFromInterviewDto,
   ) {
@@ -48,8 +112,11 @@ export class PostsManagementController {
       generatePostDto.interviewId,
     );
 
-    return this.postsManagementService.createPostDraftFromInterview(
-      postInterview,
-    );
+    const post =
+      await this.postsManagementService.createPostDraftFromInterview(
+        postInterview,
+      );
+
+    return { post };
   }
 }

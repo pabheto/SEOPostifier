@@ -8,6 +8,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Matches,
   MaxLength,
   Min,
 } from 'class-validator';
@@ -49,9 +50,17 @@ export class CreatePostInterviewDto {
   @IsNumber()
   keywordDensityTarget?: number = 0.017;
 
-  @ApiProperty({ description: 'Idioma del post (ISO 639-1: "es", "en", etc.)' })
+  @ApiProperty({
+    description: 'Idioma del post (ISO 639-1: "es", "en", etc.)',
+    example: 'es',
+    pattern: '^[a-z]{2}$',
+  })
   @IsString()
   @IsNotEmpty()
+  @Matches(/^[a-z]{2}$/, {
+    message:
+      'language must be a valid ISO 639-1 language code (e.g., "es", "en", "fr")',
+  })
   language: string;
 
   @ApiProperty({
