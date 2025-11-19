@@ -10,4 +10,3 @@ export class GetInterviewByIdDto {
   @IsString({ message: 'interviewId must be a string' })
   interviewId: string;
 }
-

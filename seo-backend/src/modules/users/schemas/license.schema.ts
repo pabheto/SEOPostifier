@@ -3,6 +3,8 @@ import { Document, Types } from 'mongoose';
 
 export enum LicenseRole {
   BASIC = 'BASIC',
+  PREMIUM = 'PREMIUM',
+  ENTERPRISE = 'ENTERPRISE',
 }
 
 @Schema({ timestamps: true })

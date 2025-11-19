@@ -1,5 +1,5 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
@@ -12,11 +12,11 @@ export class LoggerMiddleware implements NestMiddleware {
     console.log(`📥 REQUEST: ${method} ${originalUrl}`);
     console.log(`⏰ Time: ${new Date().toISOString()}`);
 
-    if (Object.keys(query).length > 0) {
+    if (query && Object.keys(query).length > 0) {
       console.log(`🔍 Query: ${this.trimContent(JSON.stringify(query))}`);
     }
 
-    if (Object.keys(body).length > 0) {
+    if (body && Object.keys(body).length > 0) {
       console.log(`📦 Body: ${this.trimContent(JSON.stringify(body))}`);
     }
 
@@ -27,14 +27,26 @@ export class LoggerMiddleware implements NestMiddleware {
     // Override res.send
     res.send = function (data: any) {
       res.send = originalSend;
-      LoggerMiddleware.logResponse(res.statusCode, data, startTime, method, originalUrl);
+      LoggerMiddleware.logResponse(
+        res.statusCode,
+        data,
+        startTime,
+        method,
+        originalUrl,
+      );
       return originalSend.call(this, data);
     };
 
     // Override res.json
     res.json = function (data: any) {
       res.json = originalJson;
-      LoggerMiddleware.logResponse(res.statusCode, data, startTime, method, originalUrl);
+      LoggerMiddleware.logResponse(
+        res.statusCode,
+        data,
+        startTime,
+        method,
+        originalUrl,
+      );
       return originalJson.call(this, data);
     };
 
@@ -49,7 +61,8 @@ export class LoggerMiddleware implements NestMiddleware {
     url: string,
   ) {
     const duration = Date.now() - startTime;
-    const statusEmoji = statusCode >= 400 ? '❌' : statusCode >= 300 ? '↩️' : '✅';
+    const statusEmoji =
+      statusCode >= 400 ? '❌' : statusCode >= 300 ? '↩️' : '✅';
 
     console.log(`${statusEmoji} RESPONSE: ${method} ${url}`);
     console.log(`📊 Status: ${statusCode} | ⚡ Duration: ${duration}ms`);
@@ -66,11 +79,13 @@ export class LoggerMiddleware implements NestMiddleware {
     return LoggerMiddleware.trimContentStatic(content, maxLength);
   }
 
-  private static trimContentStatic(content: string, maxLength: number = 300): string {
+  private static trimContentStatic(
+    content: string,
+    maxLength: number = 300,
+  ): string {
     if (content.length <= maxLength) {
       return content;
     }
     return content.substring(0, maxLength) + '... [truncated]';
   }
 }
-

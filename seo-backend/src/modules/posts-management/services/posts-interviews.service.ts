@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
 import { GroqService, SCRIPT_CREATION_MODEL } from '../../llm-manager';
 import { ScriptsPrompting } from '../../llm-manager/library/prompts/scripts.prompting';
@@ -16,7 +17,6 @@ import {
   PostInterview,
   PostInterviewDocument,
 } from '../schemas/post-interview.schema';
-import { randomUUID } from 'crypto';
 
 @Injectable()
 export class PostInterviewsService {
@@ -100,5 +100,10 @@ export class PostInterviewsService {
     await postInterview.save();
 
     return postInterview;
+  }
+
+  async getInterviewsList(): Promise<PostInterviewDocument[]> {
+    const interviews = await this.postInterviewModel.find();
+    return interviews;
   }
 }

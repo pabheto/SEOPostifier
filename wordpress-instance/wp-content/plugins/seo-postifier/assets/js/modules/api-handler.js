@@ -73,16 +73,6 @@ const APIHandler = (function ($) {
   }
 
   /**
-   * Update script text
-   */
-  function updateScriptText(interviewId, scriptText) {
-    return makeRequest("seo_postifier_update_script_text", {
-      interview_id: interviewId,
-      script_text: scriptText,
-    });
-  }
-
-  /**
    * Generate script definition (formatted JSON)
    */
   function generateScriptDefinition(interviewId) {
@@ -118,7 +108,6 @@ const APIHandler = (function ($) {
     testConnection,
     createInterview,
     generateScriptText,
-    updateScriptText,
     generateScriptDefinition,
     generatePost,
     createWordPressDraft,

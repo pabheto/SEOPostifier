@@ -1,5 +1,19 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  NotFoundException,
+  Param,
+  Post,
+} from '@nestjs/common';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
+import { RequireLicense } from '../../users/decorators/require-license.decorator';
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';
 import { GeneratePostFromInterviewDto } from '../dto/generate-post-from-interview.dto';
 import { GetInterviewByIdDto } from '../dto/get-interview-by-id.dto';
@@ -7,7 +21,9 @@ import { PostInterviewsService } from '../services/posts-interviews.service';
 import { PostsManagementService } from '../services/posts-management.service';
 
 @ApiTags('Posts Interviews Management')
+@ApiSecurity('license-key')
 @Controller('posts-interviews')
+@RequireLicense()
 export class PostsManagementController {
   constructor(
     private readonly postInterviewsService: PostInterviewsService,
@@ -24,6 +40,10 @@ export class PostsManagementController {
   @ApiResponse({
     status: 400,
     description: 'Validation error - invalid input data',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing license key',
   })
   async createPostInterview(
     @Body() createPostInterviewDto: CreatePostInterviewDto,
@@ -44,6 +64,10 @@ export class PostsManagementController {
   @ApiResponse({
     status: 400,
     description: 'Validation error - invalid interview ID',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing license key',
   })
   @ApiResponse({
     status: 404,
@@ -74,6 +98,10 @@ export class PostsManagementController {
     description: 'Validation error - invalid interview ID',
   })
   @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing license key',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Interview not found',
   })
@@ -102,6 +130,10 @@ export class PostsManagementController {
     description: 'Validation error - invalid interview ID',
   })
   @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing license key',
+  })
+  @ApiResponse({
     status: 404,
     description: 'Interview not found',
   })
@@ -118,5 +150,48 @@ export class PostsManagementController {
       );
 
     return { post };
+  }
+
+  @Get('get-interviews-list')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Get list of interviews' })
+  @ApiResponse({
+    status: 200,
+    description: 'Interviews list retrieved successfully',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing license key',
+  })
+  async getInterviewsList() {
+    const interviews = await this.postInterviewsService.getInterviewsList();
+    return { interviews };
+  }
+
+  // View
+  @Get('get-script-text/:interviewId')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Get script text for an interview' })
+  @ApiResponse({
+    status: 200,
+    description: 'Script text retrieved successfully',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing license key',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Interview not found',
+  })
+  async getScriptText(@Param('interviewId') interviewId: string) {
+    const postInterview =
+      await this.postInterviewsService.getPostInterviewById(interviewId);
+
+    if (!postInterview.generatedScriptText) {
+      throw new NotFoundException('Script text not generated');
+    }
+
+    return { scriptText: postInterview.generatedScriptText };
   }
 }

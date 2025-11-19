@@ -6,6 +6,7 @@ import { AuthHelper } from './auth.helper';
 import { User, UserSchema } from './schemas/user.schema';
 import { License, LicenseSchema } from './schemas/license.schema';
 import { Session, SessionSchema } from './schemas/session.schema';
+import { LicenseGuard } from './guards/license.guard';
 
 @Module({
   imports: [
@@ -16,8 +17,8 @@ import { Session, SessionSchema } from './schemas/session.schema';
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthHelper],
-  exports: [UsersService, AuthHelper],
+  providers: [UsersService, AuthHelper, LicenseGuard],
+  exports: [UsersService, AuthHelper, LicenseGuard],
 })
 export class UsersModule {}
 
