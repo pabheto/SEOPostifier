@@ -9,47 +9,12 @@ import {
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
 import {
   InterviewStatus,
+  ScriptFormatDefinition,
   SearchIntent,
   ToneOfVoice,
-} from 'src/modules/post-interviews/library/interfaces/post-interview.interface';
-import { PostInterview } from 'src/modules/post-interviews/schemas/post-interview.schema';
+} from 'src/modules/posts-management/library/interfaces/post-interview.interface';
+import { PostInterview } from 'src/modules/posts-management/schemas/post-interview.schema';
 import { AppModule } from '../../app.module';
-
-export type Image = {
-  sourceType: 'user|ai_generated';
-  sourceValue?: string;
-  description?: string;
-  alt?: string;
-};
-
-export type Section = {
-  id: string;
-  level: 'h2' | 'h3' | 'h4';
-  title: string;
-  lengthRange: [number, number];
-  description: string;
-  images?: Image[];
-  links: {
-    internal: string[];
-    external: string[];
-  };
-};
-
-export type ScriptFormatDefinition = {
-  indexSummary: string;
-  head: {
-    h1: string;
-    introductionDescription: string;
-    slug: string;
-    tags: string[];
-  };
-  body: {
-    sections: Section[];
-  };
-  faq?: {
-    description: string;
-  };
-};
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -88,12 +53,6 @@ async function bootstrap() {
     status: InterviewStatus.DRAFT,
     projectId: 'testProjectId',
     userId: 'testUserId',
-    suggestedSlug: 'ultimate-seo-guide',
-    suggestedCategories: ['SEO', 'Marketing'],
-    suggestedTags: ['SEO', 'Google', 'Ranking'],
-    isComplete: false,
-    metadata: {},
-    generatedPrompts: [],
   };
 
   // === Prepare output folder per result ===
@@ -101,8 +60,7 @@ async function bootstrap() {
   if (!fs.existsSync(rootOutputDir)) {
     fs.mkdirSync(rootOutputDir, { recursive: true });
   }
-  const slug =
-    testPostInterview.suggestedSlug || 'seo_script_result_' + Date.now();
+  const slug = 'seo_script_result_' + Date.now();
   const outputDir = path.join(rootOutputDir, slug);
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });

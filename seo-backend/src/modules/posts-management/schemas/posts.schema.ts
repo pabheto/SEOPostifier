@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
-import { PostInterview } from '../../post-interviews/schemas/post-interview.schema';
 import { PostBlock, PostStatus } from '../library/interfaces/posts.interface';
+import { PostInterview } from './post-interview.schema';
 
 @Schema({ timestamps: true, collection: 'posts' })
 export class Post {
@@ -37,9 +37,6 @@ export class Post {
   @Prop({ required: true })
   title: string;
 
-  @Prop({ maxlength: 160 })
-  metaDescription?: string;
-
   @Prop()
   slug?: string;
 
@@ -58,7 +55,7 @@ export class Post {
 
   /** Array ordenado de bloques que componen el post */
   @Prop({ default: [] })
-  blocks: PostBlock[];
+  blocks?: PostBlock[];
 }
 export const PostSchema = SchemaFactory.createForClass(Post);
 

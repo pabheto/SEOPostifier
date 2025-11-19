@@ -1,4 +1,8 @@
-import { PostInterview } from '../../../post-interviews/schemas/post-interview.schema';
+import {
+  ScriptFAQ,
+  ScriptSection,
+} from 'src/modules/posts-management/library/interfaces/post-interview.interface';
+import { PostInterview } from '../../../posts-management/schemas/post-interview.schema';
 
 export class ScriptsPrompting {
   static readonly GENERATE_SEO_SCRIPT_PROMPT = (
@@ -271,7 +275,7 @@ You must describe the points of the introduction to allow the writer to develop 
   - Optional slug + tags
   
   ### 3.2. “General Structure of the Article”
-  List H2/H3 headings with 1–2 line summaries.
+  List H2/H3/H4 headings with 1–2 line summaries.
   
   ### 3.3. Detailed Section Scripts
   
@@ -328,7 +332,7 @@ type Image = {
   alt?: string;
 };
 
-type Section = {
+type ScriptSection = {
   id: string;
   level: 'h2' | 'h3' | 'h4';
   title: string;
@@ -350,7 +354,7 @@ type ScriptFormatDefinition = {
     tags: string[];
   };
   body: {
-    sections: Section[];
+    sections: ScriptSection[];
   };
   faq?: {
     description: string;
@@ -451,8 +455,7 @@ Return ONLY the paragraph of the introduction with no additional text of instruc
     indexSummary: string,
     targetAudience: string,
     targetTone: string,
-    sectionTitle: string,
-    sectionDescription: string,
+    section: ScriptSection,
   ) => {
     return `You are an expert SEO copywriter. 
 
@@ -460,12 +463,24 @@ Write a compelling, SEO-optimized paragraph for the section.
 The paragraph should reflect the purpose and angle suggested in sectionDescription, stay aligned with the topic in sectionTitle, and naturally use relevant ideas from the tags.
 Keep the tone ${targetTone}, engaging, and suitable for high-quality SEO content for ${targetAudience} audience.
 
-The title of the section is ${sectionTitle}
-Match this description: ${sectionDescription}
+Title ${section.title} (don't include, just for content reference)
+The level of this paragraph is inside a ${section.level} heading.
+Description: ${section.description}
+Total words: ${section.lengthRange[0]} - ${section.lengthRange[1]}
 
 For context with other sections, the topics of the article are ${indexSummary}
 
-Return ONLY the paragraph of the section with no additional text of instructions.
+Return only the paragraph of the section in a JSON format matching the following type structure.
+Use one paragraph block per contextual paragraph of the content.
+PostBlock {
+  type: "paragraph";
+  content: string;
+}
+
+Your result should be in this JSON format, plain JSON, no formatting or additional text.
+{
+    "blocks": PostBlock[]
+}
 `;
   };
 
@@ -473,18 +488,15 @@ Return ONLY the paragraph of the section with no additional text of instructions
     indexSummary: string,
     targetAudience: string,
     targetTone: string,
-    sectionTitle: string,
-    sectionDescription: string,
+    faq: ScriptFAQ,
   ) => {
     return `You are an expert SEO copywriter. 
     Write a compelling, SEO-optimized FAQ section for the article.
     The FAQ section should reflect the purpose and angle suggested in sectionDescription, stay aligned with the topic in sectionTitle, and naturally use relevant ideas from the tags.
     Keep the tone ${targetTone}, engaging, and suitable for high-quality SEO content for ${targetAudience} audience.
 
-    The title of the section is ${sectionTitle}
-    Match this description: ${sectionDescription}
-
     For context with other sections, the topics of the article are ${indexSummary}
+    Match this description: ${faq.description}
 
     Return ONLY the FAQ section with no additional text of instructions.
     You must return it in JSON format plain text matching the following structure:

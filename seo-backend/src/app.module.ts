@@ -4,7 +4,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LlmManagerModule } from './modules/llm-manager';
-import { PostInterviewsModule } from './modules/post-interviews/post-interviews.module';
+import { PostsManagementModule } from './modules/posts-management/posts-management.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { PostInterviewsModule } from './modules/post-interviews/post-interviews.
     ),
 
     LlmManagerModule,
-    PostInterviewsModule,
+    PostsManagementModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

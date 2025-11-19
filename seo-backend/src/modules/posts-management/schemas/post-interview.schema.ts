@@ -1,14 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
+import type { ScriptFormatDefinition } from '../library/interfaces/post-interview.interface';
 import {
-  ImageSourceType,
   InterviewStatus,
   SearchIntent,
   ToneOfVoice,
 } from '../library/interfaces/post-interview.interface';
 import { Post } from './posts.schema';
-
 /**
  * Subdocumento para imágenes aportadas por el usuario
  */
@@ -17,10 +16,8 @@ export class UserImage {
   /** Tipo de fuente de la imagen */
   @Prop({
     type: String,
-    enum: ImageSourceType,
-    required: true,
   })
-  sourceType: ImageSourceType;
+  sourceType: string;
 
   /** Valor de la fuente (URL, ID de WordPress, etc.) */
   @Prop({ required: true })
@@ -144,11 +141,11 @@ export class PostInterview {
   // ============================================
 
   /** Si incluir sugerencias de enlaces internos */
-  @Prop({ default: true })
+  @Prop({ default: false })
   includeInternalLinks: boolean;
 
   /** Si incluir enlaces externos de autoridad */
-  @Prop({ default: true })
+  @Prop({ default: false })
   includeExternalLinks: boolean;
 
   /** Enlaces internos a usar */
@@ -197,39 +194,17 @@ export class PostInterview {
   associatedPostId?: Post;
 
   // ============================================
-  // Campos adicionales útiles
+  // SECCIÓN 5: Generación del conenido
   // ============================================
 
-  /** URL slug sugerido */
-  @Prop()
-  suggestedSlug?: string;
+  @Prop({ type: String })
+  promptToGenerateScript?: string;
 
-  /** Categorías de WordPress sugeridas */
-  @Prop({ type: [String], default: [] })
-  suggestedCategories?: string[];
+  @Prop({ type: String })
+  generatedScriptText?: string;
 
-  /** Tags de WordPress sugeridas */
-  @Prop({ type: [String], default: [] })
-  suggestedTags?: string[];
-
-  /** Si la entrevista ha sido completada */
-  @Prop({ default: false })
-  isComplete: boolean;
-
-  /** Fecha de completado de la entrevista */
-  @Prop()
-  completedAt?: Date;
-
-  /** Metadata adicional flexible */
-  @Prop({ type: MongooseSchema.Types.Mixed })
-  metadata?: Record<string, any>;
-
-  // ============================================
-  // SECCIÓN 5: Contenido
-  // ============================================
-
-  @Prop({ type: [String], default: [] })
-  generatedPrompts: string[];
+  @Prop({ type: Object })
+  generatedScriptDefinition?: ScriptFormatDefinition;
 }
 
 const PostInterviewSchema = SchemaFactory.createForClass(PostInterview);
