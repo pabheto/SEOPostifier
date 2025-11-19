@@ -24,9 +24,9 @@ if (!defined('ABSPATH')) {
 
     <!-- Tabs Navigation -->
     <nav class="nav-tab-wrapper wp-clearfix" style="margin-bottom: 20px;">
-        <a href="?page=seo-postifier&tab=generator" 
-           class="nav-tab <?php echo $current_tab === 'generator' ? 'nav-tab-active' : ''; ?>">
-            <?php _e('Post Generator', 'seo-postifier'); ?>
+        <a href="?page=seo-postifier&tab=scripts" 
+           class="nav-tab <?php echo ($current_tab === 'scripts' || $current_tab === 'create-script' || $current_tab === 'view-script') ? 'nav-tab-active' : ''; ?>">
+            <?php _e('My Scripts', 'seo-postifier'); ?>
         </a>
         <a href="?page=seo-postifier&tab=settings" 
            class="nav-tab <?php echo $current_tab === 'settings' ? 'nav-tab-active' : ''; ?>">
@@ -41,9 +41,15 @@ if (!defined('ABSPATH')) {
             case 'settings':
                 include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-settings.php';
                 break;
-            case 'generator':
+            case 'create-script':
+                include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-create-script.php';
+                break;
+            case 'view-script':
+                include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-view-script.php';
+                break;
+            case 'scripts':
             default:
-                include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-generator.php';
+                include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-scripts-list.php';
                 break;
         }
         ?>

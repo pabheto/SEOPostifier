@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  HttpCode,
-  NotFoundException,
-  Param,
-  Post,
-} from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import {
   ApiOperation,
   ApiResponse,
@@ -169,7 +161,7 @@ export class PostsManagementController {
   }
 
   // View
-  @Get('get-script-text/:interviewId')
+  @Get('get-interview/:interviewId')
   @HttpCode(200)
   @ApiOperation({ summary: 'Get script text for an interview' })
   @ApiResponse({
@@ -188,10 +180,6 @@ export class PostsManagementController {
     const postInterview =
       await this.postInterviewsService.getPostInterviewById(interviewId);
 
-    if (!postInterview.generatedScriptText) {
-      throw new NotFoundException('Script text not generated');
-    }
-
-    return { scriptText: postInterview.generatedScriptText };
+    return { interview: postInterview };
   }
 }

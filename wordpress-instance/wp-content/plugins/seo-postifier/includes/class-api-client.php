@@ -63,23 +63,6 @@ class SEO_Postifier_API_Client {
         ), 120);
     }
 
-    /**
-     * Generate script definition
-     */
-    public static function generate_script_definition($interview_id) {
-        return self::request('/posts-interviews/generate-script-definition', 'POST', array(
-            'interviewId' => $interview_id
-        ), 120);
-    }
-
-    /**
-     * Generate post from interview
-     */
-    public static function generate_post($interview_id) {
-        return self::request('/posts-interviews/generate-post', 'POST', array(
-            'interviewId' => $interview_id
-        ), 300);
-    }
 
     /**
      * Get interviews list
@@ -89,10 +72,10 @@ class SEO_Postifier_API_Client {
     }
 
     /**
-     * Get script text for interview
+     * Get interview by ID
      */
-    public static function get_script_text($interview_id) {
-        return self::request('/posts-interviews/get-script-text/' . $interview_id, 'GET', null, 30);
+    public static function get_interview($interview_id) {
+        return self::request('/posts-interviews/get-interview/' . $interview_id, 'GET', null, 30);
     }
 
     /**

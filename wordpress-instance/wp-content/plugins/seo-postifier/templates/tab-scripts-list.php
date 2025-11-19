@@ -1,0 +1,117 @@
+<?php
+/**
+ * My Scripts List Template
+ */
+
+// Exit if accessed directly
+if (!defined('ABSPATH')) {
+    exit;
+}
+?>
+
+<div class="seo-postifier-scripts-list">
+    <div class="card">
+        <h2><?php _e('My Scripts', 'seo-postifier'); ?></h2>
+        <p><?php _e('View and manage your script drafts.', 'seo-postifier'); ?></p>
+
+        <p class="submit" style="margin: 15px 0;">
+            <a href="?page=seo-postifier&tab=create-script" class="button button-primary button-large">
+                <?php _e('+ Create New Script', 'seo-postifier'); ?>
+            </a>
+        </p>
+
+        <div id="scripts-loading" style="margin: 20px 0;">
+            <p><?php _e('Loading scripts...', 'seo-postifier'); ?></p>
+        </div>
+
+        <div id="scripts-list-container" style="display: none; margin-top: 20px;">
+            <!-- Scripts will be loaded here by JavaScript -->
+        </div>
+
+        <div id="scripts-error" style="display: none; margin-top: 20px;">
+            <!-- Error messages will appear here -->
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+jQuery(document).ready(function($) {
+    'use strict';
+
+    const $loading = $('#scripts-loading');
+    const $container = $('#scripts-list-container');
+    const $error = $('#scripts-error');
+
+    // Load scripts list
+    function loadScripts() {
+        $.ajax({
+            url: seoPostifierData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'seo_postifier_get_interviews_list',
+                nonce: seoPostifierData.nonce
+            },
+            success: function(response) {
+                $loading.hide();
+                
+                if (response.success) {
+                    const interviews = response.data.interviews || [];
+                    
+                    if (interviews.length === 0) {
+                        $container.html('<p><?php _e('No scripts yet. Create your first script to get started!', 'seo-postifier'); ?></p>');
+                    } else {
+                        let html = '<table class="wp-list-table widefat fixed striped">';
+                        html += '<thead><tr>';
+                        html += '<th><?php _e('Created', 'seo-postifier'); ?></th>';
+                        html += '<th><?php _e('Main Keyword', 'seo-postifier'); ?></th>';
+                        html += '<th><?php _e('Language', 'seo-postifier'); ?></th>';
+                        html += '<th><?php _e('Status', 'seo-postifier'); ?></th>';
+                        html += '<th><?php _e('Actions', 'seo-postifier'); ?></th>';
+                        html += '</tr></thead><tbody>';
+                        
+                        interviews.forEach(function(interview) {
+                            const date = new Date(interview.createdAt);
+                            const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+                            
+                            let status = '<?php _e('Draft', 'seo-postifier'); ?>';
+                            if (interview.scriptText) {
+                                status = '<?php _e('Script Generated', 'seo-postifier'); ?>';
+                            }
+                            if (interview.scriptDefinition) {
+                                status = '<?php _e('Definition Ready', 'seo-postifier'); ?>';
+                            }
+                            
+                            html += '<tr>';
+                            html += '<td>' + dateStr + '</td>';
+                            html += '<td><strong>' + (interview.mainKeyword || '-') + '</strong></td>';
+                            html += '<td>' + (interview.language || '-') + '</td>';
+                            html += '<td>' + status + '</td>';
+                            html += '<td>';
+                            html += '<a href="?page=seo-postifier&tab=view-script&interviewId=' + interview.interviewId + '" class="button button-small"><?php _e('View', 'seo-postifier'); ?></a>';
+                            html += '</td>';
+                            html += '</tr>';
+                        });
+                        
+                        html += '</tbody></table>';
+                        $container.html(html);
+                    }
+                    
+                    $container.show();
+                } else {
+                    $error.html('<div class="notice notice-error"><p>' + response.data.message + '</p></div>');
+                    $error.show();
+                }
+            },
+            error: function() {
+                $loading.hide();
+                $error.html('<div class="notice notice-error"><p><?php _e('Failed to load scripts. Please try again.', 'seo-postifier'); ?></p></div>');
+                $error.show();
+            }
+        });
+    }
+
+    // Load scripts on page load
+    loadScripts();
+});
+</script>
+
