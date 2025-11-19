@@ -250,13 +250,8 @@ export class ScriptsPrompting {
   Create a **detailed SEO script** that:
   1. Is optimized to rank for **${mainKeyword}**
   2. Fully satisfies **${searchIntent}** intent
-  3. Uses **proper heading hierarchy** (H1, H2, H3, occasional H4) naturally based on the content structure
-  4. **CRITICAL**: The article MUST reach the target word count of **${
-    minWordCount || maxWordCount
-      ? `${minWordCount ?? 'unspecified'}–${maxWordCount ?? 'unspecified'} words`
-      : '1500–4000 words'
-  }**
-  5. Includes:
+  3. Uses **H1, H2, H3, occasional H4**
+  4. Includes:
      - Keyword & semantic guidance
      - Internal/external link placement (if enabled)
      - Image placement blocks (if enabled)
@@ -275,22 +270,15 @@ You must describe the points of the introduction to allow the writer to develop 
 
   - Optional slug + tags
   
-  ### 3.2. "General Structure of the Article"
-  List H2/H3/H4 headings with 1–2 line summaries showing the hierarchy clearly.
+  ### 3.2. “General Structure of the Article”
+  List H2/H3 headings with 1–2 line summaries.
   
   ### 3.3. Detailed Section Scripts
   
-  **Use proper heading hierarchy naturally:**
-  - **H2**: Main sections of the article (top-level topics)
-  - **H3**: Subsections that expand on the H2 above them (use when the topic needs depth)
-  - **H4**: Sub-subsections that expand on the H3 above them (use sparingly, only when necessary)
-  
-  Let the content structure flow naturally - don't force subsections if they're not needed.
-  
-  Use these patterns:
+  Use this pattern:
   
   \`\`\`markdown
-  ## H2 – [Main Section Heading]
+  ## H2 – [Heading]
   
   - **Purpose**
   - **Estimated word count**
@@ -301,20 +289,6 @@ You must describe the points of the introduction to allow the writer to develop 
   - **Internal link suggestions** (if enabled)
   - **External link suggestions** (if enabled)
   - **Tone notes**
-  
-  ### H3 – [Subsection Heading]
-  
-  - **Purpose**
-  - **Estimated word count**
-  - **Main points**
-  - **Examples / comparisons**
-  - **Keyword usage**
-  - **Tone notes**
-  
-  #### H4 – [Sub-subsection Heading] (if needed)
-  
-  - **Purpose**
-  - **Main points**
   \`\`\`
   
   ${faqSection}
@@ -334,24 +308,7 @@ You must describe the points of the introduction to allow the writer to develop 
   ---
   
   ## 8. Final Instruction
-  
   Produce the **full SEO script** now in **${language}**, using **pure Markdown**.
-  
-  **CRITICAL REQUIREMENTS:**
-  
-  1. **Word Count**: The article structure MUST support reaching **${
-    minWordCount || maxWordCount
-      ? `${minWordCount ?? ''}–${maxWordCount ?? ''} words`
-      : '1500–4000 words'
-  }**.
-     - Plan sections with appropriate word ranges to hit this target
-     - The total of all section word ranges should equal the target word count
-  
-  2. **Structure**: Create a natural heading hierarchy based on the content needs
-     - Use H2 for main topics
-     - Use H3 for subtopics when they add value
-     - Use H4 sparingly for deeper details
-     - Don't force subsections - let them emerge naturally from the content
   
   ${faqNote}
   `;
@@ -419,21 +376,13 @@ Important instructions:
 
 3. "body.sections" RULES
    - Each section must represent a logical part of the outline (main topics, subtopics, subsections).
-   - **CRITICAL**: Preserve the heading hierarchy from the outline exactly as it appears:
-     - **h2**: Main sections of the article (top-level topics)
-     - **h3**: Subsections that expand on their parent H2
-     - **h4**: Sub-subsections that expand on their parent H3
-   - Maintain the natural structure from the outline. Do NOT flatten or force subsections.
-   - The sections array should maintain the order from the outline, mixing h2, h3, and h4 as they appear naturally.
+   - level:
+     - h2: main sections of the article.
+     - h3 / h4: subsections logically nested under higher levels.
    - title: clean, descriptive title for the section.
    - id: unique string per section, formatted as "sec-1", "sec-2", "sec-3", etc., following order.
-   - **lengthRange: [minWords, maxWords]** - THIS IS CRITICAL
-     - Use the exact ranges specified in the script
-     - Ensure the sum of ALL section ranges matches the target word count from the brief
-     - Be realistic with ranges based on section depth and importance
-     - H2 sections typically: 250-500 words
-     - H3 subsections typically: 150-350 words  
-     - H4 sub-subsections typically: 100-200 words
+   - lengthRange: [minWords, maxWords] estimated for that section.
+     - Use the ranges specified in the script, otherwise use a reasonable range to match around 250 - 400 words.
    - description: a clear explanation of what the section should contain (guidelines for the writer/AI).
    - images (optional):
      - Include ONLY if the outline suggests an image or if an image adds value.
@@ -459,9 +408,7 @@ Important instructions:
      - Complete unclear titles.
      - Group scattered bullet points into coherent sections.
      - Add an introduction or conclusion if necessary for a complete article structure.
-   - **CRITICAL**: Ensure consistent hierarchy logic between h1 → h2 → h3 → h4.
-   - **CRITICAL**: Preserve the natural structure from the outline. Do NOT flatten or artificially create subsections.
-   - The structure should reflect the content's natural organization.
+   - Ensure consistent hierarchy logic between h1 → h2 → h3 → h4.
 
 5. VALIDATION REQUIREMENTS
    - JSON must be fully valid: double quotes only, no trailing commas.
@@ -506,17 +453,12 @@ Return ONLY the paragraph of the introduction with no additional text of instruc
     targetTone: string,
     sectionTitle: string,
     sectionDescription: string,
-    wordRange?: [number, number],
   ) => {
-    const wordCountInstruction = wordRange
-      ? `\n\n**CRITICAL**: This section must be approximately ${wordRange[0]}-${wordRange[1]} words long. This word count is mandatory.`
-      : '';
-
     return `You are an expert SEO copywriter. 
 
 Write a compelling, SEO-optimized paragraph for the section.
 The paragraph should reflect the purpose and angle suggested in sectionDescription, stay aligned with the topic in sectionTitle, and naturally use relevant ideas from the tags.
-Keep the tone ${targetTone}, engaging, and suitable for high-quality SEO content for ${targetAudience} audience.${wordCountInstruction}
+Keep the tone ${targetTone}, engaging, and suitable for high-quality SEO content for ${targetAudience} audience.
 
 The title of the section is ${sectionTitle}
 Match this description: ${sectionDescription}

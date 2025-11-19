@@ -115,18 +115,12 @@ async function bootstrap() {
   // Don't write the prompt file, just generate
 
   // ----- 2. Generate the script (Markdown) -----
-  console.log('Generating SEO script...');
   const script = await groqService.generate(generationPrompt, {
     model: SCRIPT_CREATION_MODEL,
     maxTokens: 8096,
   });
 
-  // Save the original script in Markdown
-  fs.writeFileSync(path.join(outputDir, 'script.md'), script.content, 'utf8');
-  console.log(`✓ Script (Markdown) saved to ${outputDir}/script.md`);
-
-  // ----- 3. Format script as JSON -----
-  console.log('Formatting script to JSON...');
+  // ----- 3. Save script as JSON -----
   const formattedScript = await groqService.generate(
     ScriptsPrompting.FORMAT_SEO_SCRIPT_TO_JSON_PROMPT(script.content),
     {
@@ -139,29 +133,15 @@ async function bootstrap() {
     formattedScript.content,
   ) as ScriptFormatDefinition;
 
-  // Save the formatted script as JSON
-  fs.writeFileSync(
-    path.join(outputDir, 'script-formatted.json'),
-    JSON.stringify(formattedScriptObject, null, 2),
-    'utf8',
-  );
-  console.log(`✓ Script (JSON) saved to ${outputDir}/script-formatted.json`);
-  console.log(
-    `✓ Found ${formattedScriptObject.body.sections.length} sections to generate`,
-  );
-
   // ----- 4. Compose the WHOLE article in one file -----
-  console.log('\nGenerating article content...');
   let fullArticleContent = '';
 
   // a. Write h1
   if (formattedScriptObject.head?.h1) {
     fullArticleContent += `# ${formattedScriptObject.head.h1}\n\n`;
-    console.log(`✓ Added H1: ${formattedScriptObject.head.h1}`);
   }
 
   // b. Write introduction
-  console.log('✓ Generating introduction...');
   const introduction = await groqService.generate(
     ScriptsPrompting.COPYWRITER_INTRODUCTION_PROMPT(
       formattedScriptObject.indexSummary,
@@ -178,23 +158,14 @@ async function bootstrap() {
   fullArticleContent += introduction.content.trim() + '\n\n';
 
   // c. Write sections
-  console.log(
-    `\nGenerating content for ${formattedScriptObject.body.sections.length} sections...`,
-  );
-  for (let i = 0; i < formattedScriptObject.body.sections.length; i++) {
-    const section = formattedScriptObject.body.sections[i];
+  for (const section of formattedScriptObject.body.sections) {
     const sectionTitle = section.title;
     const sectionDescription = section.description;
-    const wordRange = section.lengthRange;
 
     // Add section title based on its level
     const headingPrefix =
       section.level === 'h2' ? '##' : section.level === 'h3' ? '###' : '####';
     fullArticleContent += `${headingPrefix} ${sectionTitle}\n\n`;
-
-    console.log(
-      `  [${i + 1}/${formattedScriptObject.body.sections.length}] ${section.level.toUpperCase()}: ${sectionTitle} (${wordRange[0]}-${wordRange[1]} words)`,
-    );
 
     const prompt = ScriptsPrompting.COPYWRITER_PARAGRAPH_PROMPT(
       formattedScriptObject.indexSummary,
@@ -202,7 +173,6 @@ async function bootstrap() {
       testPostInterview.toneOfVoice,
       sectionTitle,
       sectionDescription,
-      wordRange,
     );
 
     const paragraph = await groqService.generate(prompt, {
@@ -212,11 +182,9 @@ async function bootstrap() {
 
     fullArticleContent += paragraph.content.trim() + '\n\n';
   }
-  console.log('✓ All sections generated successfully');
 
   // d. FAQ section if present
   if (formattedScriptObject.faq) {
-    console.log('\n✓ Generating FAQ section...');
     const sectionTitle = 'Frequently Asked Questions';
     const sectionDescription = formattedScriptObject.faq.description;
 
@@ -246,49 +214,9 @@ async function bootstrap() {
     'utf8',
   );
 
-  // Summary
-  const h2Count = formattedScriptObject.body.sections.filter(
-    (s) => s.level === 'h2',
-  ).length;
-  const h3Count = formattedScriptObject.body.sections.filter(
-    (s) => s.level === 'h3',
-  ).length;
-  const h4Count = formattedScriptObject.body.sections.filter(
-    (s) => s.level === 'h4',
-  ).length;
-
-  // Calculate total word range
-  const totalMinWords = formattedScriptObject.body.sections.reduce(
-    (sum, s) => sum + s.lengthRange[0],
-    0,
-  );
-  const totalMaxWords = formattedScriptObject.body.sections.reduce(
-    (sum, s) => sum + s.lengthRange[1],
-    0,
-  );
-
-  console.log('\n=== GENERATION COMPLETE ===');
-  console.log(`✓ Article saved to: ${outputDir}/article-complete.md`);
-  console.log(`\nStructure Summary:`);
-  console.log(`  - H1: 1`);
-  console.log(`  - H2 sections: ${h2Count}`);
-  console.log(`  - H3 subsections: ${h3Count}`);
-  console.log(`  - H4 sub-subsections: ${h4Count}`);
-  console.log(`  - FAQ: ${formattedScriptObject.faq ? 'Yes' : 'No'}`);
   console.log(
-    `  - Total sections: ${formattedScriptObject.body.sections.length}`,
+    `All-in-one article for "${slug}" written to ${outputDir}/article-complete.md`,
   );
-  console.log(
-    `\nWord Count Target: ${testPostInterview.minWordCount}-${testPostInterview.maxWordCount} words`,
-  );
-  console.log(
-    `Planned Word Range: ${totalMinWords}-${totalMaxWords} words (from all sections)`,
-  );
-  console.log(`\nFiles created:`);
-  console.log(`  1. ${outputDir}/script.md`);
-  console.log(`  2. ${outputDir}/script-formatted.json`);
-  console.log(`  3. ${outputDir}/article-complete.md`);
-  console.log('\n✨ Done!');
 }
 
 void bootstrap();
