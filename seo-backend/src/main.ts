@@ -58,4 +58,11 @@ async function bootstrap() {
     `📚 API Documentation available at: http://localhost:${port}/api`,
   );
 }
-bootstrap();
+bootstrap()
+  .then(() => {
+    console.log('Server is running');
+  })
+  .catch((error) => {
+    console.error('Error starting server:', error);
+    process.exit(1);
+  });

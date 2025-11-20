@@ -18,11 +18,17 @@ import {
   ToneOfVoice,
 } from '../library/interfaces/post-interview.interface';
 
-export class CreatePostInterviewDto {
-  @ApiProperty({ description: 'Palabra clave principal del post' })
+export class UpdatePostInterviewDto {
+  @ApiProperty({ description: 'ID único de la entrevista' })
   @IsString()
   @IsNotEmpty()
-  mainKeyword: string;
+  interviewId: string;
+
+  @ApiPropertyOptional({ description: 'Palabra clave principal del post' })
+  @IsOptional()
+  @IsString()
+  @IsNotEmpty()
+  mainKeyword?: string;
 
   @ApiPropertyOptional({
     description: 'Lista de palabras clave secundarias o variaciones',
@@ -30,19 +36,16 @@ export class CreatePostInterviewDto {
     default: [],
   })
   @IsOptional()
-  @Transform(({ value }): string[] => {
-    if (Array.isArray(value)) return value as string[];
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) return value;
     if (typeof value === 'string') {
-      return value
-        .split(',')
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0);
+      return value.split(',').map((item) => item.trim()).filter((item) => item.length > 0);
     }
     return [];
   })
   @IsArray()
   @IsString({ each: true })
-  secondaryKeywords?: string[] = [];
+  secondaryKeywords?: string[];
 
   @ApiPropertyOptional({
     description: 'Descripción del usuario de lo que quiere tratar en este post',
@@ -59,36 +62,39 @@ export class CreatePostInterviewDto {
   })
   @IsOptional()
   @IsNumber()
-  keywordDensityTarget?: number = 0.017;
+  keywordDensityTarget?: number;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Idioma del post (ISO 639-1: "es", "en", etc.)',
     example: 'es',
     pattern: '^[a-z]{2}$',
   })
+  @IsOptional()
   @IsString()
-  @IsNotEmpty()
   @Matches(/^[a-z]{2}$/, {
     message:
       'language must be a valid ISO 639-1 language code (e.g., "es", "en", "fr")',
   })
-  language: string;
+  language?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Intención de búsqueda del contenido',
     enum: SearchIntent,
   })
+  @IsOptional()
   @IsEnum(SearchIntent)
-  searchIntent: SearchIntent;
+  searchIntent?: SearchIntent;
 
-  @ApiProperty({ description: 'Descripción del público objetivo' })
+  @ApiPropertyOptional({ description: 'Descripción del público objetivo' })
+  @IsOptional()
   @IsString()
   @IsNotEmpty()
-  targetAudience: string;
+  targetAudience?: string;
 
-  @ApiProperty({ description: 'Tono de voz del contenido', enum: ToneOfVoice })
+  @ApiPropertyOptional({ description: 'Tono de voz del contenido', enum: ToneOfVoice })
+  @IsOptional()
   @IsEnum(ToneOfVoice)
-  toneOfVoice: ToneOfVoice;
+  toneOfVoice?: ToneOfVoice;
 
   @ApiPropertyOptional({
     description: 'Mínimo de palabras deseadas',
@@ -111,7 +117,7 @@ export class CreatePostInterviewDto {
   @ApiPropertyOptional({ description: 'Si incluir sección FAQ', default: true })
   @IsOptional()
   @IsBoolean()
-  needsFaqSection?: boolean = true;
+  needsFaqSection?: boolean;
 
   @ApiPropertyOptional({
     description: 'Si mencionar una marca específica',
@@ -119,7 +125,7 @@ export class CreatePostInterviewDto {
   })
   @IsOptional()
   @IsBoolean()
-  mentionsBrand?: boolean = false;
+  mentionsBrand?: boolean;
 
   @ApiPropertyOptional({ description: 'Nombre de la marca a mencionar' })
   @IsOptional()
@@ -157,19 +163,16 @@ export class CreatePostInterviewDto {
     default: [],
   })
   @IsOptional()
-  @Transform(({ value }): string[] => {
-    if (Array.isArray(value)) return value as string[];
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) return value;
     if (typeof value === 'string') {
-      return value
-        .split(/\r?\n/)
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0);
+      return value.split(/\r?\n/).map((item) => item.trim()).filter((item) => item.length > 0);
     }
     return [];
   })
   @IsArray()
   @IsString({ each: true })
-  internalLinksToUse?: string[] = [];
+  internalLinksToUse?: string[];
 
   @ApiPropertyOptional({
     description: 'Enlaces externos a usar',
@@ -177,19 +180,16 @@ export class CreatePostInterviewDto {
     default: [],
   })
   @IsOptional()
-  @Transform(({ value }): string[] => {
-    if (Array.isArray(value)) return value as string[];
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) return value;
     if (typeof value === 'string') {
-      return value
-        .split(/\r?\n/)
-        .map((item) => item.trim())
-        .filter((item) => item.length > 0);
+      return value.split(/\r?\n/).map((item) => item.trim()).filter((item) => item.length > 0);
     }
     return [];
   })
   @IsArray()
   @IsString({ each: true })
-  externalLinksToUse?: string[] = [];
+  externalLinksToUse?: string[];
 
   @ApiPropertyOptional({
     description: 'Si incluir enlaces externos de autoridad',
@@ -197,7 +197,7 @@ export class CreatePostInterviewDto {
   })
   @IsOptional()
   @IsBoolean()
-  includeExternalLinks?: boolean = false;
+  includeExternalLinks?: boolean;
 
   @ApiPropertyOptional({
     description: 'Si incluir sugerencias de enlaces internos',
@@ -205,10 +205,11 @@ export class CreatePostInterviewDto {
   })
   @IsOptional()
   @IsBoolean()
-  includeInternalLinks?: boolean = false;
+  includeInternalLinks?: boolean;
 
   @ApiPropertyOptional({ description: 'Notas adicionales para el redactor/IA' })
   @IsOptional()
   @IsString()
   notesForWriter?: string;
 }
+

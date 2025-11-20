@@ -9,6 +9,7 @@ import { Model } from 'mongoose';
 import { GroqService, SCRIPT_CREATION_MODEL } from '../../llm-manager';
 import { ScriptsPrompting } from '../../llm-manager/library/prompts/scripts.prompting';
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';
+import { UpdatePostInterviewDto } from '../dto/update-post-interview.dto';
 import {
   InterviewStatus,
   ScriptFormatDefinition,
@@ -107,5 +108,62 @@ export class PostInterviewsService {
   async getInterviewsList(): Promise<PostInterviewDocument[]> {
     const interviews = await this.postInterviewModel.find();
     return interviews;
+  }
+
+  async updatePostInterview(
+    updatePostInterviewDto: UpdatePostInterviewDto,
+  ): Promise<PostInterviewDocument> {
+    const postInterview = await this.getPostInterviewById(
+      updatePostInterviewDto.interviewId,
+    );
+
+    // Update only provided fields
+    const updateData: Partial<PostInterview> = {};
+    const fieldsToUpdate = [
+      'mainKeyword',
+      'secondaryKeywords',
+      'userDescription',
+      'keywordDensityTarget',
+      'language',
+      'searchIntent',
+      'targetAudience',
+      'toneOfVoice',
+      'minWordCount',
+      'maxWordCount',
+      'needsFaqSection',
+      'mentionsBrand',
+      'brandName',
+      'brandDescription',
+      'maxInternalLinks',
+      'maxExternalLinks',
+      'internalLinksToUse',
+      'externalLinksToUse',
+      'includeExternalLinks',
+      'includeInternalLinks',
+      'notesForWriter',
+    ];
+
+    for (const field of fieldsToUpdate) {
+      if (
+        updatePostInterviewDto[field as keyof UpdatePostInterviewDto] !==
+        undefined
+      ) {
+        updateData[field as keyof PostInterview] = updatePostInterviewDto[
+          field as keyof UpdatePostInterviewDto
+        ] as never;
+      }
+    }
+
+    // Reset status to draft if parameters changed (so user needs to regenerate)
+    if (Object.keys(updateData).length > 0) {
+      updateData.status = InterviewStatus.DRAFT;
+      // Clear generated content if parameters changed
+      postInterview.generatedScriptText = undefined;
+      postInterview.generatedScriptDefinition = undefined;
+      postInterview.associatedPostId = undefined;
+    }
+
+    Object.assign(postInterview, updateData);
+    return postInterview.save();
   }
 }

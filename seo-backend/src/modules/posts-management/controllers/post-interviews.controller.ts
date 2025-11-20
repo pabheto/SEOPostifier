@@ -11,6 +11,7 @@ import { RequireLicense } from '../../users/decorators/require-license.decorator
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';
 import { GeneratePostFromInterviewDto } from '../dto/generate-post-from-interview.dto';
 import { GetInterviewByIdDto } from '../dto/get-interview-by-id.dto';
+import { UpdatePostInterviewDto } from '../dto/update-post-interview.dto';
 import { PostInterviewsService } from '../services/posts-interviews.service';
 import { PostsManagementService } from '../services/posts-management.service';
 
@@ -186,5 +187,33 @@ export class PostsInterviewsController {
       await this.postInterviewsService.getPostInterviewById(interviewId);
 
     return { interview: postInterview };
+  }
+
+  @Post('update')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Update an existing post interview' })
+  @ApiResponse({
+    status: 200,
+    description: 'Interview updated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error - invalid input data',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing license key',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Interview not found',
+  })
+  async updatePostInterview(
+    @Body() updatePostInterviewDto: UpdatePostInterviewDto,
+  ) {
+    const interview = await this.postInterviewsService.updatePostInterview(
+      updatePostInterviewDto,
+    );
+    return { interview };
   }
 }

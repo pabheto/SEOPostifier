@@ -320,10 +320,18 @@ jQuery(document).ready(function($) {
         $button.prop('disabled', true).text('<?php _e('Creating...', 'seo-postifier'); ?>');
         $status.html('');
 
+        // Helper function to split string into array and filter empty values
+        const splitAndFilter = (str, delimiter) => {
+            if (!str || typeof str !== 'string') return [];
+            return str.split(delimiter)
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
+        };
+
         // Collect form data
         const formData = {
             mainKeyword: $('#main-keyword').val(),
-            secondaryKeywords: $('#secondary-keywords').val(),
+            secondaryKeywords: splitAndFilter($('#secondary-keywords').val(), ','),
             keywordDensityTarget: parseFloat($('#keyword-density').val()),
             userDescription: $('#user-description').val(),
             language: $('#language').val(),
@@ -338,10 +346,10 @@ jQuery(document).ready(function($) {
             brandDescription: $('#brand-description').val(),
             includeInternalLinks: $('#include-internal-links').is(':checked'),
             maxInternalLinks: parseInt($('#max-internal-links').val()),
-            internalLinksToUse: $('#internal-links-to-use').val(),
+            internalLinksToUse: splitAndFilter($('#internal-links-to-use').val(), '\n'),
             includeExternalLinks: $('#include-external-links').is(':checked'),
             maxExternalLinks: parseInt($('#max-external-links').val()),
-            externalLinksToUse: $('#external-links-to-use').val(),
+            externalLinksToUse: splitAndFilter($('#external-links-to-use').val(), '\n'),
             notesForWriter: $('#notes-for-writer').val()
         };
 

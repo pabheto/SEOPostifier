@@ -23,6 +23,7 @@ class SEO_Postifier_AJAX_Handlers {
         add_action('wp_ajax_seo_postifier_get_interviews_list', array(__CLASS__, 'get_interviews_list'));
         add_action('wp_ajax_seo_postifier_get_interview', array(__CLASS__, 'get_interview'));
         add_action('wp_ajax_seo_postifier_create_interview', array(__CLASS__, 'create_interview'));
+        add_action('wp_ajax_seo_postifier_update_interview', array(__CLASS__, 'update_interview'));
         add_action('wp_ajax_seo_postifier_generate_script_text', array(__CLASS__, 'generate_script_text'));
         add_action('wp_ajax_seo_postifier_generate_script_definition', array(__CLASS__, 'generate_script_definition'));
         add_action('wp_ajax_seo_postifier_generate_post', array(__CLASS__, 'generate_post'));
@@ -180,6 +181,62 @@ class SEO_Postifier_AJAX_Handlers {
         }
     }
 
+     /**
+     * Update Interview (AJAX handler)
+     */
+    public static function update_interview() {
+        try {
+            // Verify nonce
+            if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'seo_postifier_nonce')) {
+                wp_send_json_error(array('message' => 'Security check failed. Please refresh the page and try again.'));
+                return;
+            }
+
+            if (!current_user_can('manage_options')) {
+                wp_send_json_error(array('message' => 'Unauthorized'));
+                return;
+            }
+
+            if (!SEO_Postifier_Settings::has_license_key()) {
+                wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+                return;
+            }
+
+            $interview_data = isset($_POST['interview_data']) ? $_POST['interview_data'] : array();
+
+            if (empty($interview_data['interviewId'])) {
+                wp_send_json_error(array('message' => 'Interview ID is required'));
+                return;
+            }
+
+            set_time_limit(60);
+
+            $response = SEO_Postifier_API_Client::update_interview($interview_data);
+            $result = SEO_Postifier_API_Client::parse_response($response);
+
+            if ($result['success']) {
+                wp_send_json_success(array(
+                    'message' => 'Interview updated successfully',
+                    'interview' => $result['data']['interview']
+                ));
+            } else {
+                $error_message = 'Failed to update interview';
+                if (isset($result['message'])) {
+                    $error_message .= ': ' . $result['message'];
+                }
+                if (isset($result['code'])) {
+                    $error_message .= ' (HTTP ' . $result['code'] . ')';
+                }
+                wp_send_json_error(array('message' => $error_message));
+            }
+        } catch (Exception $e) {
+            error_log('SEO Postifier Error in update_interview: ' . $e->getMessage());
+            wp_send_json_error(array(
+                'message' => 'An error occurred: ' . $e->getMessage()
+            ));
+        }
+    }
+
     /**
      * Get Interviews List (AJAX handler)
      */
@@ -253,38 +310,54 @@ class SEO_Postifier_AJAX_Handlers {
      * Generate Script Text (AJAX handler)
      */
     public static function generate_script_text() {
-        check_ajax_referer('seo_postifier_nonce', 'nonce');
+        try {
+            // Verify nonce
+            if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'seo_postifier_nonce')) {
+                wp_send_json_error(array('message' => 'Security check failed. Please refresh the page and try again.'));
+                return;
+            }
 
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(array('message' => 'Unauthorized'));
-            return;
-        }
+            if (!current_user_can('manage_options')) {
+                wp_send_json_error(array('message' => 'Unauthorized'));
+                return;
+            }
 
-        if (!SEO_Postifier_Settings::has_license_key()) {
-            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
-            return;
-        }
+            if (!SEO_Postifier_Settings::has_license_key()) {
+                wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+                return;
+            }
 
-        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field($_POST['interview_id']) : '';
+            $interview_id = isset($_POST['interview_id']) ? sanitize_text_field($_POST['interview_id']) : '';
 
-        if (empty($interview_id)) {
-            wp_send_json_error(array('message' => 'Interview ID is required'));
-            return;
-        }
+            if (empty($interview_id)) {
+                wp_send_json_error(array('message' => 'Interview ID is required'));
+                return;
+            }
 
-        set_time_limit(180);
+            set_time_limit(180);
 
-        $response = SEO_Postifier_API_Client::generate_script_text($interview_id);
-        $result = SEO_Postifier_API_Client::parse_response($response);
+            $response = SEO_Postifier_API_Client::generate_script_text($interview_id);
+            $result = SEO_Postifier_API_Client::parse_response($response);
 
-        if ($result['success']) {
-            wp_send_json_success(array(
-                'message' => 'Script generated successfully',
-                'interview' => $result['data']['interview']
-            ));
-        } else {
+            if ($result['success']) {
+                wp_send_json_success(array(
+                    'message' => 'Script generated successfully',
+                    'interview' => $result['data']['interview']
+                ));
+            } else {
+                $error_message = 'Failed to generate script';
+                if (isset($result['message'])) {
+                    $error_message .= ': ' . $result['message'];
+                }
+                if (isset($result['code'])) {
+                    $error_message .= ' (HTTP ' . $result['code'] . ')';
+                }
+                wp_send_json_error(array('message' => $error_message));
+            }
+        } catch (Exception $e) {
+            error_log('SEO Postifier Error in generate_script_text: ' . $e->getMessage());
             wp_send_json_error(array(
-                'message' => 'Failed to generate script: ' . $result['message']
+                'message' => 'An error occurred: ' . $e->getMessage()
             ));
         }
     }

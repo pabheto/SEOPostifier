@@ -18,6 +18,10 @@ class SEO_Postifier_API_Client {
         $backend_url = SEO_Postifier_Settings::get_backend_url();
         $license_key = SEO_Postifier_Settings::get_license_key();
         
+        if (empty($backend_url)) {
+            return new WP_Error('no_backend_url', 'Backend URL is not configured. Please set it in Settings.');
+        }
+        
         $url = rtrim($backend_url, '/') . $endpoint;
 
         $args = array(
@@ -52,6 +56,13 @@ class SEO_Postifier_API_Client {
      */
     public static function create_interview($interview_data) {
         return self::request('/posts-interviews/create', 'POST', $interview_data, 30);
+    }
+
+    /**
+     * Update post interview
+     */
+    public static function update_interview($interview_data) {
+        return self::request('/posts-interviews/update', 'POST', $interview_data, 30);
     }
 
     /**
@@ -116,15 +127,28 @@ class SEO_Postifier_API_Client {
      */
     public static function parse_response($response) {
         if (is_wp_error($response)) {
+            $error_message = $response->get_error_message();
+            $error_code = $response->get_error_code();
+            
+            // Log the error for debugging
+            error_log('SEO Postifier API Error: ' . $error_code . ' - ' . $error_message);
+            
             return array(
                 'success' => false,
-                'message' => $response->get_error_message(),
+                'message' => $error_message,
+                'code' => $error_code,
             );
         }
 
         $body = wp_remote_retrieve_body($response);
         $code = wp_remote_retrieve_response_code($response);
         $data = json_decode($body, true);
+
+        // Log response for debugging if there's an error
+        if ($code < 200 || $code >= 300) {
+            error_log('SEO Postifier API HTTP Error: ' . $code);
+            error_log('Response body: ' . substr($body, 0, 500));
+        }
 
         if ($code >= 200 && $code < 300) {
             return array(
@@ -133,9 +157,21 @@ class SEO_Postifier_API_Client {
                 'code' => $code,
             );
         } else {
+            // Try to extract error message from response
+            $error_message = 'Request failed';
+            if (isset($data['message'])) {
+                if (is_array($data['message'])) {
+                    $error_message = implode(', ', $data['message']);
+                } else {
+                    $error_message = $data['message'];
+                }
+            } elseif (isset($data['error'])) {
+                $error_message = $data['error'];
+            }
+            
             return array(
                 'success' => false,
-                'message' => isset($data['message']) ? $data['message'] : 'Request failed',
+                'message' => $error_message,
                 'code' => $code,
                 'data' => $data,
             );
