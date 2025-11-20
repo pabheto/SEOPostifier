@@ -47,6 +47,7 @@ export class PostsManagementService {
 
     const post = new this.postModel({
       interviewId: postInterview.interviewId,
+      userId: postInterview.userId,
       status: PostStatus.DRAFT,
       title: postInterview.generatedScriptDefinition.head.h1,
       language: postInterview.language,
@@ -140,6 +141,17 @@ export class PostsManagementService {
     post.status = PostStatus.GENERATED;
     await post.save();
 
+    postInterview.associatedPostId = post._id as unknown as Post;
+    await postInterview.save();
+
     return post;
+  }
+
+  async listPostsForUser(userId: string) {
+    return this.postModel.find({ userId });
+  }
+
+  async getPostById(postId: string) {
+    return this.postModel.findById(postId);
   }
 }

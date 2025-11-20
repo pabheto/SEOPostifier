@@ -24,6 +24,9 @@ class SEO_Postifier_AJAX_Handlers {
         add_action('wp_ajax_seo_postifier_get_interview', array(__CLASS__, 'get_interview'));
         add_action('wp_ajax_seo_postifier_create_interview', array(__CLASS__, 'create_interview'));
         add_action('wp_ajax_seo_postifier_generate_script_text', array(__CLASS__, 'generate_script_text'));
+        add_action('wp_ajax_seo_postifier_generate_script_definition', array(__CLASS__, 'generate_script_definition'));
+        add_action('wp_ajax_seo_postifier_generate_post', array(__CLASS__, 'generate_post'));
+        add_action('wp_ajax_seo_postifier_get_post', array(__CLASS__, 'get_post'));
     }
 
     /**
@@ -281,6 +284,124 @@ class SEO_Postifier_AJAX_Handlers {
         } else {
             wp_send_json_error(array(
                 'message' => 'Failed to generate script: ' . $result['message']
+            ));
+        }
+    }
+
+    /**
+     * Generate Script Definition (AJAX handler)
+     */
+    public static function generate_script_definition() {
+        check_ajax_referer('seo_postifier_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        if (!SEO_Postifier_Settings::has_license_key()) {
+            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+            return;
+        }
+
+        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field($_POST['interview_id']) : '';
+
+        if (empty($interview_id)) {
+            wp_send_json_error(array('message' => 'Interview ID is required'));
+            return;
+        }
+
+        set_time_limit(180);
+
+        $response = SEO_Postifier_API_Client::generate_script_definition($interview_id);
+        $result = SEO_Postifier_API_Client::parse_response($response);
+
+        if ($result['success']) {
+            wp_send_json_success(array(
+                'message' => 'Script definition generated successfully',
+                'interview' => $result['data']['interview']
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => 'Failed to generate script definition: ' . $result['message']
+            ));
+        }
+    }
+
+    /**
+     * Generate Post (AJAX handler)
+     */
+    public static function generate_post() {
+        check_ajax_referer('seo_postifier_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        if (!SEO_Postifier_Settings::has_license_key()) {
+            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+            return;
+        }
+
+        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field($_POST['interview_id']) : '';
+
+        if (empty($interview_id)) {
+            wp_send_json_error(array('message' => 'Interview ID is required'));
+            return;
+        }
+
+        set_time_limit(300);
+
+        $response = SEO_Postifier_API_Client::generate_post($interview_id);
+        $result = SEO_Postifier_API_Client::parse_response($response);
+
+        if ($result['success']) {
+            wp_send_json_success(array(
+                'message' => 'Post generated successfully',
+                'post' => $result['data']['post']
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => 'Failed to generate post: ' . $result['message']
+            ));
+        }
+    }
+
+    /**
+     * Get Post by ID (AJAX handler)
+     */
+    public static function get_post() {
+        check_ajax_referer('seo_postifier_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        if (!SEO_Postifier_Settings::has_license_key()) {
+            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+            return;
+        }
+
+        $post_id = isset($_POST['post_id']) ? sanitize_text_field($_POST['post_id']) : '';
+
+        if (empty($post_id)) {
+            wp_send_json_error(array('message' => 'Post ID is required'));
+            return;
+        }
+
+        $response = SEO_Postifier_API_Client::get_post($post_id);
+        $result = SEO_Postifier_API_Client::parse_response($response);
+
+        if ($result['success']) {
+            wp_send_json_success(array(
+                'message' => 'Post retrieved successfully',
+                'post' => $result['data']['post']
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => 'Failed to load post: ' . $result['message']
             ));
         }
     }

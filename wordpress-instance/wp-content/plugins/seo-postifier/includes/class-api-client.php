@@ -63,6 +63,30 @@ class SEO_Postifier_API_Client {
         ), 120);
     }
 
+    /**
+     * Generate script definition
+     */
+    public static function generate_script_definition($interview_id) {
+        return self::request('/posts-interviews/generate-script-definition', 'POST', array(
+            'interviewId' => $interview_id
+        ), 120);
+    }
+
+    /**
+     * Generate post from interview
+     */
+    public static function generate_post($interview_id) {
+        return self::request('/posts/generate', 'POST', array(
+            'interviewId' => $interview_id
+        ), 300);
+    }
+
+    /**
+     * Get post by ID
+     */
+    public static function get_post($post_id) {
+        return self::request('/posts/' . $post_id, 'GET', null, 30);
+    }
 
     /**
      * Get interviews list

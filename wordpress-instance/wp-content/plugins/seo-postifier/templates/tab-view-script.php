@@ -32,20 +32,40 @@ if (empty($interview_id)) {
         </div>
 
         <div id="interview-container" style="display: none; margin-top: 20px;">
-            <h3><?php _e('Interview Data', 'seo-postifier'); ?></h3>
-            <div id="interview-json" style="background: #f5f5f5; padding: 15px; border: 1px solid #ddd; border-radius: 4px; max-height: 500px; overflow: auto; font-family: monospace; font-size: 12px; white-space: pre-wrap;"></div>
+            <div class="seo-postifier-two-column-layout">
+                <div class="seo-postifier-left-column">
+                    <h3><?php _e('Interview Data', 'seo-postifier'); ?></h3>
+                    <div id="interview-json" class="seo-postifier-json-display"></div>
 
-            <div style="margin-top: 20px;">
-                <h3><?php _e('Actions', 'seo-postifier'); ?></h3>
-                <p class="submit">
-                    <button type="button" id="generate-script-text-btn" class="button button-primary button-large">
-                        <?php _e('Generate Script Text', 'seo-postifier'); ?>
-                    </button>
-                    <button type="button" id="generate-post-btn" class="button button-secondary button-large" disabled title="<?php _e('Coming soon', 'seo-postifier'); ?>">
-                        <?php _e('Generate Post (Disabled)', 'seo-postifier'); ?>
-                    </button>
-                </p>
-                <div id="action-status" style="margin-top: 15px;"></div>
+                    <div style="margin-top: 20px;">
+                        <h3><?php _e('Actions', 'seo-postifier'); ?></h3>
+                        <p class="submit">
+                            <button type="button" id="generate-script-text-btn" class="button button-primary button-large">
+                                <?php _e('Generate Script Text', 'seo-postifier'); ?>
+                            </button>
+                            <button type="button" id="generate-script-definition-btn" class="button button-primary button-large">
+                                <?php _e('Generate Script Definition', 'seo-postifier'); ?>
+                            </button>
+                            <button type="button" id="generate-post-btn" class="button button-primary button-large">
+                                <?php _e('Generate Post', 'seo-postifier'); ?>
+                            </button>
+                        </p>
+                        <div id="action-status" style="margin-top: 15px;"></div>
+                    </div>
+                </div>
+
+                <div class="seo-postifier-right-column">
+                    <div id="post-container" style="display: none;">
+                        <h3><?php _e('Generated Post Preview', 'seo-postifier'); ?></h3>
+                        <div id="post-markdown" class="seo-postifier-markdown-display"></div>
+                        <div style="margin-top: 20px;">
+                            <button type="button" id="create-wp-draft-btn" class="button button-primary button-large">
+                                <?php _e('Create WordPress Draft', 'seo-postifier'); ?>
+                            </button>
+                            <div id="wp-draft-status" style="margin-top: 15px;"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -55,6 +75,8 @@ if (empty($interview_id)) {
     </div>
 </div>
 
+<!-- Marked.js for Markdown rendering -->
+<script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
 <script type="text/javascript">
 jQuery(document).ready(function($) {
     'use strict';
@@ -66,9 +88,110 @@ jQuery(document).ready(function($) {
     const $jsonDisplay = $('#interview-json');
     const $actionStatus = $('#action-status');
     const $generateScriptBtn = $('#generate-script-text-btn');
+    const $generateScriptDefinitionBtn = $('#generate-script-definition-btn');
     const $generatePostBtn = $('#generate-post-btn');
+    const $createWpDraftBtn = $('#create-wp-draft-btn');
+    const $wpDraftStatus = $('#wp-draft-status');
 
     let currentInterview = null;
+    let currentPost = null;
+    let currentPostId = null;
+
+    // Convert post blocks to markdown
+    function blocksToMarkdown(blocks) {
+        if (!blocks || !Array.isArray(blocks)) {
+            return '';
+        }
+
+        let markdown = '';
+
+        blocks.forEach(function(block) {
+            switch(block.type) {
+                case 'heading':
+                    const level = block.level || 'h2';
+                    const headingLevel = level.replace('h', '');
+                    const hashes = '#'.repeat(parseInt(headingLevel));
+                    markdown += hashes + ' ' + (block.title || '') + '\n\n';
+                    break;
+
+                case 'paragraph':
+                    markdown += (block.content || '') + '\n\n';
+                    break;
+
+                case 'image':
+                    if (block.image) {
+                        const alt = block.image.alt || '';
+                        const url = block.image.url || '';
+                        markdown += '![' + alt + '](' + url + ')\n\n';
+                    }
+                    break;
+
+                case 'faq':
+                    if (block.questions && block.answers) {
+                        markdown += '## FAQ\n\n';
+                        for (let i = 0; i < block.questions.length; i++) {
+                            markdown += '### ' + (block.questions[i] || '') + '\n\n';
+                            if (block.answers[i]) {
+                                markdown += block.answers[i] + '\n\n';
+                            }
+                        }
+                    }
+                    break;
+            }
+        });
+
+        return markdown.trim();
+    }
+
+    // Load post if associated
+    function loadPost(postId) {
+        if (!postId) {
+            return;
+        }
+
+        currentPostId = postId;
+
+        $.ajax({
+            url: seoPostifierData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'seo_postifier_get_post',
+                nonce: seoPostifierData.nonce,
+                post_id: postId
+            },
+            success: function(response) {
+                if (response.success) {
+                    currentPost = response.data.post;
+                    currentPostId = postId;
+                    displayPost(currentPost);
+                }
+            },
+            error: function() {
+                console.error('Failed to load post');
+            }
+        });
+    }
+
+    // Display post markdown
+    function displayPost(post) {
+        if (!post || !post.blocks) {
+            return;
+        }
+
+        const markdown = blocksToMarkdown(post.blocks);
+        
+        // Check if marked is available
+        if (typeof marked !== 'undefined') {
+            // Render markdown to HTML
+            const html = marked.parse(markdown);
+            $('#post-markdown').html(html);
+        } else {
+            // Fallback to plain text if marked is not available
+            $('#post-markdown').text(markdown);
+        }
+        
+        $('#post-container').show();
+    }
 
     // Load interview data
     function loadInterview() {
@@ -87,6 +210,14 @@ jQuery(document).ready(function($) {
                     currentInterview = response.data.interview;
                     displayInterview(currentInterview);
                     $container.show();
+
+                    // Load post if associated
+                    if (currentInterview.associatedPostId) {
+                        loadPost(currentInterview.associatedPostId);
+                    }
+
+                    // Update all button states
+                    updateButtonStates();
                 } else {
                     $error.html('<div class="notice notice-error"><p>' + response.data.message + '</p></div>');
                     $error.show();
@@ -128,6 +259,7 @@ jQuery(document).ready(function($) {
                     currentInterview = response.data.interview;
                     displayInterview(currentInterview);
                     $actionStatus.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
+                    updateButtonStates();
                 } else {
                     $actionStatus.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
                 }
@@ -141,13 +273,186 @@ jQuery(document).ready(function($) {
             },
             complete: function() {
                 $button.prop('disabled', false).text(originalText);
+                updateButtonStates();
             }
         });
     });
 
-    // Generate post (disabled for now)
+    // Generate script definition
+    $generateScriptDefinitionBtn.on('click', function() {
+        const $button = $(this);
+        const originalText = $button.text();
+
+        $button.prop('disabled', true).text('<?php _e('Generating...', 'seo-postifier'); ?>');
+        $actionStatus.html('<div class="notice notice-info inline"><p><?php _e('Generating script definition. This may take a few minutes...', 'seo-postifier'); ?></p></div>');
+
+        $.ajax({
+            url: seoPostifierData.ajaxUrl,
+            type: 'POST',
+            timeout: 180000, // 3 minutes
+            data: {
+                action: 'seo_postifier_generate_script_definition',
+                nonce: seoPostifierData.nonce,
+                interview_id: interviewId
+            },
+            success: function(response) {
+                if (response.success) {
+                    currentInterview = response.data.interview;
+                    displayInterview(currentInterview);
+                    $actionStatus.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
+                    updateButtonStates();
+                } else {
+                    $actionStatus.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
+                }
+            },
+            error: function(xhr, status) {
+                let errorMsg = '<?php _e('Failed to generate script definition. Please try again.', 'seo-postifier'); ?>';
+                if (status === 'timeout') {
+                    errorMsg = '<?php _e('Request timed out. The script definition generation may still be processing.', 'seo-postifier'); ?>';
+                }
+                $actionStatus.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
+            },
+            complete: function() {
+                $button.prop('disabled', false).text(originalText);
+                updateButtonStates();
+            }
+        });
+    });
+
+    // Update all button states
+    function updateButtonStates() {
+        if (!currentInterview) {
+            $generateScriptDefinitionBtn.prop('disabled', true);
+            $generatePostBtn.prop('disabled', true);
+            return;
+        }
+
+        const status = currentInterview.status;
+        const hasScriptText = status === 'script_text_generated' || status === 'script_definition_generated' || currentInterview.generatedScriptText;
+        const hasScriptDefinition = status === 'script_definition_generated' || 
+                                   (currentInterview.generatedScriptDefinition && 
+                                    currentInterview.generatedScriptDefinition.head && 
+                                    currentInterview.generatedScriptDefinition.head.h1);
+        const hasPost = currentInterview.associatedPostId;
+
+        // Update Generate Script Definition button
+        if (hasScriptDefinition) {
+            $generateScriptDefinitionBtn.prop('disabled', true).text('<?php _e('Script Definition Already Generated', 'seo-postifier'); ?>');
+        } else if (hasScriptText) {
+            $generateScriptDefinitionBtn.prop('disabled', false).text('<?php _e('Generate Script Definition', 'seo-postifier'); ?>');
+        } else {
+            $generateScriptDefinitionBtn.prop('disabled', true).text('<?php _e('Generate Script Text First', 'seo-postifier'); ?>');
+        }
+
+        // Update Generate Post button
+        if (hasPost) {
+            $generatePostBtn.prop('disabled', true).text('<?php _e('Post Already Generated', 'seo-postifier'); ?>');
+        } else if (hasScriptDefinition) {
+            $generatePostBtn.prop('disabled', false).text('<?php _e('Generate Post', 'seo-postifier'); ?>');
+        } else {
+            $generatePostBtn.prop('disabled', true).text('<?php _e('Generate Script Definition First', 'seo-postifier'); ?>');
+        }
+    }
+
+    // Generate post (with script definition generation first if needed)
     $generatePostBtn.on('click', function() {
-        alert('<?php _e('This feature is coming soon!', 'seo-postifier'); ?>');
+        const $button = $(this);
+        const originalText = $button.text();
+
+        if ($button.prop('disabled')) {
+            return;
+        }
+
+        $button.prop('disabled', true).text('<?php _e('Generating...', 'seo-postifier'); ?>');
+        $actionStatus.html('<div class="notice notice-info inline"><p><?php _e('Starting post generation process...', 'seo-postifier'); ?></p></div>');
+
+        // First, check if script definition is generated
+        const needsScriptDefinition = currentInterview.status !== 'script_definition_generated' || 
+                                     !currentInterview.generatedScriptDefinition || 
+                                     !currentInterview.generatedScriptDefinition.head ||
+                                     !currentInterview.generatedScriptDefinition.head.h1;
+
+        function generatePost() {
+            $actionStatus.html('<div class="notice notice-info inline"><p><?php _e('Generating post. This may take several minutes...', 'seo-postifier'); ?></p></div>');
+
+            $.ajax({
+                url: seoPostifierData.ajaxUrl,
+                type: 'POST',
+                timeout: 300000, // 5 minutes
+                data: {
+                    action: 'seo_postifier_generate_post',
+                    nonce: seoPostifierData.nonce,
+                    interview_id: interviewId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        currentPost = response.data.post;
+                        currentPostId = response.data.post._id || response.data.post.id;
+                        displayPost(currentPost);
+                        
+                        // Reload interview to get updated associatedPostId
+                        loadInterview();
+                        
+                        $actionStatus.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
+                    } else {
+                        $actionStatus.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
+                    }
+                },
+                error: function(xhr, status) {
+                    let errorMsg = '<?php _e('Failed to generate post. Please try again.', 'seo-postifier'); ?>';
+                    if (status === 'timeout') {
+                        errorMsg = '<?php _e('Request timed out. The post generation may still be processing.', 'seo-postifier'); ?>';
+                    }
+                    $actionStatus.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
+                },
+                complete: function() {
+                    $button.prop('disabled', false).text(originalText);
+                    updateButtonStates();
+                }
+            });
+        }
+
+        if (needsScriptDefinition) {
+            // First generate script definition
+            $actionStatus.html('<div class="notice notice-info inline"><p><?php _e('Generating script definition first. This may take a few minutes...', 'seo-postifier'); ?></p></div>');
+
+            $.ajax({
+                url: seoPostifierData.ajaxUrl,
+                type: 'POST',
+                timeout: 180000, // 3 minutes
+                data: {
+                    action: 'seo_postifier_generate_script_definition',
+                    nonce: seoPostifierData.nonce,
+                    interview_id: interviewId
+                },
+                success: function(response) {
+                    if (response.success) {
+                        currentInterview = response.data.interview;
+                        displayInterview(currentInterview);
+                        $actionStatus.html('<div class="notice notice-success inline"><p><?php _e('Script definition generated. Now generating post...', 'seo-postifier'); ?></p></div>');
+                        
+                        // Now generate the post
+                        setTimeout(generatePost, 1000);
+                    } else {
+                        $actionStatus.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
+                        $button.prop('disabled', false).text(originalText);
+                        updateButtonStates();
+                    }
+                },
+                error: function(xhr, status) {
+                    let errorMsg = '<?php _e('Failed to generate script definition. Please try again.', 'seo-postifier'); ?>';
+                    if (status === 'timeout') {
+                        errorMsg = '<?php _e('Request timed out. The script definition generation may still be processing.', 'seo-postifier'); ?>';
+                    }
+                    $actionStatus.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
+                    $button.prop('disabled', false).text(originalText);
+                    updateButtonStates();
+                }
+            });
+        } else {
+            // Script definition already exists, generate post directly
+            generatePost();
+        }
     });
 
     // Load interview on page load

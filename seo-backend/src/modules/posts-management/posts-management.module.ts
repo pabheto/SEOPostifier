@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LlmManagerModule } from '../llm-manager/llm-manager.module';
 import { UsersModule } from '../users/users.module';
-import { PostsManagementController } from './controllers/post-interviews.controller';
+import { PostsInterviewsController } from './controllers/post-interviews.controller';
+import { PostsManagementController } from './controllers/posts-management.controller';
 import {
   PostInterview,
   PostInterviewSchema,
@@ -26,7 +27,7 @@ import { PostsManagementService } from './services/posts-management.service';
     LlmManagerModule, // Import LlmManagerModule to use GroqService
     UsersModule, // Import UsersModule for license-based authentication
   ],
-  controllers: [PostsManagementController],
+  controllers: [PostsManagementController, PostsInterviewsController],
   providers: [PostInterviewsService, PostsManagementService],
   exports: [PostInterviewsService, PostsManagementService],
 })

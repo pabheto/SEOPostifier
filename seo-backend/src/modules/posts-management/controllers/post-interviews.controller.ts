@@ -5,6 +5,8 @@ import {
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
+import type { AuthenticatedUser } from 'src/modules/users/auth';
+import { CurrentUser } from 'src/modules/users/auth';
 import { RequireLicense } from '../../users/decorators/require-license.decorator';
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';
 import { GeneratePostFromInterviewDto } from '../dto/generate-post-from-interview.dto';
@@ -16,7 +18,7 @@ import { PostsManagementService } from '../services/posts-management.service';
 @ApiSecurity('license-key')
 @Controller('posts-interviews')
 @RequireLicense()
-export class PostsManagementController {
+export class PostsInterviewsController {
   constructor(
     private readonly postInterviewsService: PostInterviewsService,
     private readonly postsManagementService: PostsManagementService,
@@ -39,8 +41,11 @@ export class PostsManagementController {
   })
   async createPostInterview(
     @Body() createPostInterviewDto: CreatePostInterviewDto,
+    @CurrentUser() user: AuthenticatedUser,
   ) {
+    const userId = user.id;
     const interview = await this.postInterviewsService.createPostInterview(
+      userId,
       createPostInterviewDto,
     );
     return interview;

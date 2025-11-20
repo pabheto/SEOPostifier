@@ -19,6 +19,10 @@ export class Post {
   @Prop({ index: true })
   wordpressPostId?: number;
 
+  /** ID del usuario dueño del post */
+  @Prop({ index: true })
+  userId?: string;
+
   /** Estado actual del post dentro de tu sistema */
   @Prop({
     type: String,
@@ -60,6 +64,7 @@ export const PostSchema = SchemaFactory.createForClass(Post);
 // Índices útiles
 PostSchema.index({ status: 1, createdAt: -1 });
 PostSchema.index({ wordpressPostId: 1 });
+PostSchema.index({ userId: 1, createdAt: -1 });
 // Text index without language-specific stemming
 PostSchema.index(
   { mainKeyword: 'text', title: 'text' },

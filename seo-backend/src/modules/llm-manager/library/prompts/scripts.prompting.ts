@@ -499,7 +499,8 @@ Your result should be in this JSON format, plain JSON, no formatting or addition
     Match this description: ${faq.description}
 
     Return ONLY the FAQ section with no additional text of instructions.
-    You must return it in JSON format plain text matching the following structure:
+    You must return it in JSON format plain text matching the following structure
+    dont add any additional formatting characters, just plain JSON text
 
 {
   questions: string[];

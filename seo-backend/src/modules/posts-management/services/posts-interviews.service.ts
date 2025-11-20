@@ -28,6 +28,7 @@ export class PostInterviewsService {
   ) {}
 
   async createPostInterview(
+    userId: string,
     createPostInterviewDto: CreatePostInterviewDto,
   ): Promise<PostInterviewDocument> {
     // Import uuid if not already imported at the top:
@@ -36,6 +37,7 @@ export class PostInterviewsService {
     const interviewId = randomUUID();
     const postInterview = new this.postInterviewModel({
       interviewId,
+      userId,
       ...createPostInterviewDto,
     });
     return postInterview.save();
