@@ -162,7 +162,8 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 if (response.success) {
                     currentPost = response.data.post;
-                    currentPostId = postId;
+                    // Ensure we have the correct post ID
+                    currentPostId = response.data.post._id || response.data.post.id || postId;
                     displayPost(currentPost);
                 }
             },
@@ -387,7 +388,8 @@ jQuery(document).ready(function($) {
                 success: function(response) {
                     if (response.success) {
                         currentPost = response.data.post;
-                        currentPostId = response.data.post._id || response.data.post.id;
+                        // Get post ID from the post object (_id is MongoDB's default ID field)
+                        currentPostId = response.data.post._id || response.data.post.id || null;
                         displayPost(currentPost);
                         
                         // Reload interview to get updated associatedPostId
@@ -453,6 +455,57 @@ jQuery(document).ready(function($) {
             // Script definition already exists, generate post directly
             generatePost();
         }
+    });
+
+    // Create WordPress Draft
+    $createWpDraftBtn.on('click', function() {
+        // Try to get post ID from currentPost if currentPostId is not set
+        if (!currentPostId && currentPost) {
+            currentPostId = currentPost._id || currentPost.id;
+        }
+        
+        if (!currentPostId || !currentPost) {
+            $wpDraftStatus.html('<div class="notice notice-error inline"><p><?php _e('No post available to create draft.', 'seo-postifier'); ?></p></div>');
+            return;
+        }
+
+        const $button = $(this);
+        const originalText = $button.text();
+
+        $button.prop('disabled', true).text('<?php _e('Creating Draft...', 'seo-postifier'); ?>');
+        $wpDraftStatus.html('<div class="notice notice-info inline"><p><?php _e('Creating WordPress draft...', 'seo-postifier'); ?></p></div>');
+
+        $.ajax({
+            url: seoPostifierData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'seo_postifier_create_wp_draft',
+                nonce: seoPostifierData.nonce,
+                post_id: currentPostId
+            },
+            success: function(response) {
+                if (response.success) {
+                    const editUrl = response.data.edit_url;
+                    // Show success message briefly, then redirect
+                    $wpDraftStatus.html(
+                        '<div class="notice notice-success inline">' +
+                        '<p><?php _e('WordPress draft created successfully! Redirecting...', 'seo-postifier'); ?></p>' +
+                        '</div>'
+                    );
+                    // Redirect to the edit page after a short delay
+                    setTimeout(function() {
+                        window.location.href = editUrl;
+                    }, 500);
+                } else {
+                    $wpDraftStatus.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
+                    $button.prop('disabled', false).text(originalText);
+                }
+            },
+            error: function() {
+                $wpDraftStatus.html('<div class="notice notice-error inline"><p><?php _e('Failed to create WordPress draft. Please try again.', 'seo-postifier'); ?></p></div>');
+                $button.prop('disabled', false).text(originalText);
+            }
+        });
     });
 
     // Load interview on page load

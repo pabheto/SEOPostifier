@@ -27,6 +27,7 @@ class SEO_Postifier_AJAX_Handlers {
         add_action('wp_ajax_seo_postifier_generate_script_definition', array(__CLASS__, 'generate_script_definition'));
         add_action('wp_ajax_seo_postifier_generate_post', array(__CLASS__, 'generate_post'));
         add_action('wp_ajax_seo_postifier_get_post', array(__CLASS__, 'get_post'));
+        add_action('wp_ajax_seo_postifier_create_wp_draft', array(__CLASS__, 'create_wp_draft'));
     }
 
     /**
@@ -404,6 +405,164 @@ class SEO_Postifier_AJAX_Handlers {
                 'message' => 'Failed to load post: ' . $result['message']
             ));
         }
+    }
+
+    /**
+     * Create WordPress Draft from Post (AJAX handler)
+     */
+    public static function create_wp_draft() {
+        check_ajax_referer('seo_postifier_nonce', 'nonce');
+
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        if (!SEO_Postifier_Settings::has_license_key()) {
+            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+            return;
+        }
+
+        $post_id = isset($_POST['post_id']) ? sanitize_text_field($_POST['post_id']) : '';
+
+        if (empty($post_id)) {
+            wp_send_json_error(array('message' => 'Post ID is required'));
+            return;
+        }
+
+        // Get post from backend
+        $response = SEO_Postifier_API_Client::get_post($post_id);
+        $result = SEO_Postifier_API_Client::parse_response($response);
+
+        if (!$result['success']) {
+            wp_send_json_error(array(
+                'message' => 'Failed to load post: ' . $result['message']
+            ));
+            return;
+        }
+
+        $post_data = $result['data']['post'];
+
+        if (empty($post_data['blocks']) || !is_array($post_data['blocks'])) {
+            wp_send_json_error(array('message' => 'Post has no content blocks'));
+            return;
+        }
+
+        // Convert blocks to WordPress HTML content
+        $content = self::convert_blocks_to_wp_content($post_data['blocks']);
+
+        if (empty($content)) {
+            wp_send_json_error(array('message' => 'Post content is empty'));
+            return;
+        }
+
+        // Create WordPress post
+        $wp_post_data = array(
+            'post_title' => !empty($post_data['title']) ? sanitize_text_field($post_data['title']) : 'Draft Post',
+            'post_content' => $content,
+            'post_status' => 'draft',
+            'post_type' => 'post',
+            'post_author' => get_current_user_id(),
+        );
+
+        // Add excerpt if available (extract from first paragraph if no explicit excerpt)
+        if (!empty($post_data['excerpt'])) {
+            $wp_post_data['post_excerpt'] = sanitize_textarea_field($post_data['excerpt']);
+        } else {
+            // Try to extract excerpt from first paragraph block
+            foreach ($post_data['blocks'] as $block) {
+                if (isset($block['type']) && $block['type'] === 'paragraph' && !empty($block['content'])) {
+                    $excerpt = wp_trim_words(strip_tags($block['content']), 30, '...');
+                    if (!empty($excerpt)) {
+                        $wp_post_data['post_excerpt'] = sanitize_textarea_field($excerpt);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Insert post
+        $wp_post_id = wp_insert_post($wp_post_data, true);
+
+        if (is_wp_error($wp_post_id)) {
+            wp_send_json_error(array(
+                'message' => 'Failed to create WordPress draft: ' . $wp_post_id->get_error_message()
+            ));
+            return;
+        }
+
+        // Get edit URL
+        $edit_url = admin_url('post.php?action=edit&post=' . $wp_post_id);
+
+        wp_send_json_success(array(
+            'message' => 'WordPress draft created successfully',
+            'wordpress_post_id' => $wp_post_id,
+            'edit_url' => $edit_url
+        ));
+    }
+
+    /**
+     * Convert post blocks to WordPress HTML content
+     */
+    private static function convert_blocks_to_wp_content($blocks) {
+        $content = '';
+
+        foreach ($blocks as $block) {
+            if (!isset($block['type'])) {
+                continue;
+            }
+
+            switch ($block['type']) {
+                case 'heading':
+                    if (isset($block['level']) && isset($block['title'])) {
+                        $level = isset($block['level']) ? intval(str_replace('h', '', $block['level'])) : 2;
+                        $level = max(1, min(6, $level)); // Ensure level is between 1 and 6
+                        $title = wp_kses_post($block['title']);
+                        $content .= '<h' . $level . '>' . $title . '</h' . $level . '>' . "\n\n";
+                    }
+                    break;
+
+                case 'paragraph':
+                    if (isset($block['content'])) {
+                        $paragraph = wp_kses_post($block['content']);
+                        $content .= '<p>' . $paragraph . '</p>' . "\n\n";
+                    }
+                    break;
+
+                case 'image':
+                    if (isset($block['image']['url'])) {
+                        $image_url = esc_url($block['image']['url']);
+                        $image_alt = isset($block['image']['alt']) ? esc_attr($block['image']['alt']) : '';
+                        $content .= '<figure class="wp-block-image">' . "\n";
+                        $content .= '<img src="' . $image_url . '" alt="' . $image_alt . '" />' . "\n";
+                        if (!empty($image_alt)) {
+                            $content .= '<figcaption>' . esc_html($image_alt) . '</figcaption>' . "\n";
+                        }
+                        $content .= '</figure>' . "\n\n";
+                    }
+                    break;
+
+                case 'faq':
+                    if (isset($block['questions']) && isset($block['answers']) && is_array($block['questions']) && is_array($block['answers'])) {
+                        $content .= '<div class="seo-postifier-faq">' . "\n";
+                        $content .= '<h2>FAQ</h2>' . "\n";
+                        for ($i = 0; $i < count($block['questions']); $i++) {
+                            if (isset($block['questions'][$i])) {
+                                $question = wp_kses_post($block['questions'][$i]);
+                                $content .= '<h3>' . $question . '</h3>' . "\n";
+                            }
+                            if (isset($block['answers'][$i])) {
+                                $answer = wp_kses_post($block['answers'][$i]);
+                                $content .= '<p>' . $answer . '</p>' . "\n\n";
+                            }
+                        }
+                        $content .= '</div>' . "\n\n";
+                    }
+                    break;
+            }
+        }
+
+        return trim($content);
     }
 
 }
