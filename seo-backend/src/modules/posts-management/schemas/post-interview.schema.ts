@@ -43,6 +43,10 @@ export class ImagesConfig {
   @Prop({ min: 0, default: 0 })
   aiImagesCount?: number;
 
+  /** Descripciones de las imágenes generadas por la IA */
+  @Prop({ type: [String], default: [] })
+  aiImagesUserDescriptions?: string[];
+
   /** Si el usuario aportará imágenes propias */
   @Prop({ default: false })
   useUserImages: boolean;

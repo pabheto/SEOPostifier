@@ -249,6 +249,47 @@ if (!defined('ABSPATH')) {
                 </tr>
             </table>
 
+            <!-- Images Configuration -->
+            <h3><?php _e('Images Configuration', 'seo-postifier'); ?></h3>
+            <table class="form-table">
+                <tr>
+                    <th scope="row">
+                        <label for="ai-images-count"><?php _e('AI Images Count', 'seo-postifier'); ?></label>
+                    </th>
+                    <td>
+                        <input type="number" id="ai-images-count" name="aiImagesCount"
+                               value="0" min="0" class="small-text" />
+                        <p class="description"><?php _e('Number of AI-generated images to create', 'seo-postifier'); ?></p>
+                    </td>
+                </tr>
+                <tr id="ai-images-custom-descriptions-row" style="display: none;">
+                    <th scope="row">
+                        <label for="use-custom-ai-descriptions"><?php _e('Custom AI Descriptions', 'seo-postifier'); ?></label>
+                    </th>
+                    <td>
+                        <input type="checkbox" id="use-custom-ai-descriptions" name="useCustomAiDescriptions" value="1" />
+                        <label for="use-custom-ai-descriptions"><?php _e('Provide custom descriptions for each AI image', 'seo-postifier'); ?></label>
+                    </td>
+                </tr>
+                <tr id="ai-images-descriptions-container" style="display: none;">
+                    <td colspan="2">
+                        <div id="ai-images-descriptions-list"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">
+                        <label><?php _e('User Images', 'seo-postifier'); ?></label>
+                    </th>
+                    <td>
+                        <button type="button" id="add-user-image" class="button button-secondary">
+                            <?php _e('+ Add User Image', 'seo-postifier'); ?>
+                        </button>
+                        <p class="description"><?php _e('Add your own images to be used in the post', 'seo-postifier'); ?></p>
+                        <div id="user-images-list" style="margin-top: 15px;"></div>
+                    </td>
+                </tr>
+            </table>
+
             <!-- Additional Notes -->
             <h3><?php _e('Additional Instructions', 'seo-postifier'); ?></h3>
             <table class="form-table">
@@ -282,6 +323,10 @@ if (!defined('ABSPATH')) {
 jQuery(document).ready(function($) {
     'use strict';
 
+    // Counter for user images
+    let userImageCounter = 0;
+    let aiImagesCount = 0;
+
     // Toggle brand fields
     $('#mentions-brand').on('change', function() {
         if ($(this).is(':checked')) {
@@ -309,12 +354,128 @@ jQuery(document).ready(function($) {
         }
     });
 
-    // Form submission
-    $('#create-script-form').on('submit', function(e) {
-        e.preventDefault();
+    // Handle AI images count change
+    $('#ai-images-count').on('change', function() {
+        aiImagesCount = parseInt($(this).val()) || 0;
+        if (aiImagesCount > 1) {
+            $('#ai-images-custom-descriptions-row').show();
+        } else {
+            $('#ai-images-custom-descriptions-row').hide();
+            $('#use-custom-ai-descriptions').prop('checked', false);
+            $('#ai-images-descriptions-container').hide();
+        }
+        updateAiDescriptionsList();
+    });
 
+    // Handle custom AI descriptions checkbox
+    $('#use-custom-ai-descriptions').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#ai-images-descriptions-container').show();
+            updateAiDescriptionsList();
+        } else {
+            $('#ai-images-descriptions-container').hide();
+        }
+    });
+
+    // Update AI descriptions list
+    function updateAiDescriptionsList() {
+        const container = $('#ai-images-descriptions-list');
+        container.empty();
+        
+        if (! $('#use-custom-ai-descriptions').is(':checked')) {
+            return;
+        }
+
+        const count = parseInt($('#ai-images-count').val()) || 0;
+        for (let i = 0; i < count; i++) {
+            const item = $('<div class="ai-image-description-item" style="margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
+            item.append('<label style="display: block; font-weight: 600; margin-bottom: 5px;">' + 
+                '<?php _e('Image', 'seo-postifier'); ?> ' + (i + 1) + ':</label>');
+            item.append('<textarea class="large-text ai-image-description" data-index="' + i + '" ' +
+                'placeholder="<?php _e('Describe what this image should show...', 'seo-postifier'); ?>" ' +
+                'rows="2" style="width: 100%;"></textarea>');
+            container.append(item);
+        }
+    }
+
+    // Add user image
+    $('#add-user-image').on('click', function() {
+        const imageId = 'user-image-' + userImageCounter++;
+        const item = $('<div class="user-image-item" data-id="' + imageId + '" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
+        
+        item.append('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">' +
+            '<strong><?php _e('User Image', 'seo-postifier'); ?> #' + (userImageCounter) + '</strong>' +
+            '<button type="button" class="button button-link-delete remove-user-image" style="color: #b32d2e;">' +
+            '<?php _e('Remove', 'seo-postifier'); ?></button></div>');
+        
+        item.append('<table class="form-table" style="margin: 0;"><tbody>');
+        
+        // Source Type
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Source Type', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><input type="text" class="regular-text user-image-source-type" ' +
+            'placeholder="<?php _e('e.g., url, wordpress_id', 'seo-postifier'); ?>" /></td>' +
+            '</tr>');
+        
+        // Source Value (Link)
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Link/URL', 'seo-postifier'); ?> *</label></th>' +
+            '<td style="padding: 10px 0;"><input type="text" class="regular-text user-image-source-value" ' +
+            'placeholder="<?php _e('Image URL or WordPress ID', 'seo-postifier'); ?>" required /></td>' +
+            '</tr>');
+        
+        // Suggested Alt
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Alt Text', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><input type="text" class="regular-text user-image-alt" ' +
+            'placeholder="<?php _e('Suggested alt text for the image', 'seo-postifier'); ?>" /></td>' +
+            '</tr>');
+        
+        // Image Description
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Image Description', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><textarea class="large-text user-image-description" rows="2" ' +
+            'placeholder="<?php _e('Describe the image and what it shows', 'seo-postifier'); ?>"></textarea></td>' +
+            '</tr>');
+        
+        // Usage Notes
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Usage Notes', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><textarea class="large-text user-image-notes" rows="2" ' +
+            'placeholder="<?php _e('How should this image be used in the post?', 'seo-postifier'); ?>"></textarea></td>' +
+            '</tr>');
+        
+        item.find('tbody').append('</tbody></table>');
+        
+        $('#user-images-list').append(item);
+        
+        // Remove button handler
+        item.find('.remove-user-image').on('click', function() {
+            item.remove();
+        });
+    });
+
+    // Initialize AI images count handler
+    $('#ai-images-count').trigger('change');
+
+    // Form submission handler - register early to catch first submission
+    function handleFormSubmit(e) {
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+        }
+        
+        // Verify that required data is available
+        if (typeof seoPostifierData === 'undefined') {
+            console.error('seoPostifierData is not available');
+            alert('<?php _e('Error: Plugin data not loaded. Please refresh the page.', 'seo-postifier'); ?>');
+            return false;
+        }
+
+        const $form = $('#create-script-form');
         const $status = $('#create-script-status');
-        const $button = $(this).find('button[type="submit"]');
+        const $button = $form.find('button[type="submit"]');
         const originalText = $button.text();
 
         $button.prop('disabled', true).text('<?php _e('Creating...', 'seo-postifier'); ?>');
@@ -327,6 +488,60 @@ jQuery(document).ready(function($) {
                 .map(item => item.trim())
                 .filter(item => item.length > 0);
         };
+
+        // Collect images configuration
+        const aiImagesCount = parseInt($('#ai-images-count').val()) || 0;
+        const useCustomAiDescriptions = $('#use-custom-ai-descriptions').is(':checked');
+        const aiImagesUserDescriptions = [];
+        
+        if (useCustomAiDescriptions && aiImagesCount > 0) {
+            $('.ai-image-description').each(function() {
+                const desc = $(this).val().trim();
+                if (desc) {
+                    aiImagesUserDescriptions.push(desc);
+                }
+            });
+        }
+        
+        const userImages = [];
+        $('.user-image-item').each(function() {
+            const $item = $(this);
+            const sourceValue = $item.find('.user-image-source-value').val().trim();
+            
+            if (sourceValue) {
+                const imageDescription = $item.find('.user-image-description').val().trim();
+                const usageNotes = $item.find('.user-image-notes').val().trim();
+                
+                // Combine description and usage notes into notes field
+                let notes = '';
+                if (imageDescription) {
+                    notes = imageDescription;
+                }
+                if (usageNotes) {
+                    notes += (notes ? '\n\n' : '') + 'Usage: ' + usageNotes;
+                }
+                
+                userImages.push({
+                    sourceType: $item.find('.user-image-source-type').val().trim() || 'url',
+                    sourceValue: sourceValue,
+                    suggestedAlt: $item.find('.user-image-alt').val().trim() || undefined,
+                    notes: notes || undefined
+                });
+            }
+        });
+        
+        // Build images config object
+        const imagesConfig = {};
+        if (aiImagesCount > 0) {
+            imagesConfig.aiImagesCount = aiImagesCount;
+            if (aiImagesUserDescriptions.length > 0) {
+                imagesConfig.aiImagesUserDescriptions = aiImagesUserDescriptions;
+            }
+        }
+        if (userImages.length > 0) {
+            imagesConfig.useUserImages = true;
+            imagesConfig.userImages = userImages;
+        }
 
         // Collect form data
         const formData = {
@@ -352,6 +567,11 @@ jQuery(document).ready(function($) {
             externalLinksToUse: splitAndFilter($('#external-links-to-use').val(), '\n'),
             notesForWriter: $('#notes-for-writer').val()
         };
+        
+        // Add imagesConfig only if it has any properties
+        if (Object.keys(imagesConfig).length > 0) {
+            formData.imagesConfig = imagesConfig;
+        }
 
         $.ajax({
             url: seoPostifierData.ajaxUrl,
@@ -380,6 +600,26 @@ jQuery(document).ready(function($) {
                 $button.prop('disabled', false).text(originalText);
             }
         });
+        
+        return false;
+    }
+    
+    // Register form submit handler - use off() first to prevent duplicates
+    $('#create-script-form').off('submit').on('submit', handleFormSubmit);
+    
+    // Also handle button click to ensure we catch it early
+    $(document).off('click', '#create-script-form button[type="submit"]').on('click', '#create-script-form button[type="submit"]', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        // Manually validate and submit
+        const form = $('#create-script-form')[0];
+        if (form && form.checkValidity()) {
+            handleFormSubmit(e);
+        } else {
+            form.reportValidity();
+        }
+        return false;
     });
 });
 </script>

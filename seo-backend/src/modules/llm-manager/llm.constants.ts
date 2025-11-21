@@ -1,4 +1,4 @@
-export const SCRIPT_CREATION_MODEL = 'openai/gpt-oss-120b';
+export const SCRIPT_CREATION_MODEL = 'groq/compound';
 
 export const MEDIUM_GENERATION_MODEL = 'llama-3.3-70b-versatile';
 

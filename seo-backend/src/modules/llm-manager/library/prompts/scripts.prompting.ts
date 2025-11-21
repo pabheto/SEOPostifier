@@ -260,6 +260,9 @@ export class ScriptsPrompting {
      - Internal/external link placement (if enabled)
      - Image placement blocks (if enabled)
   
+  Please, research in the web when you need to obtain updated information
+  Include the source and the details of the information in the description of each section or introduction so the writter 
+  without internet access can use it to write the content.
   ---
   
   ## 3. Output Format (Markdown)
@@ -369,12 +372,12 @@ Important instructions:
    - Do NOT use code blocks, backticks, or comments.
 
    - "indexSummary" RULES: It must be a summary of the general structure of the article. 
-   One line with the title and a summary of 10 - 20 words of the content of that section. 
-   1 Line per section! It must give the whole context of the article organization.
+   One line with the title and a summary of 30 - 40 words of the content of that section and specifying if is an H2, H3 or H4
+   1 Line per section with the format [H2|H3|H4] Title: Summary
 
 2. "head" RULES
    - h1: main title of the article (extracted from the outline, or create a concise descriptive one if missing).
-   - metaDescription: 140–160 characters, compelling SEO summary.
+   - metaDescription: Include the description of the introduction for the writter. Add the story telling and description planned by the script.
    - slug: URL-friendly version of the h1 (lowercase, hyphens, no special characters).
    - tags: 3 to 8 core keywords or topics as an array of strings.
 
@@ -387,13 +390,13 @@ Important instructions:
    - id: unique string per section, formatted as "sec-1", "sec-2", "sec-3", etc., following order.
    - lengthRange: [minWords, maxWords] estimated for that section.
      - Use the ranges specified in the script, otherwise use a reasonable range to match around 250 - 400 words.
-   - description: a clear explanation of what the section should contain (guidelines for the writer/AI).
+   - description: A clear explanation of what the section should contain (guidelines for the writer/AI). Add what has been planned in the script.
    - images (optional):
      - Include ONLY if the outline suggests an image or if an image adds value.
      - Must follow the Image type structure.
      - sourceType: "user" if the image should be provided by the user, "ai_generated" if it should be generated with AI.
      - sourceValue (optional): short indication of the image type (e.g., "product photo", "comparison chart").
-     - description (optional): detailed explanation of what the image should show. Only for AI generated images.
+     - description (optional): detailed explanation of what the image should show and the purpose of it in the section.
      - alt (optional): descriptive alt-text optimized for SEO and accessibility.
    - links:
      - internal: array of suggested internal link targets (slugs or conceptual placeholders).
@@ -413,6 +416,10 @@ Important instructions:
      - Group scattered bullet points into coherent sections.
      - Add an introduction or conclusion if necessary for a complete article structure.
    - Ensure consistent hierarchy logic between h1 → h2 → h3 → h4.
+   - Please, research in the web when you need to obtain updated information
+   Include the source and the details of the information in the description of each section or introduction so the writter 
+   without internet access can use it to write the content.
+   Don't shorten much the information, try to keep the description of each section or introduction
 
 5. VALIDATION REQUIREMENTS
    - JSON must be fully valid: double quotes only, no trailing commas.

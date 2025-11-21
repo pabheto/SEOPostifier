@@ -653,3 +653,57 @@
         padding: 0 10px;
     }
 }
+
+/* Images Configuration Styles */
+.user-image-item {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #f9f9f9;
+    position: relative;
+}
+
+.user-image-item .form-table {
+    margin: 0;
+    background: transparent;
+}
+
+.user-image-item .form-table th {
+    width: 150px;
+    padding: 10px 0;
+    font-weight: 600;
+}
+
+.user-image-item .form-table td {
+    padding: 10px 0;
+}
+
+.user-image-item .remove-user-image {
+    color: #b32d2e;
+    text-decoration: none;
+}
+
+.user-image-item .remove-user-image:hover {
+    color: #8a2424;
+}
+
+.ai-image-description-item {
+    margin-bottom: 15px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    background: #f9f9f9;
+}
+
+.ai-image-description-item label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.ai-image-description-item textarea {
+    width: 100%;
+    box-sizing: border-box;
+}
