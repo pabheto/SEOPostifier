@@ -1,0 +1,14 @@
+{
+  "test": "Generate Image from Text Prompt",
+  "prompt": "Create a picture of a nano banana dish in a fancy restaurant with a Gemini theme",
+  "result": {
+    "filename": "nano-banana-generated_1763723521099_1763723521099_6c1ad9c1.png",
+    "originalName": "nano-banana-generated_1763723521099.png",
+    "path": "/Users/pabloherrero/Documents/Programacion/SEOCopyWriterWP/seo-backend/uploads/images/nano-banana-generated_1763723521099_1763723521099_6c1ad9c1.png",
+    "size": 1483711,
+    "mimeType": "image/png",
+    "url": "/uploads/images/nano-banana-generated_1763723521099_1763723521099_6c1ad9c1.png",
+    "model": "gemini-2.5-flash-image"
+  },
+  "timestamp": "2025-11-21T11:12:01.101Z"
+}

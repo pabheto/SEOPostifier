@@ -4,8 +4,10 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerMiddleware } from './middleware/logger.middleware';
+import { ImageGenerationModule } from './modules/image-generation';
 import { LlmManagerModule } from './modules/llm-manager';
 import { PostsManagementModule } from './modules/posts-management/posts-management.module';
+import { StorageModule } from './modules/storage';
 import { UsersModule } from './modules/users/users.module';
 
 @Module({
@@ -22,8 +24,10 @@ import { UsersModule } from './modules/users/users.module';
       },
     ),
 
+    ImageGenerationModule,
     LlmManagerModule,
     PostsManagementModule,
+    StorageModule,
     UsersModule,
   ],
   controllers: [AppController],

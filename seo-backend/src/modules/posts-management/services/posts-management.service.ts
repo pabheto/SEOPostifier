@@ -71,17 +71,11 @@ export class PostsManagementService {
       },
     );
 
-    blocks.push(
-      {
-        type: PostBlockType.HEADING,
-        level: 'h1',
-        title: postInterview.generatedScriptDefinition.head.h1,
-      },
-      {
-        type: PostBlockType.PARAGRAPH,
-        content: introductionResult.content,
-      },
-    );
+    // Don't add H1 heading block as WordPress already uses the post title as H1
+    blocks.push({
+      type: PostBlockType.PARAGRAPH,
+      content: introductionResult.content,
+    });
 
     for (const section of postInterview.generatedScriptDefinition.body
       .sections) {
