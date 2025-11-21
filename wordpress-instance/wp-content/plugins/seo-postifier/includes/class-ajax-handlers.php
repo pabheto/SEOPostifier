@@ -575,7 +575,7 @@ class SEO_Postifier_AJAX_Handlers {
     }
 
     /**
-     * Convert post blocks to WordPress HTML content
+     * Convert post blocks to WordPress Gutenberg block format
      */
     private static function convert_blocks_to_wp_content($blocks) {
         $content = '';
@@ -591,14 +591,23 @@ class SEO_Postifier_AJAX_Handlers {
                         $level = isset($block['level']) ? intval(str_replace('h', '', $block['level'])) : 2;
                         $level = max(1, min(6, $level)); // Ensure level is between 1 and 6
                         $title = wp_kses_post($block['title']);
-                        $content .= '<h' . $level . '>' . $title . '</h' . $level . '>' . "\n\n";
+                        
+                        // Gutenberg heading block format
+                        $attributes = json_encode(array('level' => $level), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                        $content .= '<!-- wp:heading ' . $attributes . ' -->' . "\n";
+                        $content .= '<h' . $level . ' class="wp-block-heading">' . $title . '</h' . $level . '>' . "\n";
+                        $content .= '<!-- /wp:heading -->' . "\n\n";
                     }
                     break;
 
                 case 'paragraph':
                     if (isset($block['content'])) {
                         $paragraph = wp_kses_post($block['content']);
-                        $content .= '<p>' . $paragraph . '</p>' . "\n\n";
+                        
+                        // Gutenberg paragraph block format
+                        $content .= '<!-- wp:paragraph -->' . "\n";
+                        $content .= '<p class="wp-block-paragraph">' . $paragraph . '</p>' . "\n";
+                        $content .= '<!-- /wp:paragraph -->' . "\n\n";
                     }
                     break;
 
@@ -606,30 +615,61 @@ class SEO_Postifier_AJAX_Handlers {
                     if (isset($block['image']['url'])) {
                         $image_url = esc_url($block['image']['url']);
                         $image_alt = isset($block['image']['alt']) ? esc_attr($block['image']['alt']) : '';
-                        $content .= '<figure class="wp-block-image">' . "\n";
+                        
+                        // Gutenberg image block format
+                        $attributes = array(
+                            'id' => 0,
+                            'sizeSlug' => 'full',
+                            'linkDestination' => 'none'
+                        );
+                        if (!empty($image_alt)) {
+                            $attributes['alt'] = $image_alt;
+                        }
+                        
+                        $content .= '<!-- wp:image ' . json_encode($attributes, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ' -->' . "\n";
+                        $content .= '<figure class="wp-block-image size-full">' . "\n";
                         $content .= '<img src="' . $image_url . '" alt="' . $image_alt . '" />' . "\n";
                         if (!empty($image_alt)) {
-                            $content .= '<figcaption>' . esc_html($image_alt) . '</figcaption>' . "\n";
+                            $content .= '<figcaption class="wp-element-caption">' . esc_html($image_alt) . '</figcaption>' . "\n";
                         }
-                        $content .= '</figure>' . "\n\n";
+                        $content .= '</figure>' . "\n";
+                        $content .= '<!-- /wp:image -->' . "\n\n";
                     }
                     break;
 
                 case 'faq':
                     if (isset($block['questions']) && isset($block['answers']) && is_array($block['questions']) && is_array($block['answers'])) {
-                        $content .= '<div class="seo-postifier-faq">' . "\n";
-                        $content .= '<h2>FAQ</h2>' . "\n";
+                        // Use Gutenberg group block for FAQ section
+                        $content .= '<!-- wp:group {"layout":{"type":"constrained"}} -->' . "\n";
+                        $content .= '<div class="wp-block-group">' . "\n";
+                        
+                        // FAQ heading
+                        $content .= '<!-- wp:heading {"level":2} -->' . "\n";
+                        $content .= '<h2 class="wp-block-heading">FAQ</h2>' . "\n";
+                        $content .= '<!-- /wp:heading -->' . "\n\n";
+                        
+                        // FAQ items
                         for ($i = 0; $i < count($block['questions']); $i++) {
                             if (isset($block['questions'][$i])) {
                                 $question = wp_kses_post($block['questions'][$i]);
-                                $content .= '<h3>' . $question . '</h3>' . "\n";
+                                
+                                // Question as heading
+                                $content .= '<!-- wp:heading {"level":3} -->' . "\n";
+                                $content .= '<h3 class="wp-block-heading">' . $question . '</h3>' . "\n";
+                                $content .= '<!-- /wp:heading -->' . "\n\n";
                             }
                             if (isset($block['answers'][$i])) {
                                 $answer = wp_kses_post($block['answers'][$i]);
-                                $content .= '<p>' . $answer . '</p>' . "\n\n";
+                                
+                                // Answer as paragraph
+                                $content .= '<!-- wp:paragraph -->' . "\n";
+                                $content .= '<p class="wp-block-paragraph">' . $answer . '</p>' . "\n";
+                                $content .= '<!-- /wp:paragraph -->' . "\n\n";
                             }
                         }
-                        $content .= '</div>' . "\n\n";
+                        
+                        $content .= '</div>' . "\n";
+                        $content .= '<!-- /wp:group -->' . "\n\n";
                     }
                     break;
             }

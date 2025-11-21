@@ -1,6 +1,6 @@
 <?php
 /**
- * View Script Template
+ * View Script Template - 3 Step Process
  */
 
 // Exit if accessed directly
@@ -19,87 +19,55 @@ if (empty($interview_id)) {
 
 <div class="seo-postifier-view-script">
     <div class="card">
-        <h2><?php _e('View Script', 'seo-postifier'); ?></h2>
+        <h2><?php _e('Create Draft', 'seo-postifier'); ?></h2>
         
         <p>
             <a href="?page=seo-postifier&tab=scripts" class="button button-secondary">
-                <?php _e('← Back to My Scripts', 'seo-postifier'); ?>
+                <?php _e('← Back to My Drafts', 'seo-postifier'); ?>
             </a>
         </p>
 
         <div id="loading-interview" style="margin: 20px 0;">
-            <p><?php _e('Loading interview data...', 'seo-postifier'); ?></p>
+            <p><?php _e('Loading draft data...', 'seo-postifier'); ?></p>
         </div>
 
         <div id="interview-container" style="display: none; margin-top: 20px;">
-            <!-- Interview View/Edit Toggle -->
-            <div style="margin-bottom: 20px;">
-                <button type="button" id="toggle-edit-mode" class="button button-secondary">
-                    <span class="view-mode-text"><?php _e('Edit Interview Parameters', 'seo-postifier'); ?></span>
-                    <span class="edit-mode-text" style="display: none;"><?php _e('Cancel Editing', 'seo-postifier'); ?></span>
-                </button>
-            </div>
-
-            <!-- Interview View Mode -->
-            <div id="interview-view-mode">
-                <div class="seo-postifier-two-column-layout">
-                    <div class="seo-postifier-left-column">
-                        <h3><?php _e('Interview Data', 'seo-postifier'); ?></h3>
-                        <div id="interview-json" class="seo-postifier-json-display"></div>
-
-                        <div style="margin-top: 20px;">
-                            <h3><?php _e('Actions', 'seo-postifier'); ?></h3>
-                            <p class="submit">
-                                <button type="button" id="generate-script-text-btn" class="button button-primary button-large">
-                                    <?php _e('Generate Script Text', 'seo-postifier'); ?>
-                                </button>
-                                <button type="button" id="generate-script-definition-btn" class="button button-primary button-large">
-                                    <?php _e('Generate Script Definition', 'seo-postifier'); ?>
-                                </button>
-                                <button type="button" id="generate-post-btn" class="button button-primary button-large">
-                                    <?php _e('Generate Post', 'seo-postifier'); ?>
-                                </button>
-                            </p>
-                            <div id="action-status" style="margin-top: 15px;"></div>
-                        </div>
+            <!-- Progress Stepper -->
+            <div class="seo-postifier-stepper">
+                <div class="stepper-step" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <div class="step-title"><?php _e('Define Parameters', 'seo-postifier'); ?></div>
+                        <div class="step-description"><?php _e('Set up your SEO parameters', 'seo-postifier'); ?></div>
                     </div>
-
-                    <div class="seo-postifier-right-column">
-                        <!-- Script Text Editor with Preview -->
-                        <div id="script-text-container" style="display: none; margin-bottom: 20px;">
-                            <h3><?php _e('Script Text', 'seo-postifier'); ?></h3>
-                            <div class="seo-postifier-markdown-editor">
-                                <div class="seo-postifier-editor-tabs">
-                                    <button type="button" class="editor-tab active" data-tab="edit"><?php _e('Edit', 'seo-postifier'); ?></button>
-                                    <button type="button" class="editor-tab" data-tab="preview"><?php _e('Preview', 'seo-postifier'); ?></button>
-                                </div>
-                                <div class="seo-postifier-editor-content">
-                                    <textarea id="script-text-editor" class="seo-postifier-textarea" rows="20"></textarea>
-                                    <div id="script-text-preview" class="seo-postifier-markdown-display" style="display: none;"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Post Preview -->
-                        <div id="post-container" style="display: none;">
-                            <h3><?php _e('Generated Post Preview', 'seo-postifier'); ?></h3>
-                            <div id="post-markdown" class="seo-postifier-markdown-display"></div>
-                            <div style="margin-top: 20px;">
-                                <button type="button" id="create-wp-draft-btn" class="button button-primary button-large">
-                                    <?php _e('Create WordPress Draft', 'seo-postifier'); ?>
-                                </button>
-                                <div id="wp-draft-status" style="margin-top: 15px;"></div>
-                            </div>
-                        </div>
+                </div>
+                <div class="stepper-connector"></div>
+                <div class="stepper-step" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <div class="step-title"><?php _e('Elaborate Script', 'seo-postifier'); ?></div>
+                        <div class="step-description"><?php _e('Create and refine your script', 'seo-postifier'); ?></div>
+                    </div>
+                </div>
+                <div class="stepper-connector"></div>
+                <div class="stepper-step" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <div class="step-title"><?php _e('Create Draft', 'seo-postifier'); ?></div>
+                        <div class="step-description"><?php _e('Generate WordPress draft', 'seo-postifier'); ?></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Interview Edit Mode -->
-            <div id="interview-edit-mode" style="display: none;">
-                <form id="edit-interview-form">
-                    <h3><?php _e('Edit Interview Parameters', 'seo-postifier'); ?></h3>
-                    
+            <!-- Step 1: Define Parameters -->
+            <div id="step-1-container" class="step-container">
+                <div class="step-header">
+                    <h3><?php _e('Step 1: Define Parameters', 'seo-postifier'); ?></h3>
+                    <p><?php _e('Configure the SEO parameters for your post. Once completed, the script text will be automatically generated.', 'seo-postifier'); ?></p>
+                </div>
+
+                <!-- Edit Form (same as before but simplified) -->
+                <form id="edit-interview-form" class="step-content-form">
                     <!-- SEO Configuration -->
                     <h3><?php _e('SEO Configuration', 'seo-postifier'); ?></h3>
                     <table class="form-table">
@@ -126,7 +94,7 @@ if (empty($interview_id)) {
                             </th>
                             <td>
                                 <input type="number" id="edit-keyword-density" name="keywordDensityTarget"
-                                       min="0" max="1" step="0.001" class="small-text" />
+                                       value="0.015" min="0" max="1" step="0.001" class="small-text" />
                             </td>
                         </tr>
                     </table>
@@ -150,7 +118,7 @@ if (empty($interview_id)) {
                             <td>
                                 <select id="edit-language" name="language" required>
                                     <option value="en">English</option>
-                                    <option value="es">Español</option>
+                                    <option value="es" selected>Español</option>
                                     <option value="fr">Français</option>
                                     <option value="de">Deutsch</option>
                                     <option value="it">Italiano</option>
@@ -164,7 +132,7 @@ if (empty($interview_id)) {
                             </th>
                             <td>
                                 <select id="edit-search-intent" name="searchIntent" required>
-                                    <option value="informational">Informational</option>
+                                    <option value="informational" selected>Informational</option>
                                     <option value="transactional">Transactional</option>
                                     <option value="commercial">Commercial</option>
                                     <option value="navigational">Navigational</option>
@@ -187,7 +155,7 @@ if (empty($interview_id)) {
                             <td>
                                 <select id="edit-tone-of-voice" name="toneOfVoice" required>
                                     <option value="professional">Professional</option>
-                                    <option value="friendly">Friendly</option>
+                                    <option value="friendly" selected>Friendly</option>
                                     <option value="technical">Technical</option>
                                     <option value="educational">Educational</option>
                                     <option value="casual">Casual</option>
@@ -206,7 +174,7 @@ if (empty($interview_id)) {
                             </th>
                             <td>
                                 <input type="number" id="edit-min-word-count" name="minWordCount"
-                                       min="100" class="small-text" />
+                                       value="1500" min="100" class="small-text" />
                             </td>
                         </tr>
                         <tr>
@@ -215,7 +183,7 @@ if (empty($interview_id)) {
                             </th>
                             <td>
                                 <input type="number" id="edit-max-word-count" name="maxWordCount"
-                                       min="100" class="small-text" />
+                                       value="3000" min="100" class="small-text" />
                             </td>
                         </tr>
                         <tr>
@@ -223,7 +191,7 @@ if (empty($interview_id)) {
                                 <label for="edit-needs-faq"><?php _e('Include FAQ Section', 'seo-postifier'); ?></label>
                             </th>
                             <td>
-                                <input type="checkbox" id="edit-needs-faq" name="needsFaqSection" value="1" />
+                                <input type="checkbox" id="edit-needs-faq" name="needsFaqSection" value="1" checked />
                                 <label for="edit-needs-faq"><?php _e('Add FAQ section at the end', 'seo-postifier'); ?></label>
                             </td>
                         </tr>
@@ -269,20 +237,20 @@ if (empty($interview_id)) {
                             </th>
                             <td>
                                 <input type="checkbox" id="edit-include-internal-links"
-                                       name="includeInternalLinks" value="1" />
+                                       name="includeInternalLinks" value="1" checked />
                                 <label for="edit-include-internal-links"><?php _e('Include internal links', 'seo-postifier'); ?></label>
                             </td>
                         </tr>
-                        <tr class="edit-internal-links-fields" style="display: none;">
+                        <tr class="edit-internal-links-fields">
                             <th scope="row">
                                 <label for="edit-max-internal-links"><?php _e('Max Internal Links', 'seo-postifier'); ?></label>
                             </th>
                             <td>
                                 <input type="number" id="edit-max-internal-links" name="maxInternalLinks"
-                                       min="0" class="small-text" />
+                                       value="3" min="0" class="small-text" />
                             </td>
                         </tr>
-                        <tr class="edit-internal-links-fields" style="display: none;">
+                        <tr class="edit-internal-links-fields">
                             <th scope="row">
                                 <label for="edit-internal-links-to-use"><?php _e('Internal Links URLs', 'seo-postifier'); ?></label>
                             </th>
@@ -307,7 +275,7 @@ if (empty($interview_id)) {
                             </th>
                             <td>
                                 <input type="number" id="edit-max-external-links" name="maxExternalLinks"
-                                       min="0" class="small-text" />
+                                       value="2" min="0" class="small-text" />
                             </td>
                         </tr>
                         <tr class="edit-external-links-fields" style="display: none;">
@@ -336,15 +304,59 @@ if (empty($interview_id)) {
                     </table>
 
                     <p class="submit">
-                        <button type="submit" class="button button-primary button-large">
-                            <?php _e('Save Changes', 'seo-postifier'); ?>
-                        </button>
-                        <button type="button" id="cancel-edit" class="button button-secondary">
-                            <?php _e('Cancel', 'seo-postifier'); ?>
+                        <button type="submit" id="complete-step-1-btn" class="button button-primary button-large">
+                            <?php _e('Complete Step 1 & Generate Script Text', 'seo-postifier'); ?>
                         </button>
                     </p>
-                    <div id="edit-interview-status" style="margin-top: 15px;"></div>
+                    <div id="step-1-status" style="margin-top: 15px;"></div>
                 </form>
+            </div>
+
+            <!-- Step 2: Elaborate Script -->
+            <div id="step-2-container" class="step-container" style="display: none;">
+                <div class="step-header">
+                    <h3><?php _e('Step 2: Elaborate Script', 'seo-postifier'); ?></h3>
+                    <p><?php _e('Review and modify the generated script text. Once completed, the script definition and post will be automatically generated.', 'seo-postifier'); ?></p>
+                </div>
+
+                <div class="step-content-form">
+                    <div class="seo-postifier-markdown-editor">
+                        <div class="seo-postifier-editor-tabs">
+                            <button type="button" class="editor-tab active" data-tab="edit"><?php _e('Edit', 'seo-postifier'); ?></button>
+                            <button type="button" class="editor-tab" data-tab="preview"><?php _e('Preview', 'seo-postifier'); ?></button>
+                        </div>
+                        <div class="seo-postifier-editor-content">
+                            <textarea id="script-text-editor" class="seo-postifier-textarea" rows="25"></textarea>
+                            <div id="script-text-preview" class="seo-postifier-markdown-display" style="display: none;"></div>
+                        </div>
+                    </div>
+
+                    <p class="submit" style="margin-top: 20px;">
+                        <button type="button" id="complete-step-2-btn" class="button button-primary button-large">
+                            <?php _e('Complete Step 2 & Generate Post', 'seo-postifier'); ?>
+                        </button>
+                    </p>
+                    <div id="step-2-status" style="margin-top: 15px;"></div>
+                </div>
+            </div>
+
+            <!-- Step 3: Create Draft -->
+            <div id="step-3-container" class="step-container" style="display: none;">
+                <div class="step-header">
+                    <h3><?php _e('Step 3: Create Draft', 'seo-postifier'); ?></h3>
+                    <p><?php _e('Review the generated post. Once completed, a WordPress draft will be created.', 'seo-postifier'); ?></p>
+                </div>
+
+                <div class="step-content-form">
+                    <div id="post-markdown" class="seo-postifier-markdown-display"></div>
+
+                    <p class="submit" style="margin-top: 20px;">
+                        <button type="button" id="complete-step-3-btn" class="button button-primary button-large">
+                            <?php _e('Complete Step 3 & Create WordPress Draft', 'seo-postifier'); ?>
+                        </button>
+                    </p>
+                    <div id="step-3-status" style="margin-top: 15px;"></div>
+                </div>
             </div>
         </div>
 
@@ -364,203 +376,74 @@ jQuery(document).ready(function($) {
     const $loading = $('#loading-interview');
     const $container = $('#interview-container');
     const $error = $('#interview-error');
-    const $jsonDisplay = $('#interview-json');
-    const $actionStatus = $('#action-status');
-    const $generateScriptBtn = $('#generate-script-text-btn');
-    const $generateScriptDefinitionBtn = $('#generate-script-definition-btn');
-    const $generatePostBtn = $('#generate-post-btn');
-    const $createWpDraftBtn = $('#create-wp-draft-btn');
-    const $wpDraftStatus = $('#wp-draft-status');
-
+    
     let currentInterview = null;
     let currentPost = null;
     let currentPostId = null;
 
-    // Convert post blocks to markdown
-    function blocksToMarkdown(blocks) {
-        if (!blocks || !Array.isArray(blocks)) {
-            return '';
-        }
+    // Update stepper based on interview state
+    function updateStepper(interview) {
+        // Step 1: Completed if interview exists and has parameters
+        const step1Complete = interview && interview.mainKeyword;
+        // Step 2: Completed if script text is generated
+        const step2Complete = interview && interview.generatedScriptText;
+        // Step 3: Completed if post is generated
+        const step3Complete = interview && interview.associatedPostId;
 
-        let markdown = '';
-
-        blocks.forEach(function(block) {
-            switch(block.type) {
-                case 'heading':
-                    const level = block.level || 'h2';
-                    const headingLevel = level.replace('h', '');
-                    const hashes = '#'.repeat(parseInt(headingLevel));
-                    markdown += hashes + ' ' + (block.title || '') + '\n\n';
-                    break;
-
-                case 'paragraph':
-                    markdown += (block.content || '') + '\n\n';
-                    break;
-
-                case 'image':
-                    if (block.image) {
-                        const alt = block.image.alt || '';
-                        const url = block.image.url || '';
-                        markdown += '![' + alt + '](' + url + ')\n\n';
-                    }
-                    break;
-
-                case 'faq':
-                    if (block.questions && block.answers) {
-                        markdown += '## FAQ\n\n';
-                        for (let i = 0; i < block.questions.length; i++) {
-                            markdown += '### ' + (block.questions[i] || '') + '\n\n';
-                            if (block.answers[i]) {
-                                markdown += block.answers[i] + '\n\n';
-                            }
-                        }
-                    }
-                    break;
-            }
-        });
-
-        return markdown.trim();
-    }
-
-    // Load post if associated
-    function loadPost(postId) {
-        if (!postId) {
-            return;
-        }
-
-        currentPostId = postId;
-
-        $.ajax({
-            url: seoPostifierData.ajaxUrl,
-            type: 'POST',
-            data: {
-                action: 'seo_postifier_get_post',
-                nonce: seoPostifierData.nonce,
-                post_id: postId
-            },
-            success: function(response) {
-                if (response.success) {
-                    currentPost = response.data.post;
-                    // Ensure we have the correct post ID
-                    currentPostId = response.data.post._id || response.data.post.id || postId;
-                    displayPost(currentPost);
-                }
-            },
-            error: function() {
-                console.error('Failed to load post');
-            }
-        });
-    }
-
-    // Display post markdown
-    function displayPost(post) {
-        if (!post || !post.blocks) {
-            return;
-        }
-
-        const markdown = blocksToMarkdown(post.blocks);
+        $('.stepper-step[data-step="1"]').toggleClass('completed', step1Complete);
+        $('.stepper-step[data-step="2"]').toggleClass('completed', step2Complete);
+        $('.stepper-step[data-step="3"]').toggleClass('completed', step3Complete);
         
-        // Check if marked is available
-        if (typeof marked !== 'undefined') {
-            // Render markdown to HTML
-            const html = marked.parse(markdown);
-            $('#post-markdown').html(html);
-        } else {
-            // Fallback to plain text if marked is not available
-            $('#post-markdown').text(markdown);
+        // Remove active class from all steps first
+        $('.stepper-step').removeClass('active');
+        
+        // Determine current step
+        let currentStep = 1;
+        if (step3Complete || (step2Complete && interview.generatedScriptDefinition)) {
+            currentStep = 3;
+        } else if (step2Complete) {
+            currentStep = 2;
         }
         
-        $('#post-container').show();
+        // Set active step
+        $('.stepper-step[data-step="' + currentStep + '"]').addClass('active');
+
+        // Show appropriate step container
+        showStep(currentStep);
     }
 
-    // Load interview data
-    function loadInterview() {
-        $.ajax({
-            url: seoPostifierData.ajaxUrl,
-            type: 'POST',
-            data: {
-                action: 'seo_postifier_get_interview',
-                nonce: seoPostifierData.nonce,
-                interview_id: interviewId
-            },
-            success: function(response) {
-                $loading.hide();
-                
-                if (response.success) {
-                    currentInterview = response.data.interview;
-                    displayInterview(currentInterview);
-                    $container.show();
-
-                    // Load post if associated
-                    if (currentInterview.associatedPostId) {
-                        loadPost(currentInterview.associatedPostId);
-                    }
-
-                    // Update all button states
-                    updateButtonStates();
-                } else {
-                    $error.html('<div class="notice notice-error"><p>' + response.data.message + '</p></div>');
-                    $error.show();
-                }
-            },
-            error: function() {
-                $loading.hide();
-                $error.html('<div class="notice notice-error"><p><?php _e('Failed to load interview. Please try again.', 'seo-postifier'); ?></p></div>');
-                $error.show();
-            }
-        });
-    }
-
-    // Display interview as formatted JSON
-    function displayInterview(interview) {
-        const jsonString = JSON.stringify(interview, null, 2);
-        $jsonDisplay.text(jsonString);
+    function showStep(stepNumber) {
+        // Hide all step containers
+        $('.step-container').hide();
         
-        // Populate edit form if in edit mode
-        if ($('#interview-edit-mode').is(':visible')) {
-            populateEditForm(interview);
-        }
+        // Show the requested step
+        $(`#step-${stepNumber}-container`).show();
         
-        // Display script text if available
-        if (interview.generatedScriptText) {
-            $('#script-text-editor').val(interview.generatedScriptText);
-            updateScriptPreview();
-            $('#script-text-container').show();
-        } else {
-            $('#script-text-container').hide();
-        }
+        // Update active step in stepper
+        $('.stepper-step').removeClass('active');
+        $('.stepper-step[data-step="' + stepNumber + '"]').addClass('active');
     }
     
-    // Populate edit form with interview data
-    function populateEditForm(interview) {
-        $('#edit-main-keyword').val(interview.mainKeyword || '');
-        $('#edit-secondary-keywords').val(Array.isArray(interview.secondaryKeywords) ? interview.secondaryKeywords.join(', ') : '');
-        $('#edit-keyword-density').val(interview.keywordDensityTarget || 0.017);
-        $('#edit-user-description').val(interview.userDescription || '');
-        $('#edit-language').val(interview.language || 'es');
-        $('#edit-search-intent').val(interview.searchIntent || 'informational');
-        $('#edit-target-audience').val(interview.targetAudience || '');
-        $('#edit-tone-of-voice').val(interview.toneOfVoice || 'friendly');
-        $('#edit-min-word-count').val(interview.minWordCount || '');
-        $('#edit-max-word-count').val(interview.maxWordCount || '');
-        $('#edit-needs-faq').prop('checked', interview.needsFaqSection !== false);
-        $('#edit-mentions-brand').prop('checked', interview.mentionsBrand === true);
-        $('#edit-brand-name').val(interview.brandName || '');
-        $('#edit-brand-description').val(interview.brandDescription || '');
-        $('#edit-include-internal-links').prop('checked', interview.includeInternalLinks === true);
-        $('#edit-max-internal-links').val(interview.maxInternalLinks || '');
-        $('#edit-internal-links-to-use').val(Array.isArray(interview.internalLinksToUse) ? interview.internalLinksToUse.join('\n') : '');
-        $('#edit-include-external-links').prop('checked', interview.includeExternalLinks === true);
-        $('#edit-max-external-links').val(interview.maxExternalLinks || '');
-        $('#edit-external-links-to-use').val(Array.isArray(interview.externalLinksToUse) ? interview.externalLinksToUse.join('\n') : '');
-        $('#edit-notes-for-writer').val(interview.notesForWriter || '');
+    // Handle step navigation clicks (using event delegation)
+    $(document).on('click', '.stepper-step', function() {
+        const stepNumber = parseInt($(this).data('step'));
+        const isCompleted = $(this).hasClass('completed');
+        const isActive = $(this).hasClass('active');
         
-        // Toggle conditional fields
-        $('.edit-brand-fields').toggle($('#edit-mentions-brand').is(':checked'));
-        $('.edit-internal-links-fields').toggle($('#edit-include-internal-links').is(':checked'));
-        $('.edit-external-links-fields').toggle($('#edit-include-external-links').is(':checked'));
-    }
-    
+        // Determine if step is navigable
+        let isNavigable = isCompleted || isActive;
+        
+        // Step 1 is always navigable if interview exists
+        if (stepNumber === 1 && currentInterview) {
+            isNavigable = true;
+        }
+        
+        // Only allow navigation to navigable steps
+        if (isNavigable) {
+            showStep(stepNumber);
+        }
+    });
+
     // Update script text preview
     function updateScriptPreview() {
         const markdown = $('#script-text-editor').val();
@@ -571,44 +454,7 @@ jQuery(document).ready(function($) {
             $('#script-text-preview').text(markdown);
         }
     }
-    
-    // Toggle edit mode
-    $('#toggle-edit-mode').on('click', function() {
-        const isEditMode = $('#interview-edit-mode').is(':visible');
-        if (isEditMode) {
-            $('#interview-edit-mode').hide();
-            $('#interview-view-mode').show();
-            $('.view-mode-text').show();
-            $('.edit-mode-text').hide();
-        } else {
-            if (currentInterview) {
-                populateEditForm(currentInterview);
-            }
-            $('#interview-view-mode').hide();
-            $('#interview-edit-mode').show();
-            $('.view-mode-text').hide();
-            $('.edit-mode-text').show();
-        }
-    });
-    
-    // Cancel edit
-    $('#cancel-edit').on('click', function() {
-        $('#toggle-edit-mode').click();
-    });
-    
-    // Toggle conditional fields in edit form
-    $('#edit-mentions-brand').on('change', function() {
-        $('.edit-brand-fields').toggle($(this).is(':checked'));
-    });
-    
-    $('#edit-include-internal-links').on('change', function() {
-        $('.edit-internal-links-fields').toggle($(this).is(':checked'));
-    });
-    
-    $('#edit-include-external-links').on('change', function() {
-        $('.edit-external-links-fields').toggle($(this).is(':checked'));
-    });
-    
+
     // Markdown editor tabs
     $('.editor-tab').on('click', function() {
         const tab = $(this).data('tab');
@@ -624,34 +470,76 @@ jQuery(document).ready(function($) {
             $('#script-text-preview').show();
         }
     });
-    
+
     // Update preview on script text change
     $('#script-text-editor').on('input', function() {
         if ($('.editor-tab[data-tab="preview"]').hasClass('active')) {
             updateScriptPreview();
         }
     });
+
+    // Toggle conditional fields
+    $('#edit-mentions-brand').on('change', function() {
+        $('.edit-brand-fields').toggle($(this).is(':checked'));
+    });
     
-    // Handle edit form submission
+    $('#edit-include-internal-links').on('change', function() {
+        $('.edit-internal-links-fields').toggle($(this).is(':checked'));
+    });
+    
+    $('#edit-include-external-links').on('change', function() {
+        $('.edit-external-links-fields').toggle($(this).is(':checked'));
+    });
+
+    // Populate edit form with interview data
+    function populateEditForm(interview) {
+        $('#edit-main-keyword').val(interview.mainKeyword || '');
+        $('#edit-secondary-keywords').val(Array.isArray(interview.secondaryKeywords) ? interview.secondaryKeywords.join(', ') : '');
+        $('#edit-keyword-density').val(interview.keywordDensityTarget || 0.015);
+        $('#edit-user-description').val(interview.userDescription || '');
+        $('#edit-language').val(interview.language || 'es');
+        $('#edit-search-intent').val(interview.searchIntent || 'informational');
+        $('#edit-target-audience').val(interview.targetAudience || '');
+        $('#edit-tone-of-voice').val(interview.toneOfVoice || 'friendly');
+        $('#edit-min-word-count').val(interview.minWordCount || '1500');
+        $('#edit-max-word-count').val(interview.maxWordCount || '3000');
+        $('#edit-needs-faq').prop('checked', interview.needsFaqSection !== false);
+        $('#edit-mentions-brand').prop('checked', interview.mentionsBrand === true);
+        $('#edit-brand-name').val(interview.brandName || '');
+        $('#edit-brand-description').val(interview.brandDescription || '');
+        $('#edit-include-internal-links').prop('checked', interview.includeInternalLinks === true);
+        $('#edit-max-internal-links').val(interview.maxInternalLinks || '3');
+        $('#edit-internal-links-to-use').val(Array.isArray(interview.internalLinksToUse) ? interview.internalLinksToUse.join('\n') : '');
+        $('#edit-include-external-links').prop('checked', interview.includeExternalLinks === true);
+        $('#edit-max-external-links').val(interview.maxExternalLinks || '2');
+        $('#edit-external-links-to-use').val(Array.isArray(interview.externalLinksToUse) ? interview.externalLinksToUse.join('\n') : '');
+        $('#edit-notes-for-writer').val(interview.notesForWriter || '');
+        
+        // Toggle conditional fields
+        $('.edit-brand-fields').toggle($('#edit-mentions-brand').is(':checked'));
+        $('.edit-internal-links-fields').toggle($('#edit-include-internal-links').is(':checked'));
+        $('.edit-external-links-fields').toggle($('#edit-include-external-links').is(':checked'));
+    }
+
+    // Helper function to split string into array
+    const splitAndFilter = (str, delimiter) => {
+        if (!str || typeof str !== 'string') return [];
+        return str.split(delimiter)
+            .map(item => item.trim())
+            .filter(item => item.length > 0);
+    };
+
+    // Step 1: Complete and generate script text
     $('#edit-interview-form').on('submit', function(e) {
         e.preventDefault();
         
-        const $status = $('#edit-interview-status');
-        const $button = $(this).find('button[type="submit"]');
+        const $status = $('#step-1-status');
+        const $button = $('#complete-step-1-btn');
         const originalText = $button.text();
         
-        $button.prop('disabled', true).text('<?php _e('Saving...', 'seo-postifier'); ?>');
+        $button.prop('disabled', true).text('<?php _e('Saving & Generating Script Text...', 'seo-postifier'); ?>');
         $status.html('');
-        
-        // Helper function to split string into array and filter empty values
-        const splitAndFilter = (str, delimiter) => {
-            if (!str || typeof str !== 'string') return [];
-            return str.split(delimiter)
-                .map(item => item.trim())
-                .filter(item => item.length > 0);
-        };
-        
-        // Collect form data
+
         const formData = {
             interviewId: interviewId,
             mainKeyword: $('#edit-main-keyword').val(),
@@ -676,14 +564,14 @@ jQuery(document).ready(function($) {
             externalLinksToUse: splitAndFilter($('#edit-external-links-to-use').val(), '\n'),
             notesForWriter: $('#edit-notes-for-writer').val() || undefined
         };
-        
-        // Remove undefined values
+
         Object.keys(formData).forEach(key => {
             if (formData[key] === undefined) {
                 delete formData[key];
             }
         });
-        
+
+        // First update interview
         $.ajax({
             url: seoPostifierData.ajaxUrl,
             type: 'POST',
@@ -695,106 +583,69 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 if (response.success) {
                     currentInterview = response.data.interview;
-                    displayInterview(currentInterview);
-                    $status.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
+                    $status.html('<div class="notice notice-info inline"><p><?php _e('Parameters saved. Generating script text...', 'seo-postifier'); ?></p></div>');
                     
-                    // Switch back to view mode
-                    setTimeout(function() {
-                        $('#toggle-edit-mode').click();
-                        updateButtonStates();
-                    }, 1000);
+                    // Now generate script text
+                    $.ajax({
+                        url: seoPostifierData.ajaxUrl,
+                        type: 'POST',
+                        timeout: 180000,
+                        data: {
+                            action: 'seo_postifier_generate_script_text',
+                            nonce: seoPostifierData.nonce,
+                            interview_id: interviewId
+                        },
+                        success: function(response2) {
+                            if (response2.success) {
+                                currentInterview = response2.data.interview;
+                                $('#script-text-editor').val(currentInterview.generatedScriptText || '');
+                                updateStepper(currentInterview);
+                                $status.html('<div class="notice notice-success inline"><p><?php _e('Step 1 completed! Script text generated.', 'seo-postifier'); ?></p></div>');
+                            } else {
+                                $status.html('<div class="notice notice-error inline"><p>' + response2.data.message + '</p></div>');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            let errorMsg = '<?php _e('Failed to generate script text.', 'seo-postifier'); ?>';
+                            if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+                                errorMsg = xhr.responseJSON.data.message;
+                            }
+                            $status.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
+                        },
+                        complete: function() {
+                            $button.prop('disabled', false).text(originalText);
+                        }
+                    });
                 } else {
                     $status.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
+                    $button.prop('disabled', false).text(originalText);
                 }
             },
             error: function(xhr, status, error) {
-                let errorMsg = '<?php _e('Failed to update interview. Please try again.', 'seo-postifier'); ?>';
+                let errorMsg = '<?php _e('Failed to save parameters.', 'seo-postifier'); ?>';
                 if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
                     errorMsg = xhr.responseJSON.data.message;
                 }
                 $status.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
-            },
-            complete: function() {
                 $button.prop('disabled', false).text(originalText);
             }
         });
     });
 
-    // Generate script text
-    $generateScriptBtn.on('click', function() {
+    // Step 2: Complete and generate post
+    $('#complete-step-2-btn').on('click', function() {
         const $button = $(this);
         const originalText = $button.text();
+        const $status = $('#step-2-status');
+        
+        $button.prop('disabled', true).text('<?php _e('Generating Script Definition & Post...', 'seo-postifier'); ?>');
+        $status.html('<div class="notice notice-info inline"><p><?php _e('Generating script definition...', 'seo-postifier'); ?></p></div>');
 
-        $button.prop('disabled', true).text('<?php _e('Generating...', 'seo-postifier'); ?>');
-        $actionStatus.html('<div class="notice notice-info inline"><p><?php _e('Generating script text. This may take a few minutes...', 'seo-postifier'); ?></p></div>');
-
+        // First generate script definition
         $.ajax({
             url: seoPostifierData.ajaxUrl,
             type: 'POST',
-            timeout: 180000, // 3 minutes
-            data: {
-                action: 'seo_postifier_generate_script_text',
-                nonce: seoPostifierData.nonce,
-                interview_id: interviewId
-            },
-            success: function(response) {
-                if (response.success) {
-                    currentInterview = response.data.interview;
-                    displayInterview(currentInterview);
-                    $actionStatus.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
-                    updateButtonStates();
-                } else {
-                    $actionStatus.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
-                }
-            },
-            error: function(xhr, status, error) {
-                let errorMsg = '<?php _e('Failed to generate script text. Please try again.', 'seo-postifier'); ?>';
-                
-                // Check if we got a response with error details
-                if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
-                    errorMsg = xhr.responseJSON.data.message;
-                } else if (xhr.status === 0) {
-                    errorMsg = '<?php _e('Connection failed. Please check your backend URL settings.', 'seo-postifier'); ?>';
-                } else if (status === 'timeout') {
-                    errorMsg = '<?php _e('Request timed out. The script generation may still be processing.', 'seo-postifier'); ?>';
-                } else if (xhr.status === 400) {
-                    errorMsg = '<?php _e('Invalid request. Please check the interview ID.', 'seo-postifier'); ?>';
-                } else if (xhr.status === 401) {
-                    errorMsg = '<?php _e('Authentication failed. Please check your license key.', 'seo-postifier'); ?>';
-                } else if (xhr.status === 404) {
-                    errorMsg = '<?php _e('Interview not found.', 'seo-postifier'); ?>';
-                } else if (xhr.status === 500) {
-                    errorMsg = '<?php _e('Server error. Please try again later.', 'seo-postifier'); ?>';
-                }
-                
-                console.error('Script text generation error:', {
-                    status: xhr.status,
-                    statusText: status,
-                    error: error,
-                    response: xhr.responseText
-                });
-                
-                $actionStatus.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
-            },
-            complete: function() {
-                $button.prop('disabled', false).text(originalText);
-                updateButtonStates();
-            }
-        });
-    });
-
-    // Generate script definition
-    $generateScriptDefinitionBtn.on('click', function() {
-        const $button = $(this);
-        const originalText = $button.text();
-
-        $button.prop('disabled', true).text('<?php _e('Generating...', 'seo-postifier'); ?>');
-        $actionStatus.html('<div class="notice notice-info inline"><p><?php _e('Generating script definition. This may take a few minutes...', 'seo-postifier'); ?></p></div>');
-
-        $.ajax({
-            url: seoPostifierData.ajaxUrl,
-            type: 'POST',
-            timeout: 180000, // 3 minutes
+            timeout: 180000,
             data: {
                 action: 'seo_postifier_generate_script_definition',
                 nonce: seoPostifierData.nonce,
@@ -803,181 +654,84 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 if (response.success) {
                     currentInterview = response.data.interview;
-                    displayInterview(currentInterview);
-                    $actionStatus.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
-                    updateButtonStates();
+                    $status.html('<div class="notice notice-info inline"><p><?php _e('Script definition generated. Now generating post...', 'seo-postifier'); ?></p></div>');
+                    
+                    // Now generate post
+                    $.ajax({
+                        url: seoPostifierData.ajaxUrl,
+                        type: 'POST',
+                        timeout: 300000,
+                        data: {
+                            action: 'seo_postifier_generate_post',
+                            nonce: seoPostifierData.nonce,
+                            interview_id: interviewId
+                        },
+                        success: function(response2) {
+                            if (response2.success) {
+                                currentPost = response2.data.post;
+                                currentPostId = response2.data.post._id || response2.data.post.id || null;
+                                
+                                // Convert post blocks to markdown
+                                const markdown = blocksToMarkdown(currentPost.blocks);
+                                if (typeof marked !== 'undefined') {
+                                    const html = marked.parse(markdown);
+                                    $('#post-markdown').html(html);
+                                } else {
+                                    $('#post-markdown').text(markdown);
+                                }
+                                
+                                // Reload interview to get updated associatedPostId
+                                loadInterview();
+                                
+                                $status.html('<div class="notice notice-success inline"><p><?php _e('Step 2 completed! Post generated.', 'seo-postifier'); ?></p></div>');
+                            } else {
+                                $status.html('<div class="notice notice-error inline"><p>' + response2.data.message + '</p></div>');
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            let errorMsg = '<?php _e('Failed to generate post.', 'seo-postifier'); ?>';
+                            if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+                                errorMsg = xhr.responseJSON.data.message;
+                            }
+                            $status.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
+                        },
+                        complete: function() {
+                            $button.prop('disabled', false).text(originalText);
+                        }
+                    });
                 } else {
-                    $actionStatus.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
+                    $status.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
+                    $button.prop('disabled', false).text(originalText);
                 }
             },
-            error: function(xhr, status) {
-                let errorMsg = '<?php _e('Failed to generate script definition. Please try again.', 'seo-postifier'); ?>';
-                if (status === 'timeout') {
-                    errorMsg = '<?php _e('Request timed out. The script definition generation may still be processing.', 'seo-postifier'); ?>';
+            error: function(xhr, status, error) {
+                let errorMsg = '<?php _e('Failed to generate script definition.', 'seo-postifier'); ?>';
+                if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+                    errorMsg = xhr.responseJSON.data.message;
                 }
-                $actionStatus.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
-            },
-            complete: function() {
+                $status.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
                 $button.prop('disabled', false).text(originalText);
-                updateButtonStates();
             }
         });
     });
 
-    // Update all button states
-    function updateButtonStates() {
-        if (!currentInterview) {
-            $generateScriptDefinitionBtn.prop('disabled', true);
-            $generatePostBtn.prop('disabled', true);
-            return;
-        }
-
-        const status = currentInterview.status;
-        const hasScriptText = status === 'script_text_generated' || status === 'script_definition_generated' || currentInterview.generatedScriptText;
-        const hasScriptDefinition = status === 'script_definition_generated' || 
-                                   (currentInterview.generatedScriptDefinition && 
-                                    currentInterview.generatedScriptDefinition.head && 
-                                    currentInterview.generatedScriptDefinition.head.h1);
-        const hasPost = currentInterview.associatedPostId;
-
-        // Update Generate Script Definition button
-        if (hasScriptDefinition) {
-            $generateScriptDefinitionBtn.prop('disabled', true).text('<?php _e('Script Definition Already Generated', 'seo-postifier'); ?>');
-        } else if (hasScriptText) {
-            $generateScriptDefinitionBtn.prop('disabled', false).text('<?php _e('Generate Script Definition', 'seo-postifier'); ?>');
-        } else {
-            $generateScriptDefinitionBtn.prop('disabled', true).text('<?php _e('Generate Script Text First', 'seo-postifier'); ?>');
-        }
-
-        // Update Generate Post button
-        if (hasPost) {
-            $generatePostBtn.prop('disabled', true).text('<?php _e('Post Already Generated', 'seo-postifier'); ?>');
-        } else if (hasScriptDefinition) {
-            $generatePostBtn.prop('disabled', false).text('<?php _e('Generate Post', 'seo-postifier'); ?>');
-        } else {
-            $generatePostBtn.prop('disabled', true).text('<?php _e('Generate Script Definition First', 'seo-postifier'); ?>');
-        }
-    }
-
-    // Generate post (with script definition generation first if needed)
-    $generatePostBtn.on('click', function() {
-        const $button = $(this);
-        const originalText = $button.text();
-
-        if ($button.prop('disabled')) {
-            return;
-        }
-
-        $button.prop('disabled', true).text('<?php _e('Generating...', 'seo-postifier'); ?>');
-        $actionStatus.html('<div class="notice notice-info inline"><p><?php _e('Starting post generation process...', 'seo-postifier'); ?></p></div>');
-
-        // First, check if script definition is generated
-        const needsScriptDefinition = currentInterview.status !== 'script_definition_generated' || 
-                                     !currentInterview.generatedScriptDefinition || 
-                                     !currentInterview.generatedScriptDefinition.head ||
-                                     !currentInterview.generatedScriptDefinition.head.h1;
-
-        function generatePost() {
-            $actionStatus.html('<div class="notice notice-info inline"><p><?php _e('Generating post. This may take several minutes...', 'seo-postifier'); ?></p></div>');
-
-            $.ajax({
-                url: seoPostifierData.ajaxUrl,
-                type: 'POST',
-                timeout: 300000, // 5 minutes
-                data: {
-                    action: 'seo_postifier_generate_post',
-                    nonce: seoPostifierData.nonce,
-                    interview_id: interviewId
-                },
-                success: function(response) {
-                    if (response.success) {
-                        currentPost = response.data.post;
-                        // Get post ID from the post object (_id is MongoDB's default ID field)
-                        currentPostId = response.data.post._id || response.data.post.id || null;
-                        displayPost(currentPost);
-                        
-                        // Reload interview to get updated associatedPostId
-                        loadInterview();
-                        
-                        $actionStatus.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
-                    } else {
-                        $actionStatus.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
-                    }
-                },
-                error: function(xhr, status) {
-                    let errorMsg = '<?php _e('Failed to generate post. Please try again.', 'seo-postifier'); ?>';
-                    if (status === 'timeout') {
-                        errorMsg = '<?php _e('Request timed out. The post generation may still be processing.', 'seo-postifier'); ?>';
-                    }
-                    $actionStatus.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
-                },
-                complete: function() {
-                    $button.prop('disabled', false).text(originalText);
-                    updateButtonStates();
-                }
-            });
-        }
-
-        if (needsScriptDefinition) {
-            // First generate script definition
-            $actionStatus.html('<div class="notice notice-info inline"><p><?php _e('Generating script definition first. This may take a few minutes...', 'seo-postifier'); ?></p></div>');
-
-            $.ajax({
-                url: seoPostifierData.ajaxUrl,
-                type: 'POST',
-                timeout: 180000, // 3 minutes
-                data: {
-                    action: 'seo_postifier_generate_script_definition',
-                    nonce: seoPostifierData.nonce,
-                    interview_id: interviewId
-                },
-                success: function(response) {
-                    if (response.success) {
-                        currentInterview = response.data.interview;
-                        displayInterview(currentInterview);
-                        $actionStatus.html('<div class="notice notice-success inline"><p><?php _e('Script definition generated. Now generating post...', 'seo-postifier'); ?></p></div>');
-                        
-                        // Now generate the post
-                        setTimeout(generatePost, 1000);
-                    } else {
-                        $actionStatus.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
-                        $button.prop('disabled', false).text(originalText);
-                        updateButtonStates();
-                    }
-                },
-                error: function(xhr, status) {
-                    let errorMsg = '<?php _e('Failed to generate script definition. Please try again.', 'seo-postifier'); ?>';
-                    if (status === 'timeout') {
-                        errorMsg = '<?php _e('Request timed out. The script definition generation may still be processing.', 'seo-postifier'); ?>';
-                    }
-                    $actionStatus.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
-                    $button.prop('disabled', false).text(originalText);
-                    updateButtonStates();
-                }
-            });
-        } else {
-            // Script definition already exists, generate post directly
-            generatePost();
-        }
-    });
-
-    // Create WordPress Draft
-    $createWpDraftBtn.on('click', function() {
-        // Try to get post ID from currentPost if currentPostId is not set
+    // Step 3: Complete and create WordPress draft
+    $('#complete-step-3-btn').on('click', function() {
         if (!currentPostId && currentPost) {
             currentPostId = currentPost._id || currentPost.id;
         }
         
         if (!currentPostId || !currentPost) {
-            $wpDraftStatus.html('<div class="notice notice-error inline"><p><?php _e('No post available to create draft.', 'seo-postifier'); ?></p></div>');
+            $('#step-3-status').html('<div class="notice notice-error inline"><p><?php _e('No post available to create draft.', 'seo-postifier'); ?></p></div>');
             return;
         }
 
         const $button = $(this);
         const originalText = $button.text();
+        const $status = $('#step-3-status');
 
-        $button.prop('disabled', true).text('<?php _e('Creating Draft...', 'seo-postifier'); ?>');
-        $wpDraftStatus.html('<div class="notice notice-info inline"><p><?php _e('Creating WordPress draft...', 'seo-postifier'); ?></p></div>');
+        $button.prop('disabled', true).text('<?php _e('Creating WordPress Draft...', 'seo-postifier'); ?>');
+        $status.html('<div class="notice notice-info inline"><p><?php _e('Creating WordPress draft...', 'seo-postifier'); ?></p></div>');
 
         $.ajax({
             url: seoPostifierData.ajaxUrl,
@@ -990,30 +744,147 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 if (response.success) {
                     const editUrl = response.data.edit_url;
-                    // Show success message briefly, then redirect
-                    $wpDraftStatus.html(
+                    $status.html(
                         '<div class="notice notice-success inline">' +
-                        '<p><?php _e('WordPress draft created successfully! Redirecting...', 'seo-postifier'); ?></p>' +
+                        '<p><?php _e('Step 3 completed! WordPress draft created successfully. Redirecting...', 'seo-postifier'); ?></p>' +
                         '</div>'
                     );
-                    // Redirect to the edit page after a short delay
                     setTimeout(function() {
                         window.location.href = editUrl;
-                    }, 500);
+                    }, 1000);
                 } else {
-                    $wpDraftStatus.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
+                    $status.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
                     $button.prop('disabled', false).text(originalText);
                 }
             },
             error: function() {
-                $wpDraftStatus.html('<div class="notice notice-error inline"><p><?php _e('Failed to create WordPress draft. Please try again.', 'seo-postifier'); ?></p></div>');
+                $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to create WordPress draft. Please try again.', 'seo-postifier'); ?></p></div>');
                 $button.prop('disabled', false).text(originalText);
             }
         });
     });
 
+    // Convert post blocks to markdown
+    function blocksToMarkdown(blocks) {
+        if (!blocks || !Array.isArray(blocks)) {
+            return '';
+        }
+
+        let markdown = '';
+        blocks.forEach(function(block) {
+            switch(block.type) {
+                case 'heading':
+                    const level = block.level || 'h2';
+                    const headingLevel = level.replace('h', '');
+                    const hashes = '#'.repeat(parseInt(headingLevel));
+                    markdown += hashes + ' ' + (block.title || '') + '\n\n';
+                    break;
+                case 'paragraph':
+                    markdown += (block.content || '') + '\n\n';
+                    break;
+                case 'image':
+                    if (block.image) {
+                        const alt = block.image.alt || '';
+                        const url = block.image.url || '';
+                        markdown += '![' + alt + '](' + url + ')\n\n';
+                    }
+                    break;
+                case 'faq':
+                    if (block.questions && block.answers) {
+                        markdown += '## FAQ\n\n';
+                        for (let i = 0; i < block.questions.length; i++) {
+                            markdown += '### ' + (block.questions[i] || '') + '\n\n';
+                            if (block.answers[i]) {
+                                markdown += block.answers[i] + '\n\n';
+                            }
+                        }
+                    }
+                    break;
+            }
+        });
+        return markdown.trim();
+    }
+
+    // Load interview data
+    function loadInterview() {
+        $.ajax({
+            url: seoPostifierData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'seo_postifier_get_interview',
+                nonce: seoPostifierData.nonce,
+                interview_id: interviewId
+            },
+            success: function(response) {
+                $loading.hide();
+                
+                if (response.success) {
+                    currentInterview = response.data.interview;
+                    
+                    // Populate form
+                    populateEditForm(currentInterview);
+                    
+                    // Populate script text editor if available
+                    if (currentInterview.generatedScriptText) {
+                        $('#script-text-editor').val(currentInterview.generatedScriptText);
+                    }
+                    
+                    // Load post if associated
+                    if (currentInterview.associatedPostId) {
+                        loadPost(currentInterview.associatedPostId);
+                    }
+                    
+                    // Update stepper and show appropriate step
+                    updateStepper(currentInterview);
+                    
+                    $container.show();
+                } else {
+                    $error.html('<div class="notice notice-error"><p>' + response.data.message + '</p></div>');
+                    $error.show();
+                }
+            },
+            error: function() {
+                $loading.hide();
+                $error.html('<div class="notice notice-error"><p><?php _e('Failed to load interview. Please try again.', 'seo-postifier'); ?></p></div>');
+                $error.show();
+            }
+        });
+    }
+
+    // Load post if associated
+    function loadPost(postId) {
+        if (!postId) return;
+        
+        currentPostId = postId;
+        $.ajax({
+            url: seoPostifierData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'seo_postifier_get_post',
+                nonce: seoPostifierData.nonce,
+                post_id: postId
+            },
+            success: function(response) {
+                if (response.success) {
+                    currentPost = response.data.post;
+                    currentPostId = response.data.post._id || response.data.post.id || postId;
+                    
+                    const markdown = blocksToMarkdown(currentPost.blocks);
+                    if (typeof marked !== 'undefined') {
+                        const html = marked.parse(markdown);
+                        $('#post-markdown').html(html);
+                    } else {
+                        $('#post-markdown').text(markdown);
+                    }
+                }
+            },
+            error: function() {
+                console.error('Failed to load post');
+            }
+        });
+    }
+
     // Load interview on page load
     loadInterview();
 });
 </script>
-

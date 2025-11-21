@@ -475,6 +475,132 @@
     margin-top: 0;
 }
 
+/* Progress Stepper */
+.seo-postifier-stepper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 30px 0;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+}
+
+.stepper-step {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    cursor: default;
+}
+
+.stepper-step.completed,
+.stepper-step.active {
+    cursor: pointer;
+}
+
+.stepper-step.completed:hover,
+.stepper-step.active:hover {
+    opacity: 0.8;
+}
+
+.stepper-step.completed:hover .step-number,
+.stepper-step.active:hover .step-number {
+    transform: scale(1.1);
+}
+
+.stepper-step .step-number {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #ddd;
+    color: #666;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 18px;
+    margin-right: 15px;
+    transition: all 0.3s;
+    flex-shrink: 0;
+}
+
+.stepper-step.completed .step-number {
+    background: #46b450;
+    color: #fff;
+}
+
+.stepper-step.active .step-number {
+    background: #007cba;
+    color: #fff;
+    box-shadow: 0 0 0 4px rgba(0, 124, 186, 0.2);
+}
+
+.stepper-step .step-content {
+    flex: 1;
+}
+
+.stepper-step .step-title {
+    font-weight: 600;
+    font-size: 16px;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.stepper-step.completed .step-title,
+.stepper-step.active .step-title {
+    color: #007cba;
+}
+
+.stepper-step .step-description {
+    font-size: 13px;
+    color: #666;
+}
+
+.stepper-connector {
+    flex: 1;
+    height: 2px;
+    background: #ddd;
+    margin: 0 20px;
+    position: relative;
+    top: -20px;
+}
+
+.stepper-step.completed + .stepper-connector {
+    background: #46b450;
+}
+
+/* Step Containers */
+.step-container {
+    margin-top: 30px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.step-header {
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.step-header h3 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    color: #333;
+}
+
+.step-header p {
+    margin: 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.step-content-form {
+    margin-top: 20px;
+}
+
 /* Responsive design */
 @media (max-width: 1200px) {
     .seo-postifier-two-column-layout {
@@ -501,6 +627,24 @@
     #script-text-preview {
         min-height: 300px;
         max-height: 400px;
+    }
+    
+    .seo-postifier-stepper {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .stepper-connector {
+        display: none;
+    }
+    
+    .stepper-step {
+        width: 100%;
+        margin-bottom: 15px;
+    }
+    
+    .stepper-step:last-child {
+        margin-bottom: 0;
     }
 }
 

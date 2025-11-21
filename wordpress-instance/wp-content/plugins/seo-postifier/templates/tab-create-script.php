@@ -16,7 +16,7 @@ if (!defined('ABSPATH')) {
 
         <p>
             <a href="?page=seo-postifier&tab=scripts" class="button button-secondary">
-                <?php _e('← Back to My Scripts', 'seo-postifier'); ?>
+                <?php _e('← Back to My Drafts', 'seo-postifier'); ?>
             </a>
         </p>
 

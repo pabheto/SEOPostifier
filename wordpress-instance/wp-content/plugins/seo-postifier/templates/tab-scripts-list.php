@@ -1,6 +1,6 @@
 <?php
 /**
- * My Scripts List Template
+ * My Drafts List Template
  */
 
 // Exit if accessed directly
@@ -9,23 +9,23 @@ if (!defined('ABSPATH')) {
 }
 ?>
 
-<div class="seo-postifier-scripts-list">
+<div class="seo-postifier-drafts-list">
     <div class="card">
-        <h2><?php _e('My Scripts', 'seo-postifier'); ?></h2>
-        <p><?php _e('View and manage your script drafts.', 'seo-postifier'); ?></p>
+        <h2><?php _e('My Drafts', 'seo-postifier'); ?></h2>
+        <p><?php _e('View and manage your post drafts.', 'seo-postifier'); ?></p>
 
         <p class="submit" style="margin: 15px 0;">
             <a href="?page=seo-postifier&tab=create-script" class="button button-primary button-large">
-                <?php _e('+ Create New Script', 'seo-postifier'); ?>
+                <?php _e('+ Create New Draft', 'seo-postifier'); ?>
             </a>
         </p>
 
         <div id="scripts-loading" style="margin: 20px 0;">
-            <p><?php _e('Loading scripts...', 'seo-postifier'); ?></p>
+            <p><?php _e('Loading drafts...', 'seo-postifier'); ?></p>
         </div>
 
         <div id="scripts-list-container" style="display: none; margin-top: 20px;">
-            <!-- Scripts will be loaded here by JavaScript -->
+            <!-- Drafts will be loaded here by JavaScript -->
         </div>
 
         <div id="scripts-error" style="display: none; margin-top: 20px;">
@@ -58,7 +58,7 @@ jQuery(document).ready(function($) {
                     const interviews = response.data.interviews || [];
                     
                     if (interviews.length === 0) {
-                        $container.html('<p><?php _e('No scripts yet. Create your first script to get started!', 'seo-postifier'); ?></p>');
+                        $container.html('<p><?php _e('No drafts yet. Create your first draft to get started!', 'seo-postifier'); ?></p>');
                     } else {
                         let html = '<table class="wp-list-table widefat fixed striped">';
                         html += '<thead><tr>';
@@ -104,7 +104,7 @@ jQuery(document).ready(function($) {
             },
             error: function() {
                 $loading.hide();
-                $error.html('<div class="notice notice-error"><p><?php _e('Failed to load scripts. Please try again.', 'seo-postifier'); ?></p></div>');
+                $error.html('<div class="notice notice-error"><p><?php _e('Failed to load drafts. Please try again.', 'seo-postifier'); ?></p></div>');
                 $error.show();
             }
         });
