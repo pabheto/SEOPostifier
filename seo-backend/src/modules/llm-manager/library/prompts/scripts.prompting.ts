@@ -109,6 +109,8 @@ export class ScriptsPrompting {
   \`\`\`markdown
   ## Frequently Asked Questions
   
+  - **FAQ word count**: [MIN] - [MAX] words (MUST specify exact range)
+  
   ### Question 1
   - **Short expected answer**: ...
   
@@ -118,6 +120,7 @@ export class ScriptsPrompting {
   
   Create **4–8 FAQs** based on the real search intent and People-Also-Ask patterns.
   Each answer should be concise (to be expanded later).
+  **MUST specify the total word count for the entire FAQ section.**
   `.trim()
       : '';
 
@@ -273,7 +276,8 @@ export class ScriptsPrompting {
 Mention the main keyword naturally once.
 Include either a micro-storytelling element or a relevant fact or statistic.
 You must describe the points of the introduction to allow the writer to develop it later
-
+You can include real world information here
+  - **Introduction word count**: Specify the word count range for the introduction (e.g., "Introduction word count: 250 - 350 words")
 
   - Optional slug + tags
   
@@ -288,7 +292,7 @@ You must describe the points of the introduction to allow the writer to develop 
   ## H2 – [Heading]
   
   - **Purpose**
-  - **Estimated word count**
+  - **Estimated word count**: [MIN] - [MAX] words (MUST specify exact range, e.g., "300 - 450 words")
   - **Search intent covered**
   - **Main points**
   - **Examples / comparisons**
@@ -297,6 +301,13 @@ You must describe the points of the introduction to allow the writer to develop 
   - **External link suggestions** (if enabled)
   - **Tone notes**
   \`\`\`
+  
+  **CRITICAL WORD COUNT REQUIREMENTS:**
+  - You MUST specify word count ranges for EVERY section (H2, H3, H4)
+  - You MUST specify word count for the introduction (typically 8-12% of total: ${minWordCount && maxWordCount ? `${Math.round(minWordCount * 0.1)} - ${Math.round(maxWordCount * 0.1)} words` : '200-400 words'})
+  ${needsFaqSection ? `- You MUST specify word count for the FAQ section (typically 5-10% of total: ${minWordCount && maxWordCount ? `${Math.round(minWordCount * 0.075)} - ${Math.round(maxWordCount * 0.075)} words` : '300-600 words'})` : ''}
+  - The SUM of all section word counts (intro + body sections + FAQ) should equal approximately ${minWordCount && maxWordCount ? `${minWordCount} - ${maxWordCount} words` : 'the target article length'}
+  - Format word counts clearly as: "Estimated word count: 300 - 450 words" or "Word count: 250-400"
   
   ${faqSection}
   
@@ -321,7 +332,21 @@ You must describe the points of the introduction to allow the writer to develop 
   `;
   };
 
-  static readonly FORMAT_SEO_SCRIPT_TO_JSON_PROMPT = (script: string) => {
+  static readonly FORMAT_SEO_SCRIPT_TO_JSON_PROMPT = (
+    script: string,
+    minWordCount?: number,
+    maxWordCount?: number,
+    needsFaqSection?: boolean,
+  ) => {
+    const hasWordCountTarget = minWordCount && maxWordCount;
+    const wordCountValidation = hasWordCountTarget
+      ? `
+## WORD COUNT VALIDATION (Reference Only)
+
+The target article length is ${minWordCount} - ${maxWordCount} words. Use this as a reference to verify that the word counts extracted from the script are reasonable, but DO NOT recalculate or redistribute them. Extract exactly what the script designer specified.
+`
+      : '';
+
     return `
 Act as a strict converter from unstructured text to structured JSON.
 
@@ -355,12 +380,14 @@ type ScriptFormatDefinition = {
     introductionDescription: string;
     slug: string;
     tags: string[];
+    introductionLengthRange?: [number, number];
   };
   body: {
     sections: ScriptSection[];
   };
   faq?: {
     description: string;
+    lengthRange?: [number, number];
   };
 };
 
@@ -377,7 +404,9 @@ Important instructions:
 
 2. "head" RULES
    - h1: main title of the article (extracted from the outline, or create a concise descriptive one if missing).
-   - metaDescription: Include the description of the introduction for the writter. Add the story telling and description planned by the script.
+   - introductionDescription: Include the description of the introduction for the writter. Add the story telling and description planned by the script.
+   - introductionLengthRange (optional): [minWords, maxWords] for the introduction section.
+     **EXTRACT the word count from the script if specified. If not specified in the script, leave it undefined.**
    - slug: URL-friendly version of the h1 (lowercase, hyphens, no special characters).
    - tags: 3 to 8 core keywords or topics as an array of strings.
 
@@ -389,7 +418,11 @@ Important instructions:
    - title: clean, descriptive title for the section.
    - id: unique string per section, formatted as "sec-1", "sec-2", "sec-3", etc., following order.
    - lengthRange: [minWords, maxWords] estimated for that section.
-     - Use the ranges specified in the script, otherwise use a reasonable range to match around 250 - 400 words.
+     **CRITICAL: EXTRACT the exact word count range specified in the script for each section.**
+     - Look for phrases like "Estimated word count: X-Y words", "Word count: X-Y", "X-Y words", etc.
+     - If the script explicitly mentions a word count for a section, use that EXACTLY.
+     - If NO word count is mentioned in the script for a section, use a reasonable default: 250-400 words for main sections, 150-300 for subsections.
+     - DO NOT calculate or redistribute word counts based on total article length. The script designer has already planned this.
    - description: A clear explanation of what the section should contain (guidelines for the writer/AI). Add what has been planned in the script.
    - images (optional):
      - Include ONLY if the outline suggests an image or if an image adds value.
@@ -403,13 +436,17 @@ Important instructions:
      - external: array of generic resource descriptions (e.g., "Google ranking factors study", "Official schema.org docs").
        → Do NOT include real URLs.
 
-    "faq" RULES
-    - description: a clear explanation of what the FAQ section should contain (guidelines for the writer/AI).
-    Find suitable questions and write them in the description. If it's short, provide the answers
-    One line per question and answer or description.
-    
+4. "faq" RULES
+   - description: a clear explanation of what the FAQ section should contain (guidelines for the writer/AI).
+   - Find suitable questions and write them in the description. If it's short, provide the answers
+   - One line per question and answer or description.
+   - lengthRange (optional): [minWords, maxWords] for the FAQ section.
+     **EXTRACT the word count from the script if specified. If not specified in the script, leave it undefined.**
+   ${needsFaqSection ? '- FAQ section MUST be included if present in the script.' : '- FAQ section is optional.'}
 
-4. STYLE & CONSISTENCY
+${wordCountValidation}
+
+5. STYLE & CONSISTENCY
    - Preserve the language of the original outline (if the outline is in English, keep everything in English).
    - You may:
      - Complete unclear titles.
@@ -417,18 +454,18 @@ Important instructions:
      - Add an introduction or conclusion if necessary for a complete article structure.
    - Ensure consistent hierarchy logic between h1 → h2 → h3 → h4.
    - Please, research in the web when you need to obtain updated information
-   Include the source and the details of the information in the description of each section or introduction so the writter 
-   without internet access can use it to write the content.
-   Don't shorten much the information, try to keep the description of each section or introduction
+   Don't shorten much the information, try to keep the description of each section or introduction respecting the given online,
+   just focus on parsing that information in the JSON not summarizing it
 
-5. VALIDATION REQUIREMENTS
+6. VALIDATION REQUIREMENTS
    - JSON must be fully valid: double quotes only, no trailing commas.
    - All required fields must be present:
-     - head.h1, head.metaDescription, head.slug, head.tags
+     - head.h1, head.introductionDescription, head.slug, head.tags
      - body.sections
      - Each Section must contain: id, level, title, lengthRange, description, links (internal + external).
 
 Now I will provide the outline. Convert it into the required JSON format and return ONLY the JSON.
+DONT USE ANY CHARACTERS THAT CAUSE JSON FORMATTING ERRORS
 
 === OUTLINE ===
 ${script}
@@ -442,7 +479,28 @@ ${script}
     introductionDescription: string,
     targetAudience: string,
     targetTone: string,
+    lengthRange?: [number, number],
   ) => {
+    const wordCountInstruction = lengthRange
+      ? `
+## CRITICAL WORD COUNT REQUIREMENT
+
+**YOU MUST write EXACTLY ${lengthRange[0]} - ${lengthRange[1]} words.**
+
+This is a HARD REQUIREMENT. Your response must be within this range:
+- Minimum: ${lengthRange[0]} words
+- Maximum: ${lengthRange[1]} words
+
+Count your words carefully. If your draft is too short, expand it with more detail, examples, or context. If it's too long, condense it while keeping all key points.
+
+The word count is STRICTLY ENFORCED. Do not exceed or fall below these limits.
+`
+      : `
+## Word Count Guidance
+
+Aim for approximately 200-400 words for the introduction. Be comprehensive but concise.
+`;
+
     return `
 You are an expert SEO copywriter. 
 Write a compelling, SEO-optimized introduction for the article. 
@@ -453,6 +511,8 @@ The title is ${h1}
 Match this description: ${introductionDescription}
 
 The topics of the article are ${indexSummary}
+
+${wordCountInstruction}
 
 Return ONLY the paragraph of the introduction with no additional text of instructions.
     `;
@@ -473,7 +533,27 @@ Keep the tone ${targetTone}, engaging, and suitable for high-quality SEO content
 Title ${section.title} (don't include, just for content reference)
 The level of this paragraph is inside a ${section.level} heading.
 Description: ${section.description}
-Total words: ${section.lengthRange[0]} - ${section.lengthRange[1]}
+
+## CRITICAL WORD COUNT REQUIREMENT
+
+**YOU MUST write EXACTLY ${section.lengthRange[0]} - ${section.lengthRange[1]} words for this section.**
+
+This is a HARD REQUIREMENT. The total word count of all paragraph blocks combined must be within this range:
+- Minimum: ${section.lengthRange[0]} words
+- Maximum: ${section.lengthRange[1]} words
+
+**How to ensure correct word count:**
+1. Count words in your response carefully
+2. If your draft is too short (below ${section.lengthRange[0]} words):
+   - Add more detail, examples, or explanations
+   - Expand on key points mentioned in the description
+   - Include relevant context or background information
+3. If your draft is too long (above ${section.lengthRange[1]} words):
+   - Condense sentences while keeping all key points
+   - Remove redundant information
+   - Combine similar ideas
+
+The word count is STRICTLY ENFORCED. Your response will be rejected if it doesn't meet this requirement.
 
 For context with other sections, the topics of the article are ${indexSummary}
 
@@ -488,6 +568,8 @@ Your result should be in this JSON format, plain JSON, no formatting or addition
 {
     "blocks": PostBlock[]
 }
+
+**REMINDER: Total words across all blocks MUST be ${section.lengthRange[0]} - ${section.lengthRange[1]} words.**
 `;
   };
 
@@ -497,6 +579,29 @@ Your result should be in this JSON format, plain JSON, no formatting or addition
     targetTone: string,
     faq: ScriptFAQ,
   ) => {
+    const wordCountInstruction = faq.lengthRange
+      ? `
+## CRITICAL WORD COUNT REQUIREMENT
+
+**YOU MUST write a FAQ section with EXACTLY ${faq.lengthRange[0]} - ${faq.lengthRange[1]} total words across all questions and answers combined.**
+
+This is a HARD REQUIREMENT. The total word count of all questions and answers must be within this range:
+- Minimum: ${faq.lengthRange[0]} words
+- Maximum: ${faq.lengthRange[1]} words
+
+**How to ensure correct word count:**
+1. Count words in all questions and answers combined
+2. If too short: Expand answers with more detail, examples, or explanations
+3. If too long: Condense answers while keeping key information, or reduce the number of questions
+
+The word count is STRICTLY ENFORCED. Your response will be rejected if it doesn't meet this requirement.
+`
+      : `
+## Word Count Guidance
+
+Aim for approximately 300-600 words total across all questions and answers. Be comprehensive but concise.
+`;
+
     return `You are an expert SEO copywriter. 
     Write a compelling, SEO-optimized FAQ section for the article.
     The FAQ section should reflect the purpose and angle suggested in sectionDescription, stay aligned with the topic in sectionTitle, and naturally use relevant ideas from the tags.
@@ -504,6 +609,8 @@ Your result should be in this JSON format, plain JSON, no formatting or addition
 
     For context with other sections, the topics of the article are ${indexSummary}
     Match this description: ${faq.description}
+
+    ${wordCountInstruction}
 
     Return ONLY the FAQ section with no additional text of instructions.
     You must return it in JSON format plain text matching the following structure
@@ -514,6 +621,7 @@ Your result should be in this JSON format, plain JSON, no formatting or addition
   answers: string[];
 }
 
+**REMINDER: Total words across all questions and answers MUST be ${faq.lengthRange ? `${faq.lengthRange[0]} - ${faq.lengthRange[1]} words` : 'approximately 300-600 words'}.**
   `;
   };
 }

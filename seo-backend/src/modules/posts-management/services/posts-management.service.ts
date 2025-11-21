@@ -64,6 +64,7 @@ export class PostsManagementService {
         postInterview.generatedScriptDefinition.head.introductionDescription,
         postInterview.targetAudience,
         postInterview.toneOfVoice,
+        postInterview.generatedScriptDefinition.head.introductionLengthRange,
       ),
       {
         model: MEDIUM_GENERATION_MODEL,

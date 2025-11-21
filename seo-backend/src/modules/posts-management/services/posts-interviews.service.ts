@@ -6,7 +6,11 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
-import { GroqService, SCRIPT_CREATION_MODEL } from '../../llm-manager';
+import {
+  GPT_OSS_120B_MODEL,
+  GroqService,
+  SCRIPT_CREATION_MODEL,
+} from '../../llm-manager';
 import { ScriptsPrompting } from '../../llm-manager/library/prompts/scripts.prompting';
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';
 import { UpdatePostInterviewDto } from '../dto/update-post-interview.dto';
@@ -87,10 +91,13 @@ export class PostInterviewsService {
     }
     const prompt = ScriptsPrompting.FORMAT_SEO_SCRIPT_TO_JSON_PROMPT(
       postInterview.generatedScriptText,
+      postInterview.minWordCount,
+      postInterview.maxWordCount,
+      postInterview.needsFaqSection,
     );
 
     const scriptDefinitionResult = await this.groqService.generate(prompt, {
-      model: SCRIPT_CREATION_MODEL,
+      model: GPT_OSS_120B_MODEL,
       maxTokens: 8096,
     });
 

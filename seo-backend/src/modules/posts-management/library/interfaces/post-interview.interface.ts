@@ -43,6 +43,7 @@ export type ScriptSection = {
 
 export type ScriptFAQ = {
   description: string;
+  lengthRange?: [number, number];
 };
 
 export type ScriptFormatDefinition = {
@@ -52,6 +53,7 @@ export type ScriptFormatDefinition = {
     introductionDescription: string;
     slug: string;
     tags: string[];
+    introductionLengthRange?: [number, number];
   };
   body: {
     sections: ScriptSection[];

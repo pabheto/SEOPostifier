@@ -81,7 +81,12 @@ async function bootstrap() {
 
   // ----- 3. Save script as JSON -----
   const formattedScript = await groqService.generate(
-    ScriptsPrompting.FORMAT_SEO_SCRIPT_TO_JSON_PROMPT(script.content),
+    ScriptsPrompting.FORMAT_SEO_SCRIPT_TO_JSON_PROMPT(
+      script.content,
+      testPostInterview.minWordCount,
+      testPostInterview.maxWordCount,
+      testPostInterview.needsFaqSection,
+    ),
     {
       model: SCRIPT_CREATION_MODEL,
       maxTokens: 8096,
@@ -108,6 +113,7 @@ async function bootstrap() {
       formattedScriptObject.head.introductionDescription,
       testPostInterview.targetAudience,
       testPostInterview.toneOfVoice,
+      formattedScriptObject.head.introductionLengthRange,
     ),
     {
       model: MEDIUM_GENERATION_MODEL,
