@@ -612,28 +612,37 @@ class SEO_Postifier_AJAX_Handlers {
                     break;
 
                 case 'image':
-                    if (isset($block['image']['url'])) {
-                        $image_url = esc_url($block['image']['url']);
-                        $image_alt = isset($block['image']['alt']) ? esc_attr($block['image']['alt']) : '';
-                        
-                        // Gutenberg image block format
-                        $attributes = array(
-                            'id' => 0,
-                            'sizeSlug' => 'full',
-                            'linkDestination' => 'none'
-                        );
-                        if (!empty($image_alt)) {
-                            $attributes['alt'] = $image_alt;
+                    if (isset($block['image'])) {
+                        // Support both 'sourceValue' (new format) and 'url' (legacy format)
+                        $image_url = '';
+                        if (isset($block['image']['sourceValue']) && !empty($block['image']['sourceValue'])) {
+                            $image_url = esc_url($block['image']['sourceValue']);
+                        } elseif (isset($block['image']['url']) && !empty($block['image']['url'])) {
+                            $image_url = esc_url($block['image']['url']);
                         }
                         
-                        $content .= '<!-- wp:image ' . json_encode($attributes, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ' -->' . "\n";
-                        $content .= '<figure class="wp-block-image size-full">' . "\n";
-                        $content .= '<img src="' . $image_url . '" alt="' . $image_alt . '" />' . "\n";
-                        if (!empty($image_alt)) {
-                            $content .= '<figcaption class="wp-element-caption">' . esc_html($image_alt) . '</figcaption>' . "\n";
+                        if (!empty($image_url)) {
+                            $image_alt = isset($block['image']['alt']) ? esc_attr($block['image']['alt']) : '';
+                            
+                            // Gutenberg image block format
+                            $attributes = array(
+                                'id' => 0,
+                                'sizeSlug' => 'full',
+                                'linkDestination' => 'none'
+                            );
+                            if (!empty($image_alt)) {
+                                $attributes['alt'] = $image_alt;
+                            }
+                            
+                            $content .= '<!-- wp:image ' . json_encode($attributes, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ' -->' . "\n";
+                            $content .= '<figure class="wp-block-image size-full">' . "\n";
+                            $content .= '<img src="' . $image_url . '" alt="' . $image_alt . '" />' . "\n";
+                            if (!empty($image_alt)) {
+                                $content .= '<figcaption class="wp-element-caption">' . esc_html($image_alt) . '</figcaption>' . "\n";
+                            }
+                            $content .= '</figure>' . "\n";
+                            $content .= '<!-- /wp:image -->' . "\n\n";
                         }
-                        $content .= '</figure>' . "\n";
-                        $content .= '<!-- /wp:image -->' . "\n\n";
                     }
                     break;
 

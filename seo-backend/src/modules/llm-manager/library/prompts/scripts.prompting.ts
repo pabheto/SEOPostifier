@@ -174,41 +174,37 @@ export class ScriptsPrompting {
   
   - No brand mention is required.`.trim();
 
-    const imagePlacementDetails = hasAnyImages
+    const imagePlacementRules = hasAnyImages
       ? `
-  ## 4. Image Placement Blocks
-  
-  Define the exact placement of all images.
-  
-  ### Rules
+  ### Image Placement Rules (within sections)
   
   1. Total image blocks MUST NOT exceed \`totalDesiredImages\`.
   2. AI image blocks MUST NOT exceed \`aiImagesCount\`.
   3. If user images exist, prioritize them.
   4. Only use AI images when slots remain.
+  5. Include image blocks **directly within the relevant section** where they should appear.
   
-  ### Block Format
+  ### Image Block Format (include in section descriptions)
+  
+  When an image should be placed in a section, include it in the section's description using this format:
   
   #### User images
   \`\`\`user-image
-  sourceType: "url|wordpress_media_id|other"
+  sourceType: "user" | "ai_generated"
   sourceValue: "URL or ID or identifier"
-  sectionHeading: "Exact H2/H3 location"
   description: "Short descriptive context"
   alt: "SEO-friendly alt text in ${language}"
   \`\`\`
   
   #### AI images
   \`\`\`ai-image
-  sectionHeading: "Exact H2/H3 location"
   description: "Clear prompt for image generation"
   alt: "SEO-friendly alt text in ${language}"
   \`\`\`
-  `.trim()
-      : `
-  ## 4. Image Placement
   
-  No images should be used.`.trim();
+  Place these blocks within the section description where the image should appear in the content flow.
+  `.trim()
+      : '';
 
     return `
   You are an elite-level SEO strategist and senior copy chief.  
@@ -262,6 +258,7 @@ export class ScriptsPrompting {
      - Keyword & semantic guidance
      - Internal/external link placement (if enabled)
      - Image placement blocks (if enabled)
+  5. Fully satisfies the desired article length. Distribute the size of each section to match the user word range requirement.
   
   Please, research in the web when you need to obtain updated information
   Include the source and the details of the information in the description of each section or introduction so the writter 
@@ -278,11 +275,12 @@ Include either a micro-storytelling element or a relevant fact or statistic.
 You must describe the points of the introduction to allow the writer to develop it later
 You can include real world information here
   - **Introduction word count**: Specify the word count range for the introduction (e.g., "Introduction word count: 250 - 350 words")
+  - Specify the target word count for the article as mentioned in the input data
 
   - Optional slug + tags
   
   ### 3.2. “General Structure of the Article”
-  List H2/H3/H4 headings with 1–2 line summaries.
+  List H2/H3/H4 headings with 1–2 line summaries. Add the estimated word count for each section and make sure that the sum of all the sections + introduction + FAQ matches the user word range requirement.
   
   ### 3.3. Detailed Section Scripts
   
@@ -299,6 +297,7 @@ You can include real world information here
   - **Keyword usage**
   - **Internal link suggestions** (if enabled)
   - **External link suggestions** (if enabled)
+  ${hasAnyImages ? '- **Image blocks** (if applicable): Include image blocks directly here using the format specified in Image Placement Rules' : ''}
   - **Tone notes**
   \`\`\`
   
@@ -311,7 +310,7 @@ You can include real world information here
   
   ${faqSection}
   
-  ${imagePlacementDetails}
+  ${imagePlacementRules}
   
   ${linkRules}
   
@@ -400,7 +399,8 @@ Important instructions:
 
    - "indexSummary" RULES: It must be a summary of the general structure of the article. 
    One line with the title and a summary of 30 - 40 words of the content of that section and specifying if is an H2, H3 or H4
-   1 Line per section with the format [H2|H3|H4] Title: Summary
+   1 Line per section with the format [H2|H3|H4] Title: Summary + The estimated length of each section
+   THE SUM OF ALL THE CONTENT OF THE SECTIONS + INTRODUCTION + FAQ SHOULD MATCH THE USER WORD RANGE REQUIREMENT
 
 2. "head" RULES
    - h1: main title of the article (extracted from the outline, or create a concise descriptive one if missing).
@@ -423,14 +423,20 @@ Important instructions:
      - If the script explicitly mentions a word count for a section, use that EXACTLY.
      - If NO word count is mentioned in the script for a section, use a reasonable default: 250-400 words for main sections, 150-300 for subsections.
      - DO NOT calculate or redistribute word counts based on total article length. The script designer has already planned this.
-   - description: A clear explanation of what the section should contain (guidelines for the writer/AI). Add what has been planned in the script.
+   - description: A clear explanation of what the section should contain (guidelines for the writer/AI). Add what has been planned in the script. **IMPORTANT**: If the section description contains image blocks (\`\`\`user-image or \`\`\`ai-image), extract them to the images array and remove the image block syntax from the description, keeping only the descriptive text.
    - images (optional):
-     - Include ONLY if the outline suggests an image or if an image adds value.
-     - Must follow the Image type structure.
-     - sourceType: "user" if the image should be provided by the user, "ai_generated" if it should be generated with AI.
-     - sourceValue (optional): short indication of the image type (e.g., "product photo", "comparison chart").
-     - description (optional): detailed explanation of what the image should show and the purpose of it in the section.
-     - alt (optional): descriptive alt-text optimized for SEO and accessibility.
+     - **CRITICAL**: Extract image blocks from the section description if present.
+     - Look for code blocks with \`\`\`user-image or \`\`\`ai-image markers within the section description.
+     - For each image block found:
+       - Extract all fields from the block (sourceType, sourceValue, description, alt)
+       - Remove the image block syntax from the section description
+       - Add the image to the images array
+     - Must follow the Image type structure:
+       - sourceType: "user" if sourceType is "user" in the block, "ai_generated" if sourceType is "ai_generated" or if it's an \`\`\`ai-image block
+       - sourceValue (optional): extract from the block if present, or use a short indication of the image type
+       - description (optional): extract the description from the block - this should be the prompt for AI generation or context for user images
+       - alt (optional): extract the alt text from the block, or generate SEO-friendly alt text if not provided
+     - If no image blocks are found in the section, leave images undefined or empty.
    - links:
      - internal: array of suggested internal link targets (slugs or conceptual placeholders).
      - external: array of generic resource descriptions (e.g., "Google ranking factors study", "Official schema.org docs").

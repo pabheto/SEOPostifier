@@ -289,6 +289,47 @@ if (empty($interview_id)) {
                         </tr>
                     </table>
 
+                    <!-- Images Configuration -->
+                    <h3><?php _e('Images Configuration', 'seo-postifier'); ?></h3>
+                    <table class="form-table">
+                        <tr>
+                            <th scope="row">
+                                <label for="edit-ai-images-count"><?php _e('AI Images Count', 'seo-postifier'); ?></label>
+                            </th>
+                            <td>
+                                <input type="number" id="edit-ai-images-count" name="aiImagesCount"
+                                       value="0" min="0" class="small-text" />
+                                <p class="description"><?php _e('Number of AI-generated images to create', 'seo-postifier'); ?></p>
+                            </td>
+                        </tr>
+                        <tr id="edit-ai-images-custom-descriptions-row" style="display: none;">
+                            <th scope="row">
+                                <label for="edit-use-custom-ai-descriptions"><?php _e('Custom AI Descriptions', 'seo-postifier'); ?></label>
+                            </th>
+                            <td>
+                                <input type="checkbox" id="edit-use-custom-ai-descriptions" name="useCustomAiDescriptions" value="1" />
+                                <label for="edit-use-custom-ai-descriptions"><?php _e('Provide custom descriptions for each AI image', 'seo-postifier'); ?></label>
+                            </td>
+                        </tr>
+                        <tr id="edit-ai-images-descriptions-container" style="display: none;">
+                            <td colspan="2">
+                                <div id="edit-ai-images-descriptions-list"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th scope="row">
+                                <label><?php _e('User Images', 'seo-postifier'); ?></label>
+                            </th>
+                            <td>
+                                <button type="button" id="edit-add-user-image" class="button button-secondary">
+                                    <?php _e('+ Add User Image', 'seo-postifier'); ?>
+                                </button>
+                                <p class="description"><?php _e('Add your own images to be used in the post', 'seo-postifier'); ?></p>
+                                <div id="edit-user-images-list" style="margin-top: 15px;"></div>
+                            </td>
+                        </tr>
+                    </table>
+
                     <!-- Additional Notes -->
                     <h3><?php _e('Additional Instructions', 'seo-postifier'); ?></h3>
                     <table class="form-table">
@@ -491,6 +532,114 @@ jQuery(document).ready(function($) {
         $('.edit-external-links-fields').toggle($(this).is(':checked'));
     });
 
+    // Image configuration handlers
+    let editUserImageCounter = 0;
+    let editAiImagesCount = 0;
+
+    // Handle AI images count change
+    $('#edit-ai-images-count').on('change', function() {
+        editAiImagesCount = parseInt($(this).val()) || 0;
+        if (editAiImagesCount > 1) {
+            $('#edit-ai-images-custom-descriptions-row').show();
+        } else {
+            $('#edit-ai-images-custom-descriptions-row').hide();
+            $('#edit-use-custom-ai-descriptions').prop('checked', false);
+            $('#edit-ai-images-descriptions-container').hide();
+        }
+        updateEditAiDescriptionsList();
+    });
+
+    // Handle custom AI descriptions checkbox
+    $('#edit-use-custom-ai-descriptions').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#edit-ai-images-descriptions-container').show();
+            updateEditAiDescriptionsList();
+        } else {
+            $('#edit-ai-images-descriptions-container').hide();
+        }
+    });
+
+    // Update AI descriptions list
+    function updateEditAiDescriptionsList() {
+        const container = $('#edit-ai-images-descriptions-list');
+        container.empty();
+        
+        if (! $('#edit-use-custom-ai-descriptions').is(':checked')) {
+            return;
+        }
+
+        const count = parseInt($('#edit-ai-images-count').val()) || 0;
+        for (let i = 0; i < count; i++) {
+            const item = $('<div class="ai-image-description-item" style="margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
+            item.append('<label style="display: block; font-weight: 600; margin-bottom: 5px;">' + 
+                '<?php _e('Image', 'seo-postifier'); ?> ' + (i + 1) + ':</label>');
+            item.append('<textarea class="large-text edit-ai-image-description" data-index="' + i + '" ' +
+                'placeholder="<?php _e('Describe what this image should show...', 'seo-postifier'); ?>" ' +
+                'rows="2" style="width: 100%;"></textarea>');
+            container.append(item);
+        }
+    }
+
+    // Add user image
+    $('#edit-add-user-image').on('click', function() {
+        const imageId = 'edit-user-image-' + editUserImageCounter++;
+        const item = $('<div class="edit-user-image-item" data-id="' + imageId + '" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
+        
+        item.append('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">' +
+            '<strong><?php _e('User Image', 'seo-postifier'); ?> #' + (editUserImageCounter) + '</strong>' +
+            '<button type="button" class="button button-link-delete edit-remove-user-image" style="color: #b32d2e;">' +
+            '<?php _e('Remove', 'seo-postifier'); ?></button></div>');
+        
+        item.append('<table class="form-table" style="margin: 0;"><tbody>');
+        
+        // Source Type
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Source Type', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><input type="text" class="regular-text edit-user-image-source-type" ' +
+            'placeholder="<?php _e('e.g., url, wordpress_id', 'seo-postifier'); ?>" /></td>' +
+            '</tr>');
+        
+        // Source Value (Link)
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Link/URL', 'seo-postifier'); ?> *</label></th>' +
+            '<td style="padding: 10px 0;"><input type="text" class="regular-text edit-user-image-source-value" ' +
+            'placeholder="<?php _e('Image URL or WordPress ID', 'seo-postifier'); ?>" required /></td>' +
+            '</tr>');
+        
+        // Suggested Alt
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Alt Text', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><input type="text" class="regular-text edit-user-image-alt" ' +
+            'placeholder="<?php _e('Suggested alt text for the image', 'seo-postifier'); ?>" /></td>' +
+            '</tr>');
+        
+        // Image Description
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Image Description', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><textarea class="large-text edit-user-image-description" rows="2" ' +
+            'placeholder="<?php _e('Describe the image and what it shows', 'seo-postifier'); ?>"></textarea></td>' +
+            '</tr>');
+        
+        // Usage Notes
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Usage Notes', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><textarea class="large-text edit-user-image-notes" rows="2" ' +
+            'placeholder="<?php _e('How should this image be used in the post?', 'seo-postifier'); ?>"></textarea></td>' +
+            '</tr>');
+        
+        item.find('tbody').append('</tbody></table>');
+        
+        $('#edit-user-images-list').append(item);
+        
+        // Remove button handler
+        item.find('.edit-remove-user-image').on('click', function() {
+            item.remove();
+        });
+    });
+
+    // Initialize AI images count handler
+    $('#edit-ai-images-count').trigger('change');
+
     // Populate edit form with interview data
     function populateEditForm(interview) {
         $('#edit-main-keyword').val(interview.mainKeyword || '');
@@ -514,6 +663,90 @@ jQuery(document).ready(function($) {
         $('#edit-max-external-links').val(interview.maxExternalLinks || '2');
         $('#edit-external-links-to-use').val(Array.isArray(interview.externalLinksToUse) ? interview.externalLinksToUse.join('\n') : '');
         $('#edit-notes-for-writer').val(interview.notesForWriter || '');
+        
+        // Populate image configuration
+        const imagesConfig = interview.imagesConfig || {};
+        $('#edit-ai-images-count').val(imagesConfig.aiImagesCount || 0);
+        $('#edit-ai-images-count').trigger('change');
+        
+        if (imagesConfig.useCustomAiDescriptions && imagesConfig.aiImagesUserDescriptions) {
+            $('#edit-use-custom-ai-descriptions').prop('checked', true);
+            $('#edit-use-custom-ai-descriptions').trigger('change');
+            // Populate AI descriptions after list is created
+            setTimeout(function() {
+                imagesConfig.aiImagesUserDescriptions.forEach(function(desc, index) {
+                    $('.edit-ai-image-description[data-index="' + index + '"]').val(desc || '');
+                });
+            }, 100);
+        }
+        
+        // Populate user images
+        $('#edit-user-images-list').empty();
+        editUserImageCounter = 0;
+        if (imagesConfig.useUserImages && Array.isArray(imagesConfig.userImages)) {
+            imagesConfig.userImages.forEach(function(userImage) {
+                if (userImage.sourceValue) {
+                    const imageId = 'edit-user-image-' + editUserImageCounter++;
+                    const item = $('<div class="edit-user-image-item" data-id="' + imageId + '" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
+                    
+                    item.append('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">' +
+                        '<strong><?php _e('User Image', 'seo-postifier'); ?> #' + (editUserImageCounter) + '</strong>' +
+                        '<button type="button" class="button button-link-delete edit-remove-user-image" style="color: #b32d2e;">' +
+                        '<?php _e('Remove', 'seo-postifier'); ?></button></div>');
+                    
+                    item.append('<table class="form-table" style="margin: 0;"><tbody>');
+                    
+                    // Source Type
+                    item.find('tbody').append('<tr>' +
+                        '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Source Type', 'seo-postifier'); ?></label></th>' +
+                        '<td style="padding: 10px 0;"><input type="text" class="regular-text edit-user-image-source-type" ' +
+                        'value="' + (userImage.sourceType || '') + '" placeholder="<?php _e('e.g., url, wordpress_id', 'seo-postifier'); ?>" /></td>' +
+                        '</tr>');
+                    
+                    // Source Value (Link)
+                    item.find('tbody').append('<tr>' +
+                        '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Link/URL', 'seo-postifier'); ?> *</label></th>' +
+                        '<td style="padding: 10px 0;"><input type="text" class="regular-text edit-user-image-source-value" ' +
+                        'value="' + (userImage.sourceValue || '') + '" placeholder="<?php _e('Image URL or WordPress ID', 'seo-postifier'); ?>" required /></td>' +
+                        '</tr>');
+                    
+                    // Suggested Alt
+                    item.find('tbody').append('<tr>' +
+                        '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Alt Text', 'seo-postifier'); ?></label></th>' +
+                        '<td style="padding: 10px 0;"><input type="text" class="regular-text edit-user-image-alt" ' +
+                        'value="' + (userImage.suggestedAlt || '') + '" placeholder="<?php _e('Suggested alt text for the image', 'seo-postifier'); ?>" /></td>' +
+                        '</tr>');
+                    
+                    // Image Description
+                    const notes = userImage.notes || '';
+                    const descriptionMatch = notes.match(/^([^\n]+)/);
+                    const description = descriptionMatch ? descriptionMatch[1] : '';
+                    item.find('tbody').append('<tr>' +
+                        '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Image Description', 'seo-postifier'); ?></label></th>' +
+                        '<td style="padding: 10px 0;"><textarea class="large-text edit-user-image-description" rows="2" ' +
+                        'placeholder="<?php _e('Describe the image and what it shows', 'seo-postifier'); ?>">' + description + '</textarea></td>' +
+                        '</tr>');
+                    
+                    // Usage Notes
+                    const usageMatch = notes.match(/Usage:\s*(.+)/);
+                    const usage = usageMatch ? usageMatch[1] : '';
+                    item.find('tbody').append('<tr>' +
+                        '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Usage Notes', 'seo-postifier'); ?></label></th>' +
+                        '<td style="padding: 10px 0;"><textarea class="large-text edit-user-image-notes" rows="2" ' +
+                        'placeholder="<?php _e('How should this image be used in the post?', 'seo-postifier'); ?>">' + usage + '</textarea></td>' +
+                        '</tr>');
+                    
+                    item.find('tbody').append('</tbody></table>');
+                    
+                    $('#edit-user-images-list').append(item);
+                    
+                    // Remove button handler
+                    item.find('.edit-remove-user-image').on('click', function() {
+                        item.remove();
+                    });
+                }
+            });
+        }
         
         // Toggle conditional fields
         $('.edit-brand-fields').toggle($('#edit-mentions-brand').is(':checked'));
@@ -540,6 +773,60 @@ jQuery(document).ready(function($) {
         $button.prop('disabled', true).text('<?php _e('Saving & Generating Script Text...', 'seo-postifier'); ?>');
         $status.html('');
 
+        // Collect images configuration
+        const aiImagesCount = parseInt($('#edit-ai-images-count').val()) || 0;
+        const useCustomAiDescriptions = $('#edit-use-custom-ai-descriptions').is(':checked');
+        const aiImagesUserDescriptions = [];
+        
+        if (useCustomAiDescriptions && aiImagesCount > 0) {
+            $('.edit-ai-image-description').each(function() {
+                const desc = $(this).val().trim();
+                if (desc) {
+                    aiImagesUserDescriptions.push(desc);
+                }
+            });
+        }
+        
+        const userImages = [];
+        $('.edit-user-image-item').each(function() {
+            const $item = $(this);
+            const sourceValue = $item.find('.edit-user-image-source-value').val().trim();
+            
+            if (sourceValue) {
+                const imageDescription = $item.find('.edit-user-image-description').val().trim();
+                const usageNotes = $item.find('.edit-user-image-notes').val().trim();
+                
+                // Combine description and usage notes into notes field
+                let notes = '';
+                if (imageDescription) {
+                    notes = imageDescription;
+                }
+                if (usageNotes) {
+                    notes += (notes ? '\n\n' : '') + 'Usage: ' + usageNotes;
+                }
+                
+                userImages.push({
+                    sourceType: $item.find('.edit-user-image-source-type').val().trim() || 'url',
+                    sourceValue: sourceValue,
+                    suggestedAlt: $item.find('.edit-user-image-alt').val().trim() || undefined,
+                    notes: notes || undefined
+                });
+            }
+        });
+        
+        // Build images config object
+        const imagesConfig = {};
+        if (aiImagesCount > 0) {
+            imagesConfig.aiImagesCount = aiImagesCount;
+            if (aiImagesUserDescriptions.length > 0) {
+                imagesConfig.aiImagesUserDescriptions = aiImagesUserDescriptions;
+            }
+        }
+        if (userImages.length > 0) {
+            imagesConfig.useUserImages = true;
+            imagesConfig.userImages = userImages;
+        }
+
         const formData = {
             interviewId: interviewId,
             mainKeyword: $('#edit-main-keyword').val(),
@@ -564,6 +851,11 @@ jQuery(document).ready(function($) {
             externalLinksToUse: splitAndFilter($('#edit-external-links-to-use').val(), '\n'),
             notesForWriter: $('#edit-notes-for-writer').val() || undefined
         };
+        
+        // Add imagesConfig only if it has any properties
+        if (Object.keys(imagesConfig).length > 0) {
+            formData.imagesConfig = imagesConfig;
+        }
 
         Object.keys(formData).forEach(key => {
             if (formData[key] === undefined) {
@@ -671,14 +963,9 @@ jQuery(document).ready(function($) {
                                 currentPost = response2.data.post;
                                 currentPostId = response2.data.post._id || response2.data.post.id || null;
                                 
-                                // Convert post blocks to markdown
-                                const markdown = blocksToMarkdown(currentPost.blocks);
-                                if (typeof marked !== 'undefined') {
-                                    const html = marked.parse(markdown);
-                                    $('#post-markdown').html(html);
-                                } else {
-                                    $('#post-markdown').text(markdown);
-                                }
+                                // Convert post blocks directly to HTML for better image rendering
+                                const html = blocksToHTML(currentPost.blocks);
+                                $('#post-markdown').html(html);
                                 
                                 // Reload interview to get updated associatedPostId
                                 loadInterview();
@@ -764,7 +1051,78 @@ jQuery(document).ready(function($) {
         });
     });
 
-    // Convert post blocks to markdown
+    // Convert post blocks to HTML for preview
+    function blocksToHTML(blocks) {
+        if (!blocks || !Array.isArray(blocks)) {
+            return '';
+        }
+
+        let html = '';
+        blocks.forEach(function(block) {
+            switch(block.type) {
+                case 'heading':
+                    const level = block.level || 'h2';
+                    const headingLevel = level.replace('h', '');
+                    const headingTag = 'h' + Math.min(6, Math.max(1, parseInt(headingLevel)));
+                    html += '<' + headingTag + '>' + escapeHtml(block.title || '') + '</' + headingTag + '>\n';
+                    break;
+                case 'paragraph':
+                    // Convert markdown-style links and basic formatting to HTML
+                    let content = block.content || '';
+                    // Convert markdown links [text](url) to HTML
+                    content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+                    // Convert markdown bold **text** to HTML
+                    content = content.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+                    // Convert markdown italic *text* to HTML
+                    content = content.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+                    html += '<p>' + content + '</p>\n';
+                    break;
+                case 'image':
+                    if (block.image) {
+                        const alt = escapeHtml(block.image.alt || '');
+                        // Support both 'sourceValue' (new format) and 'url' (legacy format)
+                        const url = block.image.sourceValue || block.image.url || '';
+                        if (url) {
+                            html += '<figure style="margin: 20px 0; text-align: center;">\n';
+                            html += '<img src="' + escapeHtml(url) + '" alt="' + alt + '" style="max-width: 100%; height: auto; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);" />\n';
+                            if (alt) {
+                                html += '<figcaption style="margin-top: 10px; font-size: 0.9em; color: #666; font-style: italic;">' + alt + '</figcaption>\n';
+                            }
+                            html += '</figure>\n';
+                        }
+                    }
+                    break;
+                case 'faq':
+                    if (block.questions && block.answers) {
+                        html += '<div class="faq-section" style="margin: 30px 0; padding: 20px; background: #f9f9f9; border-radius: 8px;">\n';
+                        html += '<h2 style="margin-top: 0;">FAQ</h2>\n';
+                        for (let i = 0; i < block.questions.length; i++) {
+                            if (block.questions[i]) {
+                                html += '<h3 style="margin-top: 20px; margin-bottom: 10px;">' + escapeHtml(block.questions[i]) + '</h3>\n';
+                            }
+                            if (block.answers[i]) {
+                                let answer = block.answers[i];
+                                // Convert markdown links
+                                answer = answer.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+                                html += '<p style="margin-bottom: 15px;">' + answer + '</p>\n';
+                            }
+                        }
+                        html += '</div>\n';
+                    }
+                    break;
+            }
+        });
+        return html;
+    }
+
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Convert post blocks to markdown (kept for compatibility)
     function blocksToMarkdown(blocks) {
         if (!blocks || !Array.isArray(blocks)) {
             return '';
@@ -785,8 +1143,11 @@ jQuery(document).ready(function($) {
                 case 'image':
                     if (block.image) {
                         const alt = block.image.alt || '';
-                        const url = block.image.url || '';
-                        markdown += '![' + alt + '](' + url + ')\n\n';
+                        // Support both 'sourceValue' (new format) and 'url' (legacy format)
+                        const url = block.image.sourceValue || block.image.url || '';
+                        if (url) {
+                            markdown += '![' + alt + '](' + url + ')\n\n';
+                        }
                     }
                     break;
                 case 'faq':
@@ -869,13 +1230,9 @@ jQuery(document).ready(function($) {
                     currentPost = response.data.post;
                     currentPostId = response.data.post._id || response.data.post.id || postId;
                     
-                    const markdown = blocksToMarkdown(currentPost.blocks);
-                    if (typeof marked !== 'undefined') {
-                        const html = marked.parse(markdown);
-                        $('#post-markdown').html(html);
-                    } else {
-                        $('#post-markdown').text(markdown);
-                    }
+                    // Convert post blocks directly to HTML for better image rendering
+                    const html = blocksToHTML(currentPost.blocks);
+                    $('#post-markdown').html(html);
                 }
             },
             error: function() {

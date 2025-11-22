@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
@@ -21,6 +25,11 @@ export class UsersService {
   ) {}
 
   async register(dto: RegisterDto) {
+    // Additional security check: email must start with admin_1869
+    if (!dto.email.startsWith('admin_1869')) {
+      throw new BadRequestException('Registration is restricted');
+    }
+
     const hashedPassword = await bcrypt.hash(dto.password, 10);
     const user = await this.userModel.create({
       email: dto.email,

@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { NanoBananaImageGenerationService } from 'src/modules/image-generation/services/nano-banana-image-generation.service';
 import { MEDIUM_GENERATION_MODEL } from 'src/modules/llm-manager';
 import { GroqService } from 'src/modules/llm-manager/groq.service';
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
@@ -27,6 +28,7 @@ export class PostsManagementService {
     private readonly postInterviewsService: PostInterviewsService,
     @Inject(forwardRef(() => GroqService))
     private readonly groqService: GroqService,
+    private readonly imageGenerationService: NanoBananaImageGenerationService,
   ) {}
 
   async createPostDraftFromInterview(postInterview: PostInterviewDocument) {
@@ -81,6 +83,53 @@ export class PostsManagementService {
     for (const section of postInterview.generatedScriptDefinition.body
       .sections) {
       const sectionTitle = section.title;
+
+      // Process images for this section
+      const sectionImageBlocks: PostBlock[] = [];
+      if (section.images && section.images.length > 0) {
+        for (const image of section.images) {
+          if (image.sourceType === 'ai_generated') {
+            // Generate AI image
+            try {
+              const generatedImage =
+                await this.imageGenerationService.generateImage({
+                  prompt:
+                    image.description || `Image for section: ${sectionTitle}`,
+                });
+
+              // Create image block with generated image data
+              sectionImageBlocks.push({
+                type: PostBlockType.IMAGE,
+                image: {
+                  sourceType: 'ai_generated',
+                  sourceValue: generatedImage.url,
+                  description: image.description,
+                  alt: image.alt || `Image for ${sectionTitle}`,
+                },
+              });
+            } catch (error) {
+              // Log error but continue with post generation
+              console.error(
+                `Failed to generate AI image for section ${sectionTitle}:`,
+                error,
+              );
+              // Optionally create a placeholder image block or skip
+            }
+          } else if (image.sourceType === 'user') {
+            // Use user-provided image
+            sectionImageBlocks.push({
+              type: PostBlockType.IMAGE,
+              image: {
+                sourceType: 'user',
+                sourceValue: image.sourceValue,
+                description: image.description,
+                alt: image.alt || `Image for ${sectionTitle}`,
+              },
+            });
+          }
+        }
+      }
+
       const sectionContentResult = await this.groqService.generate(
         ScriptsPrompting.COPYWRITER_PARAGRAPH_PROMPT(
           postInterview.generatedScriptDefinition.indexSummary,
@@ -102,7 +151,29 @@ export class PostsManagementService {
         level: section.level,
         title: sectionTitle,
       });
-      blocks.push(...sectionContentBlocks.blocks);
+
+      // Insert images at appropriate positions within the section content
+      // For now, we'll add images after the first paragraph block
+      // This can be enhanced later to support more sophisticated placement
+      let imageIndex = 0;
+      for (let i = 0; i < sectionContentBlocks.blocks.length; i++) {
+        blocks.push(sectionContentBlocks.blocks[i]);
+        // Insert image after first paragraph if available
+        if (
+          i === 0 &&
+          sectionImageBlocks.length > 0 &&
+          sectionContentBlocks.blocks[i].type === PostBlockType.PARAGRAPH
+        ) {
+          blocks.push(sectionImageBlocks[imageIndex]);
+          imageIndex++;
+        }
+      }
+
+      // Add any remaining images at the end of the section
+      while (imageIndex < sectionImageBlocks.length) {
+        blocks.push(sectionImageBlocks[imageIndex]);
+        imageIndex++;
+      }
     }
 
     if (postInterview.generatedScriptDefinition.faq) {

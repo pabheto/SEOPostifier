@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ImageGenerationModule } from '../image-generation/image-generation.module';
 import { LlmManagerModule } from '../llm-manager/llm-manager.module';
 import { UsersModule } from '../users/users.module';
 import { PostsInterviewsController } from './controllers/post-interviews.controller';
@@ -26,6 +27,7 @@ import { PostsManagementService } from './services/posts-management.service';
     ]),
     LlmManagerModule, // Import LlmManagerModule to use GroqService
     UsersModule, // Import UsersModule for license-based authentication
+    ImageGenerationModule, // Import ImageGenerationModule to use NanoBananaImageGenerationService
   ],
   controllers: [PostsManagementController, PostsInterviewsController],
   providers: [PostInterviewsService, PostsManagementService],

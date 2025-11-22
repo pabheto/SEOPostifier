@@ -21,6 +21,7 @@ export enum ToneOfVoice {
 }
 
 export type IUserImage = {
+  sourceType: 'user' | 'ai_generated';
   sourceValue?: string;
   description?: string;
   alt?: string;

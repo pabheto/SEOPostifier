@@ -15,3 +15,4 @@ export class Session extends Document {
 
 export const SessionSchema = SchemaFactory.createForClass(Session);
 
+
