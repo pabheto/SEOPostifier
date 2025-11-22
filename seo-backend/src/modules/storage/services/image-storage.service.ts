@@ -1,4 +1,11 @@
 import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  HeadObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from '@aws-sdk/client-s3';
+import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
@@ -6,7 +13,6 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
-import * as fs from 'fs/promises';
 import * as path from 'path';
 
 export interface UploadedFile {
@@ -33,7 +39,9 @@ export interface ImageUploadResult {
 @Injectable()
 export class ImageStorageService {
   private readonly logger = new Logger(ImageStorageService.name);
-  private readonly uploadPath: string;
+  private readonly s3Client: S3Client;
+  private readonly bucketName: string;
+  private readonly baseUrl: string;
   private readonly allowedMimeTypes = [
     'image/jpeg',
     'image/jpg',
@@ -45,34 +53,44 @@ export class ImageStorageService {
   private readonly maxFileSize = 10 * 1024 * 1024; // 10MB
 
   constructor(private readonly configService: ConfigService) {
-    // Get upload path from config or use default
-    this.uploadPath =
-      this.configService.get<string>('STORAGE_UPLOAD_PATH') ||
-      path.join(process.cwd(), 'uploads', 'images');
+    // Get S3 configuration from environment variables
+    const endpoint =
+      this.configService.get<string>('S3_ENDPOINT') ||
+      'https://ams3.digitaloceanspaces.com';
+    const region = this.configService.get<string>('S3_REGION') || 'ams3';
+    const accessKeyId = this.configService.get<string>('S3_ACCESS_KEY_ID');
+    const secretAccessKey = this.configService.get<string>(
+      'S3_SECRET_ACCESS_KEY',
+    );
+    this.bucketName =
+      this.configService.get<string>('S3_BUCKET_NAME') || 'seo-postifier';
 
-    // Ensure upload directory exists
-    void this.ensureUploadDirectoryExists();
-  }
+    // Base URL for public access (defaults to the provided endpoint)
+    this.baseUrl =
+      this.configService.get<string>('S3_BASE_URL') ||
+      `https://${this.bucketName}.${region}.digitaloceanspaces.com`;
 
-  /**
-   * Ensures the upload directory exists, creates it if it doesn't
-   */
-  private async ensureUploadDirectoryExists(): Promise<void> {
-    try {
-      await fs.access(this.uploadPath);
-    } catch {
-      try {
-        await fs.mkdir(this.uploadPath, { recursive: true });
-        this.logger.log(`Created upload directory: ${this.uploadPath}`);
-      } catch (error) {
-        const errorMessage =
-          error instanceof Error ? error.message : 'Unknown error';
-        this.logger.error(`Failed to create upload directory: ${errorMessage}`);
-        throw new InternalServerErrorException(
-          'Failed to initialize storage directory',
-        );
-      }
+    if (!accessKeyId || !secretAccessKey) {
+      this.logger.warn(
+        'S3_ACCESS_KEY_ID or S3_SECRET_ACCESS_KEY not found. S3 operations will fail until configured.',
+      );
     }
+
+    // Initialize S3 client for DigitalOcean Spaces
+    this.s3Client = new S3Client({
+      endpoint,
+      region,
+      credentials:
+        accessKeyId && secretAccessKey
+          ? {
+              accessKeyId,
+              secretAccessKey,
+            }
+          : undefined,
+      forcePathStyle: false, // DigitalOcean Spaces uses virtual-hosted-style
+    });
+
+    this.logger.log(`S3 client initialized for bucket: ${this.bucketName}`);
   }
 
   /**
@@ -122,22 +140,30 @@ export class ImageStorageService {
 
     const originalName = file.originalname;
     const filename = this.generateFilename(originalName);
-    const filePath = path.join(this.uploadPath, filename);
+    const key = `images/${filename}`; // Store in images/ prefix
 
     try {
       const buffer = file.buffer;
-      await fs.writeFile(filePath, buffer);
-      this.logger.log(`Image stored: ${filename}`);
 
-      // Generate URL (you can customize this based on your needs)
-      const baseUrl =
-        this.configService.get<string>('STORAGE_BASE_URL') || '/uploads/images';
-      const url = `${baseUrl}/${filename}`;
+      // Upload to S3
+      const command = new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        Body: buffer,
+        ContentType: file.mimetype,
+        ACL: 'public-read', // Make the file publicly accessible
+      });
+
+      await this.s3Client.send(command);
+      this.logger.log(`Image stored in S3: ${key}`);
+
+      // Generate public URL
+      const url = `${this.baseUrl}/${key}`;
 
       return {
         filename,
         originalName,
-        path: filePath,
+        path: key, // Store S3 key instead of file path
         size: file.size,
         mimeType: file.mimetype,
         url,
@@ -177,23 +203,39 @@ export class ImageStorageService {
    * Retrieves an image file
    */
   async getImage(filename: string): Promise<Buffer> {
-    const filePath = path.join(this.uploadPath, filename);
+    // Security: prevent directory traversal
+    const sanitizedFilename = path.basename(filename);
+    const key = `images/${sanitizedFilename}`;
 
     try {
-      // Security: prevent directory traversal
-      const resolvedPath = path.resolve(filePath);
-      const resolvedUploadPath = path.resolve(this.uploadPath);
+      const command = new GetObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
 
-      if (!resolvedPath.startsWith(resolvedUploadPath)) {
-        throw new BadRequestException('Invalid file path');
+      const response = await this.s3Client.send(command);
+
+      if (!response.Body) {
+        throw new BadRequestException(`Image not found: ${filename}`);
       }
 
-      return await fs.readFile(filePath);
+      // Convert stream to buffer
+      const chunks: Uint8Array[] = [];
+      if (response.Body && typeof response.Body === 'object') {
+        // AWS SDK v3 returns Body as a Readable stream
+        const stream = response.Body as AsyncIterable<Uint8Array>;
+        for await (const chunk of stream) {
+          chunks.push(chunk);
+        }
+      }
+      const buffer = Buffer.concat(chunks);
+
+      return buffer;
     } catch (error) {
       if (
         error instanceof Error &&
-        'code' in error &&
-        error.code === 'ENOENT'
+        'name' in error &&
+        error.name === 'NoSuchKey'
       ) {
         throw new BadRequestException(`Image not found: ${filename}`);
       }
@@ -208,20 +250,30 @@ export class ImageStorageService {
    * Checks if an image exists
    */
   async imageExists(filename: string): Promise<boolean> {
-    const filePath = path.join(this.uploadPath, filename);
+    // Security: prevent directory traversal
+    const sanitizedFilename = path.basename(filename);
+    const key = `images/${sanitizedFilename}`;
 
     try {
-      // Security: prevent directory traversal
-      const resolvedPath = path.resolve(filePath);
-      const resolvedUploadPath = path.resolve(this.uploadPath);
+      const command = new HeadObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
 
-      if (!resolvedPath.startsWith(resolvedUploadPath)) {
+      await this.s3Client.send(command);
+      return true;
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        'name' in error &&
+        error.name === 'NotFound'
+      ) {
         return false;
       }
-
-      await fs.access(filePath);
-      return true;
-    } catch {
+      // For other errors, log and return false
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.warn(`Error checking image existence: ${errorMessage}`);
       return false;
     }
   }
@@ -230,27 +282,19 @@ export class ImageStorageService {
    * Deletes an image file
    */
   async deleteImage(filename: string): Promise<void> {
-    const filePath = path.join(this.uploadPath, filename);
+    // Security: prevent directory traversal
+    const sanitizedFilename = path.basename(filename);
+    const key = `images/${sanitizedFilename}`;
 
     try {
-      // Security: prevent directory traversal
-      const resolvedPath = path.resolve(filePath);
-      const resolvedUploadPath = path.resolve(this.uploadPath);
+      const command = new DeleteObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+      });
 
-      if (!resolvedPath.startsWith(resolvedUploadPath)) {
-        throw new BadRequestException('Invalid file path');
-      }
-
-      await fs.unlink(filePath);
-      this.logger.log(`Image deleted: ${filename}`);
+      await this.s3Client.send(command);
+      this.logger.log(`Image deleted from S3: ${key}`);
     } catch (error) {
-      if (
-        error instanceof Error &&
-        'code' in error &&
-        error.code === 'ENOENT'
-      ) {
-        throw new BadRequestException(`Image not found: ${filename}`);
-      }
       const errorMessage =
         error instanceof Error ? error.message : 'Unknown error';
       this.logger.error(`Failed to delete image: ${errorMessage}`);
@@ -262,8 +306,8 @@ export class ImageStorageService {
    * Gets the URL for an image
    */
   getImageUrl(filename: string): string {
-    const baseUrl =
-      this.configService.get<string>('STORAGE_BASE_URL') || '/uploads/images';
-    return `${baseUrl}/${filename}`;
+    const sanitizedFilename = path.basename(filename);
+    const key = `images/${sanitizedFilename}`;
+    return `${this.baseUrl}/${key}`;
   }
 }
