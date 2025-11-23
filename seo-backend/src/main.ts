@@ -40,6 +40,10 @@ async function bootstrap() {
     .addTag('seo', 'SEO analysis and optimization endpoints')
     .addTag('users', 'User authentication and license management')
     .addBearerAuth()
+    .addServer(
+      'https://seo-postifier-backend-nmb9f.ondigitalocean.app',
+      'Production server',
+    )
     .addServer('http://localhost:4000', 'Development server')
     .addServer('http://localhost:3000', 'Alternative development server')
     .build();

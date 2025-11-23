@@ -1,0 +1,117 @@
+=== SEO Postifier ===
+Contributors: pabloherrero
+Tags: seo, content generation, ai, automation, posts, wordpress
+Requires at least: 5.0
+Tested up to: 6.4
+Stable tag: 2.0.0
+Requires PHP: 7.4
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
+
+Automatically generates WordPress posts with SEO optimizations using AI-powered backend.
+
+== Description ==
+
+SEO Postifier is a powerful WordPress plugin that automates the creation of SEO-optimized blog posts using advanced AI technology. Connect to your backend API and generate high-quality, search-engine-friendly content with just a few clicks.
+
+= Key Features =
+
+* **AI-Powered Content Generation**: Leverage advanced AI to create SEO-optimized blog posts automatically
+* **License-Based Authentication**: Secure access with license key authentication
+* **Easy Script Management**: Create, view, and manage content generation scripts from the WordPress admin
+* **SEO Optimization**: Automatically generates content optimized for search engines
+* **Backend Integration**: Seamlessly connects to your SEO Postifier backend API
+* **User-Friendly Interface**: Clean, intuitive admin interface for managing all features
+* **Settings Management**: Easy configuration of license keys and backend URLs
+
+= How It Works =
+
+1. Install and activate the plugin
+2. Navigate to the SEO Postifier settings page
+3. Enter your license key (BASIC, PREMIUM, or ENTERPRISE tier)
+4. Configure your backend URL (default provided)
+5. Start creating SEO-optimized posts using the script creation interface
+
+= License Tiers =
+
+* **BASIC**: Standard access to all post generation features
+* **PREMIUM**: Enhanced features with priority support
+* **ENTERPRISE**: Full access with dedicated resources
+
+== Installation ==
+
+= Automatic Installation =
+
+1. Log in to your WordPress admin panel
+2. Navigate to Plugins > Add New
+3. Search for "SEO Postifier"
+4. Click "Install Now" and then "Activate"
+
+= Manual Installation =
+
+1. Download the plugin zip file
+2. Extract the files to `/wp-content/plugins/seo-postifier/` directory
+3. Log in to your WordPress admin panel
+4. Navigate to Plugins
+5. Find "SEO Postifier" in the list and click "Activate"
+
+= Post-Installation Setup =
+
+1. Go to the SEO Postifier settings page in your WordPress admin
+2. Enter your license key in the settings form
+3. (Optional) Configure a custom backend URL if needed
+4. Click "Test License & Connection" to verify your setup
+5. Start creating SEO-optimized posts!
+
+== Frequently Asked Questions ==
+
+= Do I need a license key? =
+
+Yes, a license key is required to authenticate with the backend API. You should receive your license key when you register for the service.
+
+= What license tiers are available? =
+
+Three tiers are available: BASIC (standard features), PREMIUM (enhanced features with priority support), and ENTERPRISE (full access with dedicated resources).
+
+= Can I use a custom backend URL? =
+
+Yes, you can configure a custom backend URL in the plugin settings. By default, the plugin uses the official backend server.
+
+= What WordPress version do I need? =
+
+SEO Postifier requires WordPress 5.0 or higher and PHP 7.4 or higher.
+
+= Is the plugin compatible with other SEO plugins? =
+
+Yes, SEO Postifier works alongside other SEO plugins. The generated content is optimized for search engines and can be further enhanced with your preferred SEO plugin.
+
+== Screenshots ==
+
+1. Plugin settings page with license key configuration
+2. Script creation interface
+3. Scripts list view
+4. Individual script view
+
+== Changelog ==
+
+= 2.0.0 =
+* Initial release
+* License key authentication system
+* Backend API integration
+* Script creation and management interface
+* Settings management page
+* AJAX handlers for seamless user experience
+
+== Upgrade Notice ==
+
+= 2.0.0 =
+Initial release of SEO Postifier. Install and configure your license key to get started.
+
+== Support ==
+
+For support, feature requests, or bug reports, please visit the plugin's support page or contact the development team.
+
+== Credits ==
+
+Developed with modern WordPress development practices and best security standards.
+
