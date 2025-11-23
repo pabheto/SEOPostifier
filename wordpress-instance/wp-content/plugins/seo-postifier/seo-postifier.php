@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 define('SEO_POSTIFIER_VERSION', '2.0.0');
 define('SEO_POSTIFIER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SEO_POSTIFIER_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('SEO_POSTIFIER_BACKEND_URL', getenv('SEO_BACKEND_URL') ?: 'http://localhost:4000');
+define('SEO_POSTIFIER_BACKEND_URL', getenv('SEO_BACKEND_URL') ?: 'https://seo-postifier-backend-nmb9f.ondigitalocean.app/');
 
 // Require plugin classes
 require_once SEO_POSTIFIER_PLUGIN_DIR . 'includes/class-settings.php';

@@ -49,7 +49,7 @@ $settings = SEO_Postifier_Settings::get_all();
                                name="backend_url" 
                                class="large-text code" 
                                value="<?php echo esc_attr($settings['backend_url']); ?>" 
-                               placeholder="http://localhost:4000" />
+                               placeholder="https://seo-postifier-backend-nmb9f.ondigitalocean.app/" />
                         <p class="description">
                             <?php _e('The URL of your SEO Postifier backend server. Leave default unless you have a custom setup.', 'seo-postifier'); ?>
                         </p>
