@@ -671,21 +671,26 @@ class SEO_Postifier_AJAX_Handlers {
                         $content .= '<h2 class="wp-block-heading">FAQ</h2>' . "\n";
                         $content .= '<!-- /wp:heading -->' . "\n\n";
                         
-                        // FAQ items as accordion using HTML block
+                        // FAQ items as accordion using WordPress core/details block
                         for ($i = 0; $i < count($block['questions']); $i++) {
                             if (isset($block['questions'][$i]) && isset($block['answers'][$i])) {
                                 $question = wp_kses_post($block['questions'][$i]);
                                 $answer = wp_kses_post($block['answers'][$i]);
                                 
-                                // Use HTML block with details/summary for accordion
-                                $content .= '<!-- wp:html -->' . "\n";
-                                $content .= '<details class="wp-block-html faq-item">' . "\n";
+                                // Use WordPress core/details block for accordion
+                                // The summary attribute contains the question text
+                                $attributes = json_encode(array(
+                                    'summary' => $question
+                                ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                                
+                                $content .= '<!-- wp:details ' . $attributes . ' -->' . "\n";
+                                $content .= '<details class="wp-block-details faq-item">' . "\n";
                                 $content .= '<summary class="faq-question">' . $question . '</summary>' . "\n";
-                                $content .= '<div class="faq-answer">' . "\n";
-                                $content .= '<p>' . $answer . '</p>' . "\n";
-                                $content .= '</div>' . "\n";
+                                $content .= '<!-- wp:paragraph -->' . "\n";
+                                $content .= '<p class="wp-block-paragraph faq-answer">' . $answer . '</p>' . "\n";
+                                $content .= '<!-- /wp:paragraph -->' . "\n";
                                 $content .= '</details>' . "\n";
-                                $content .= '<!-- /wp:html -->' . "\n\n";
+                                $content .= '<!-- /wp:details -->' . "\n\n";
                             }
                         }
                         
@@ -700,4 +705,5 @@ class SEO_Postifier_AJAX_Handlers {
     }
 
 }
+
 
