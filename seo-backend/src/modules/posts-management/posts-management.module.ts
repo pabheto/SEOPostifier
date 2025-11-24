@@ -27,7 +27,7 @@ import { PostsManagementService } from './services/posts-management.service';
     ]),
     LlmManagerModule, // Import LlmManagerModule to use GroqService
     UsersModule, // Import UsersModule for license-based authentication
-    ImageGenerationModule, // Import ImageGenerationModule to use NanoBananaImageGenerationService
+    ImageGenerationModule, // Import ImageGenerationModule to use PixabayImageGenerationService
   ],
   controllers: [PostsManagementController, PostsInterviewsController],
   providers: [PostInterviewsService, PostsManagementService],

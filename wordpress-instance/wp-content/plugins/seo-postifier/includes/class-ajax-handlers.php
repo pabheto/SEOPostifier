@@ -589,10 +589,89 @@ class SEO_Postifier_AJAX_Handlers {
     }
 
     /**
+     * Generate table of contents from heading blocks
+     */
+    private static function generate_index($blocks) {
+        $headings = array();
+        $anchor_counts = array(); // Track anchor usage for uniqueness
+        
+        foreach ($blocks as $block) {
+            if (isset($block['type']) && $block['type'] === 'heading') {
+                if (isset($block['level']) && isset($block['title'])) {
+                    $level = intval(str_replace('h', '', $block['level']));
+                    $level = max(2, min(6, $level)); // Only include H2-H6 (H1 is the post title)
+                    $title = wp_kses_post($block['title']);
+                    
+                    // Generate anchor ID from title
+                    $base_anchor = sanitize_title($title);
+                    
+                    // Ensure unique anchor IDs
+                    $anchor = $base_anchor;
+                    $counter = 1;
+                    while (isset($anchor_counts[$anchor])) {
+                        $anchor = $base_anchor . '-' . $counter;
+                        $counter++;
+                    }
+                    $anchor_counts[$anchor] = true;
+                    
+                    $headings[] = array(
+                        'level' => $level,
+                        'title' => $title,
+                        'anchor' => $anchor
+                    );
+                }
+            }
+        }
+        
+        // Don't generate index if there are less than 2 headings
+        if (count($headings) < 2) {
+            return '';
+        }
+        
+        $index_content = '<!-- wp:group {"className":"seo-postifier-index","layout":{"type":"constrained"}} -->' . "\n";
+        $index_content .= '<div class="wp-block-group seo-postifier-index">' . "\n";
+        
+        // Index title
+        $index_content .= '<!-- wp:heading {"level":2} -->' . "\n";
+        $index_content .= '<h2 class="wp-block-heading index-title">' . esc_html__('Table of Contents', 'seo-postifier') . '</h2>' . "\n";
+        $index_content .= '<!-- /wp:heading -->' . "\n\n";
+        
+        // Index list
+        $index_content .= '<!-- wp:list -->' . "\n";
+        $index_content .= '<ul class="wp-block-list index-list">' . "\n";
+        
+        foreach ($headings as $heading) {
+            $level_class = 'index-level-' . $heading['level'];
+            $index_content .= '<li class="' . esc_attr($level_class) . '">';
+            $index_content .= '<a href="#' . esc_attr($heading['anchor']) . '">' . $heading['title'] . '</a>';
+            $index_content .= '</li>' . "\n";
+        }
+        
+        $index_content .= '</ul>' . "\n";
+        $index_content .= '<!-- /wp:list -->' . "\n\n";
+        
+        $index_content .= '</div>' . "\n";
+        $index_content .= '<!-- /wp:group -->' . "\n\n";
+        
+        return $index_content;
+    }
+
+    /**
      * Convert post blocks to WordPress Gutenberg block format
      */
     private static function convert_blocks_to_wp_content($blocks) {
+        // Generate table of contents from headings
+        $index_content = self::generate_index($blocks);
+        
         $content = '';
+        
+        // Add index at the beginning if generated
+        if (!empty($index_content)) {
+            $content .= $index_content;
+        }
+
+        // Track anchor IDs to ensure uniqueness
+        $anchor_counts = array();
 
         foreach ($blocks as $block) {
             if (!isset($block['type'])) {
@@ -606,10 +685,35 @@ class SEO_Postifier_AJAX_Handlers {
                         $level = max(1, min(6, $level)); // Ensure level is between 1 and 6
                         $title = wp_kses_post($block['title']);
                         
-                        // Gutenberg heading block format
-                        $attributes = json_encode(array('level' => $level), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
-                        $content .= '<!-- wp:heading ' . $attributes . ' -->' . "\n";
-                        $content .= '<h' . $level . ' class="wp-block-heading">' . $title . '</h' . $level . '>' . "\n";
+                        // Generate anchor ID for headings (H2 and below, since H1 is the post title)
+                        $anchor = '';
+                        if ($level >= 2) {
+                            $base_anchor = sanitize_title($title);
+                            
+                            // Ensure unique anchor IDs
+                            $anchor = $base_anchor;
+                            $counter = 1;
+                            while (isset($anchor_counts[$anchor])) {
+                                $anchor = $base_anchor . '-' . $counter;
+                                $counter++;
+                            }
+                            $anchor_counts[$anchor] = true;
+                        }
+                        
+                        // Gutenberg heading block format with anchor ID
+                        $attributes = array('level' => $level);
+                        if (!empty($anchor)) {
+                            $attributes['anchor'] = $anchor;
+                        }
+                        $attributes_json = json_encode($attributes, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                        
+                        $content .= '<!-- wp:heading ' . $attributes_json . ' -->' . "\n";
+                        $heading_tag = '<h' . $level . ' class="wp-block-heading"';
+                        if (!empty($anchor)) {
+                            $heading_tag .= ' id="' . esc_attr($anchor) . '"';
+                        }
+                        $heading_tag .= '>' . $title . '</h' . $level . '>';
+                        $content .= $heading_tag . "\n";
                         $content .= '<!-- /wp:heading -->' . "\n\n";
                     }
                     break;

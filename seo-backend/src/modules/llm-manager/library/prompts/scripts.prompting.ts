@@ -485,6 +485,27 @@ Return ONLY the introduction paragraph (no additional text or instructions).
       ? `This is a CORE section (400-500 words). You may need to create multiple subsections or expand content significantly.`
       : `This is a standard section (150-300 words).`;
 
+    // Build links information if available
+    const hasInternalLinks =
+      section.links?.internal && section.links.internal.length > 0;
+    const hasExternalLinks =
+      section.links?.external && section.links.external.length > 0;
+    const linksSection =
+      hasInternalLinks || hasExternalLinks
+        ? `
+  **Links to Include (MANDATORY):**
+  ${hasInternalLinks ? `- **Internal links**: ${section.links.internal.map((link) => `"${link}"`).join(', ')}` : ''}
+  ${hasExternalLinks ? `- **External links**: ${section.links.external.map((link) => `"${link}"`).join(', ')}` : ''}
+
+  **Link Integration Requirements:**
+  - You MUST naturally incorporate ALL suggested links into the content
+  - Internal links should be embedded naturally within relevant paragraphs
+  - External links should be used to support claims, provide authority, or cite sources
+  - Links should feel organic and enhance the content, not forced
+  - Distribute links throughout the section paragraphs (don't cluster them all in one place)
+  `
+        : '';
+
     return `You are an expert SEO copywriter. Write compelling, SEO-optimized content for this section.
 
 **Section Context:**
@@ -493,6 +514,7 @@ Return ONLY the introduction paragraph (no additional text or instructions).
 - Tone: ${targetTone}
 - Audience: ${targetAudience}
 - Article topics: ${indexSummary}
+${linksSection}
 
 ## CRITICAL WORD COUNT REQUIREMENTS
 
@@ -518,7 +540,7 @@ Return ONLY a JSON object with this structure (no additional text):
   "blocks": [
     {
       "type": "paragraph",
-      "content": "First paragraph (40-80 words)..."
+      "content": "First paragraph (40-80 words) with [internal link text](internal-link-slug) and [external link text](https://external-url.com)..."
     },
     {
       "type": "paragraph",
@@ -527,11 +549,17 @@ Return ONLY a JSON object with this structure (no additional text):
   ]
 }
 
+**Link Format in Content:**
+- Internal links: Use markdown format [link text](internal-link-slug) where the slug matches the internal link suggestion
+- External links: Use markdown format [link text](https://full-url.com) with the actual URL from external link suggestions
+- Links should be naturally integrated into the paragraph content, not added as separate sentences
+
 NEVER ADD BACKTICKS, CODEBLOCK FENCES, OR FORMATTING CHARACTERS
 
 **VALIDATION:**
 - Total words across all blocks: ${section.lengthRange[0]} - ${section.lengthRange[1]} words
 - Each paragraph: 40-80 words (up to 120 if critical)
+${hasInternalLinks || hasExternalLinks ? `- ALL suggested links must be included in the content` : ''}
 - JSON must be valid (double quotes, no trailing commas)
 
 DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS

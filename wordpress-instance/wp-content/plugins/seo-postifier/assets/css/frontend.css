@@ -1,91 +1,134 @@
-/* FAQ Accordion Styles */
+/* FAQ Accordion Styles - Matches blog theme styling */
 .wp-block-group .faq-item {
-  margin-bottom: 15px;
-  border: 1px solid #e5e5e5;
-  border-radius: 4px;
-  background: #fff;
-  overflow: hidden;
-  transition: all 0.3s ease;
-}
-
-.wp-block-group .faq-item:hover {
-  border-color: #007cba;
-  box-shadow: 0 2px 4px rgba(0, 124, 186, 0.1);
+  margin-bottom: 1.5em;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
 }
 
 .wp-block-group .faq-item summary.faq-question {
-  padding: 15px 20px;
+  padding: 0.5em 0;
   font-weight: 600;
-  font-size: 16px;
-  color: #333;
+  font-size: 1.1em;
+  color: inherit;
   cursor: pointer;
   list-style: none;
   position: relative;
   user-select: none;
-  background: #f9f9f9;
-  transition: background-color 0.2s ease;
+  background: transparent;
+  border-bottom: 1px solid currentColor;
+  border-opacity: 0.1;
+  margin-bottom: 0.5em;
+  transition: opacity 0.2s ease;
 }
 
 .wp-block-group .faq-item summary.faq-question::-webkit-details-marker {
   display: none;
 }
 
-.wp-block-group .faq-item summary.faq-question::before {
-  content: '+';
+.wp-block-group .faq-item summary.faq-question::after {
+  content: '▼';
   position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 24px;
-  font-weight: 300;
-  color: #007cba;
-  transition: transform 0.3s ease;
+  right: 0;
+  top: 0.5em;
+  font-size: 0.7em;
+  font-weight: normal;
+  opacity: 0.6;
+  transition: transform 0.3s ease, opacity 0.2s ease;
 }
 
-.wp-block-group .faq-item[open] summary.faq-question::before {
-  content: '−';
-  transform: translateY(-50%) rotate(0deg);
+.wp-block-group .faq-item[open] summary.faq-question::after {
+  transform: rotate(180deg);
 }
 
 .wp-block-group .faq-item summary.faq-question:hover {
-  background: #f0f0f0;
-}
-
-.wp-block-group .faq-item[open] summary.faq-question {
-  background: #fff;
-  border-bottom: 1px solid #e5e5e5;
+  opacity: 0.8;
 }
 
 .wp-block-group .faq-item .faq-answer {
-  padding: 20px;
-  background: #fff;
-  color: #555;
-  line-height: 1.7;
+  padding: 0.5em 0 0 0;
+  background: transparent;
+  color: inherit;
+  line-height: inherit;
+  margin-top: 0.5em;
 }
 
 .wp-block-group .faq-item .faq-answer p {
-  margin: 0;
-  margin-bottom: 10px;
+  margin: 0 0 1em 0;
 }
 
 .wp-block-group .faq-item .faq-answer p:last-child {
   margin-bottom: 0;
 }
 
+/* Table of Contents Styles */
+.wp-block-group.seo-postifier-index {
+  margin-bottom: 2em;
+  padding: 1.5em;
+  background: transparent;
+  border-left: 3px solid currentColor;
+  border-opacity: 0.2;
+}
+
+.wp-block-group.seo-postifier-index .index-title {
+  font-weight: 600;
+  font-size: 1.2em;
+  margin-bottom: 1em;
+  color: inherit;
+}
+
+.wp-block-group.seo-postifier-index .index-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.wp-block-group.seo-postifier-index .index-list li {
+  margin-bottom: 0.5em;
+  padding-left: 0;
+}
+
+.wp-block-group.seo-postifier-index .index-list li a {
+  color: inherit;
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+}
+
+.wp-block-group.seo-postifier-index .index-list li a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+.wp-block-group.seo-postifier-index .index-list li.index-level-2 {
+  padding-left: 0;
+}
+
+.wp-block-group.seo-postifier-index .index-list li.index-level-3 {
+  padding-left: 1.5em;
+}
+
+.wp-block-group.seo-postifier-index .index-list li.index-level-4 {
+  padding-left: 3em;
+}
+
 /* Responsive adjustments */
 @media (max-width: 782px) {
   .wp-block-group .faq-item summary.faq-question {
-    padding: 12px 15px;
-    font-size: 15px;
+    font-size: 1em;
   }
 
-  .wp-block-group .faq-item .faq-answer {
-    padding: 15px;
+  .wp-block-group.seo-postifier-index {
+    padding: 1em;
   }
 
-  .wp-block-group .faq-item summary.faq-question::before {
-    right: 15px;
-    font-size: 20px;
+  .wp-block-group.seo-postifier-index .index-list li.index-level-3 {
+    padding-left: 1em;
+  }
+
+  .wp-block-group.seo-postifier-index .index-list li.index-level-4 {
+    padding-left: 2em;
   }
 }
 
