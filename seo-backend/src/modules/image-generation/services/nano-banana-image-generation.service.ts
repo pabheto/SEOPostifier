@@ -54,6 +54,30 @@ export class NanoBananaImageGenerationService {
   }
 
   /**
+   * Enhances a prompt to generate realistic, stock photo-like images
+   */
+  private enhancePromptForRealisticImage(originalPrompt: string): string {
+    const enhancementInstructions = [
+      'professional stock photography',
+      'high-quality realistic photograph',
+      'natural lighting and authentic colors',
+      'sharp focus and crisp details',
+      'no AI artifacts or digital rendering look',
+      'photorealistic style',
+      'editorial photography quality',
+      'natural shadows and depth',
+      'real-world texture and imperfections',
+      'candid and authentic appearance',
+      'shot with professional camera',
+      '8K resolution quality',
+      'no oversaturation or artificial enhancement',
+      'lifelike and believable',
+    ].join(', ');
+
+    return `${originalPrompt}. Style: ${enhancementInstructions}. The image should look like a professional stock photo taken with a high-end camera, completely natural and realistic with no signs of AI generation.`;
+  }
+
+  /**
    * Generates an image from a text prompt using Nano Banana (Gemini 2.5 Flash Image)
    */
   async generateImage(
@@ -65,14 +89,18 @@ export class NanoBananaImageGenerationService {
       throw new BadRequestException('Prompt is required');
     }
 
+    // Enhance the prompt for realistic, stock photo-like images
+    const enhancedPrompt = this.enhancePromptForRealisticImage(prompt);
+
     this.logger.debug(
-      `Generating image with Nano Banana (${model}), prompt: ${prompt}`,
+      `Generating image with Nano Banana (${model}), original prompt: ${prompt}`,
     );
+    this.logger.debug(`Enhanced prompt: ${enhancedPrompt}`);
 
     try {
       const response = await this.ai.models.generateContent({
         model,
-        contents: prompt,
+        contents: enhancedPrompt,
       });
 
       // Extract image from response
@@ -133,9 +161,13 @@ export class NanoBananaImageGenerationService {
       throw new BadRequestException('Image buffer is required');
     }
 
+    // Enhance the prompt for realistic, stock photo-like images
+    const enhancedPrompt = this.enhancePromptForRealisticImage(prompt);
+
     this.logger.debug(
-      `Editing image with Nano Banana (${model}), prompt: ${prompt}`,
+      `Editing image with Nano Banana (${model}), original prompt: ${prompt}`,
     );
+    this.logger.debug(`Enhanced prompt: ${enhancedPrompt}`);
 
     try {
       // Convert image buffer to base64
@@ -143,7 +175,7 @@ export class NanoBananaImageGenerationService {
 
       // Prepare the prompt with image data
       const contents = [
-        { text: prompt },
+        { text: enhancedPrompt },
         {
           inlineData: {
             mimeType: imageMimeType,
