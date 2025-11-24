@@ -7,6 +7,6 @@ import { PixabayImageGenerationService } from './services/pixabay-image-generati
 @Module({
   imports: [ConfigModule, StorageModule],
   providers: [NanoBananaImageGenerationService, PixabayImageGenerationService],
-  exports: [PixabayImageGenerationService],
+  exports: [NanoBananaImageGenerationService, PixabayImageGenerationService],
 })
 export class ImageGenerationModule {}

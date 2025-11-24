@@ -589,6 +589,56 @@ class SEO_Postifier_AJAX_Handlers {
     }
 
     /**
+     * Convert markdown links to HTML links
+     * Converts [text](url) format to <a href="url">text</a>
+     * 
+     * @param string $content Content that may contain markdown links
+     * @return string Content with markdown links converted to HTML
+     */
+    private static function convert_markdown_links_to_html($content) {
+        // Skip if content is empty or already contains HTML links (basic check)
+        if (empty($content) || preg_match('/<a\s+href/i', $content)) {
+            return $content;
+        }
+        
+        // Convert markdown links [text](url) to HTML
+        // Pattern matches: [link text](url) or [link text](url "title")
+        // Handles URLs with special characters, parentheses, etc.
+        $content = preg_replace_callback(
+            '/\[([^\]]+)\]\(([^)]+)\)/',
+            function($matches) {
+                $link_text = $matches[1];
+                $url = trim($matches[2]);
+                
+                // Remove title if present (format: url "title")
+                if (preg_match('/^(.+?)\s+"([^"]+)"$/', $url, $title_matches)) {
+                    $url = $title_matches[1];
+                }
+                
+                // Determine if external link (starts with http:// or https://)
+                $is_external = preg_match('/^https?:\/\//i', $url);
+                
+                // Sanitize URL
+                $url = esc_url($url);
+                $link_text = esc_html($link_text);
+                
+                // Build link attributes
+                $attributes = 'href="' . $url . '"';
+                
+                // Add target and rel for external links
+                if ($is_external) {
+                    $attributes .= ' target="_blank" rel="noopener noreferrer"';
+                }
+                
+                return '<a ' . $attributes . '>' . $link_text . '</a>';
+            },
+            $content
+        );
+        
+        return $content;
+    }
+
+    /**
      * Generate table of contents from heading blocks
      */
     private static function generate_index($blocks) {
@@ -720,7 +770,10 @@ class SEO_Postifier_AJAX_Handlers {
 
                 case 'paragraph':
                     if (isset($block['content'])) {
-                        $paragraph = wp_kses_post($block['content']);
+                        // Convert markdown links to HTML before sanitization
+                        $paragraph = self::convert_markdown_links_to_html($block['content']);
+                        // Sanitize HTML (allows <a> tags with proper attributes)
+                        $paragraph = wp_kses_post($paragraph);
                         
                         // Gutenberg paragraph block format
                         $content .= '<!-- wp:paragraph -->' . "\n";
@@ -804,7 +857,9 @@ class SEO_Postifier_AJAX_Handlers {
                         for ($i = 0; $i < count($block['questions']); $i++) {
                             if (isset($block['questions'][$i]) && isset($block['answers'][$i])) {
                                 $question = wp_kses_post($block['questions'][$i]);
-                                $answer = wp_kses_post($block['answers'][$i]);
+                                // Convert markdown links in FAQ answers to HTML
+                                $answer = self::convert_markdown_links_to_html($block['answers'][$i]);
+                                $answer = wp_kses_post($answer);
                                 
                                 // Use WordPress core/details block for accordion
                                 // The summary attribute contains the question text

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { PixabayImageGenerationService } from 'src/modules/image-generation/services/pixabay-image-generation.service';
+import { NanoBananaImageGenerationService } from 'src/modules/image-generation/services/nano-banana-image-generation.service';
 import { MEDIUM_GENERATION_MODEL } from 'src/modules/llm-manager';
 import { GroqService } from 'src/modules/llm-manager/groq.service';
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
@@ -28,7 +28,7 @@ export class PostsManagementService {
     private readonly postInterviewsService: PostInterviewsService,
     @Inject(forwardRef(() => GroqService))
     private readonly groqService: GroqService,
-    private readonly imageGenerationService: PixabayImageGenerationService,
+    private readonly imageGenerationService: NanoBananaImageGenerationService,
   ) {}
 
   async createPostDraftFromInterview(postInterview: PostInterviewDocument) {
