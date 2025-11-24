@@ -136,13 +136,15 @@ export class ScriptsPrompting {
   \`\`\`user-image
   sourceType: "user" | "ai_generated"
   sourceValue: "URL or ID or identifier"
-  description: "Short descriptive context"
+  title: "Short, descriptive title for the image (used as img title attribute)"
+  description: "Detailed description/context for the image (used as caption)"
   alt: "SEO-friendly alt text in ${language}"
   \`\`\`
   
   #### AI images
   \`\`\`ai-image
-  description: "Clear prompt for image generation"
+  title: "Short, descriptive title for the image (used as img title attribute)"
+  description: "Clear prompt for image generation and detailed description (used as caption)"
   alt: "SEO-friendly alt text in ${language}"
   \`\`\`
   
@@ -385,13 +387,14 @@ Important instructions:
    - images (optional):
      - Extract image blocks from section description if present
      - For each \`\`\`user-image or \`\`\`ai-image block:
-       - Extract: sourceType, sourceValue, description, alt
+       - Extract: sourceType, sourceValue, title, description, alt
        - Remove block syntax from description
        - Add to images array
      - Image structure:
        - sourceType: "user" or "ai_generated" (from block or inferred from \`\`\`ai-image)
        - sourceValue (optional): from block or short identifier
-       - description (optional): AI prompt or user image context
+       - title (optional): Short descriptive title for the image (from block or generate from description)
+       - description (optional): AI prompt or user image context (detailed description for caption)
        - alt (optional): from block or generate SEO-friendly alt text
      - If no blocks found: leave images undefined/empty
    - links:

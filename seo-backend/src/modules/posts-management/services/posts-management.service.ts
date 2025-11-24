@@ -98,16 +98,25 @@ export class PostsManagementService {
                 });
 
               // Create image block with generated image data
+              // Generate title from description or section if not provided
+              const imageTitle: string =
+                image.title ||
+                (image.description
+                  ? image.description.split('.')[0].trim()
+                  : `Image for ${sectionTitle}`);
+
               sectionImageBlocks.push({
                 type: PostBlockType.IMAGE,
                 image: {
                   sourceType: 'ai_generated',
                   sourceValue: generatedImage.url,
-                  description: image.description,
+                  title: imageTitle,
+                  description:
+                    image.description || `Image related to ${sectionTitle}`,
                   alt: image.alt || `Image for ${sectionTitle}`,
                 },
               });
-            } catch (error) {
+            } catch (error: unknown) {
               // Log error but continue with post generation
               console.error(
                 `Failed to generate AI image for section ${sectionTitle}:`,
@@ -117,12 +126,21 @@ export class PostsManagementService {
             }
           } else if (image.sourceType === 'user') {
             // Use user-provided image
+            // Generate title from description or section if not provided
+            const imageTitle: string =
+              image.title ||
+              (image.description
+                ? image.description.split('.')[0].trim()
+                : `Image for ${sectionTitle}`);
+
             sectionImageBlocks.push({
               type: PostBlockType.IMAGE,
               image: {
                 sourceType: 'user',
                 sourceValue: image.sourceValue,
-                description: image.description,
+                title: imageTitle,
+                description:
+                  image.description || `Image related to ${sectionTitle}`,
                 alt: image.alt || `Image for ${sectionTitle}`,
               },
             });

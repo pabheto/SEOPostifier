@@ -740,23 +740,48 @@ class SEO_Postifier_AJAX_Handlers {
                         }
                         
                         if (!empty($image_url)) {
-                            $image_alt = isset($block['image']['alt']) ? esc_attr($block['image']['alt']) : '';
+                            // Extract image metadata with fallbacks for accessibility
+                            $image_alt = isset($block['image']['alt']) && !empty($block['image']['alt']) 
+                                ? esc_attr($block['image']['alt']) 
+                                : (isset($block['image']['title']) && !empty($block['image']['title'])
+                                    ? esc_attr($block['image']['title'])
+                                    : (isset($block['image']['description']) && !empty($block['image']['description'])
+                                        ? esc_attr($block['image']['description'])
+                                        : 'Image'));
+                            $image_title = isset($block['image']['title']) ? esc_attr($block['image']['title']) : '';
+                            $image_description = isset($block['image']['description']) ? esc_html($block['image']['description']) : '';
                             
                             // Gutenberg image block format
                             $attributes = array(
                                 'id' => 0,
                                 'sizeSlug' => 'full',
-                                'linkDestination' => 'none'
+                                'linkDestination' => 'none',
+                                'alt' => $image_alt  // Always include alt for accessibility
                             );
-                            if (!empty($image_alt)) {
-                                $attributes['alt'] = $image_alt;
+                            if (!empty($image_title)) {
+                                $attributes['title'] = $image_title;
                             }
                             
                             $content .= '<!-- wp:image ' . json_encode($attributes, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . ' -->' . "\n";
                             $content .= '<figure class="wp-block-image size-full">' . "\n";
-                            $content .= '<img src="' . $image_url . '" alt="' . $image_alt . '" />' . "\n";
-                            if (!empty($image_alt)) {
-                                $content .= '<figcaption class="wp-element-caption">' . esc_html($image_alt) . '</figcaption>' . "\n";
+                            
+                            // Build img tag with title and alt attributes (alt is always required for accessibility)
+                            $img_attrs = 'src="' . esc_url($image_url) . '" alt="' . $image_alt . '"';
+                            if (!empty($image_title)) {
+                                $img_attrs .= ' title="' . $image_title . '"';
+                            }
+                            $content .= '<img ' . $img_attrs . ' />' . "\n";
+                            
+                            // Use description for caption if available, otherwise fall back to alt (but only if alt is meaningful)
+                            // Don't use the generic "Image" fallback as caption
+                            $caption_text = '';
+                            if (!empty($image_description)) {
+                                $caption_text = $image_description;
+                            } elseif (!empty($image_alt) && $image_alt !== 'Image') {
+                                $caption_text = $image_alt;
+                            }
+                            if (!empty($caption_text)) {
+                                $content .= '<figcaption class="wp-element-caption">' . $caption_text . '</figcaption>' . "\n";
                             }
                             $content .= '</figure>' . "\n";
                             $content .= '<!-- /wp:image -->' . "\n\n";
