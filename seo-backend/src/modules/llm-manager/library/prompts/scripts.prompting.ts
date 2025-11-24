@@ -29,8 +29,7 @@ export class ScriptsPrompting {
       includeExternalLinks = true,
       internalLinksToUse = [],
       externalLinksToUse = [],
-      maxInternalLinks,
-      maxExternalLinks,
+      externalLinksToIncludeAutomatically,
       notesForWriter,
     } = postInterview;
 
@@ -57,15 +56,14 @@ export class ScriptsPrompting {
   - **Include internal links?** ${includeInternalLinks ? 'Yes' : 'No'}
   ${
     includeInternalLinks
-      ? `- **Internal links to consider**: ${internalLinksToUse.length ? internalLinksToUse.join(', ') : '_none provided_'}
-  - **Max internal links**: ${maxInternalLinks ?? 'not specified'}`
+      ? `- **Internal links to consider**: ${internalLinksToUse.length ? internalLinksToUse.join(', ') : '_none provided_'}`
       : ''
   }
   - **Include external links?** ${includeExternalLinks ? 'Yes' : 'No'}
   ${
     includeExternalLinks
       ? `- **External links to consider**: ${externalLinksToUse.length ? externalLinksToUse.join(', ') : '_none provided_'}
-  - **Max external links**: ${maxExternalLinks ?? 'not specified'}`
+  - **External links to include automatically**: ${externalLinksToIncludeAutomatically ?? 'not specified'}`
       : ''
   }
   `.trim()

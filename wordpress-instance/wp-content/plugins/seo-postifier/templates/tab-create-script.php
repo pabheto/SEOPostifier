@@ -201,15 +201,6 @@ if (!defined('ABSPATH')) {
                 </tr>
                 <tr class="internal-links-fields">
                     <th scope="row">
-                        <label for="max-internal-links"><?php _e('Max Internal Links', 'seo-postifier'); ?></label>
-                    </th>
-                    <td>
-                        <input type="number" id="max-internal-links" name="maxInternalLinks"
-                               value="3" min="0" class="small-text" />
-                    </td>
-                </tr>
-                <tr class="internal-links-fields">
-                    <th scope="row">
                         <label for="internal-links-to-use"><?php _e('Internal Links URLs', 'seo-postifier'); ?></label>
                     </th>
                     <td>
@@ -230,11 +221,12 @@ if (!defined('ABSPATH')) {
                 </tr>
                 <tr class="external-links-fields" style="display: none;">
                     <th scope="row">
-                        <label for="max-external-links"><?php _e('Max External Links', 'seo-postifier'); ?></label>
+                        <label for="external-links-to-include-automatically"><?php _e('External Links to Include Automatically', 'seo-postifier'); ?></label>
                     </th>
                     <td>
-                        <input type="number" id="max-external-links" name="maxExternalLinks"
+                        <input type="number" id="external-links-to-include-automatically" name="externalLinksToIncludeAutomatically"
                                value="2" min="0" class="small-text" />
+                        <p class="description"><?php _e('Number of external links to automatically include', 'seo-postifier'); ?></p>
                     </td>
                 </tr>
                 <tr class="external-links-fields" style="display: none;">
@@ -560,10 +552,9 @@ jQuery(document).ready(function($) {
             brandName: $('#brand-name').val(),
             brandDescription: $('#brand-description').val(),
             includeInternalLinks: $('#include-internal-links').is(':checked'),
-            maxInternalLinks: parseInt($('#max-internal-links').val()),
             internalLinksToUse: splitAndFilter($('#internal-links-to-use').val(), '\n'),
             includeExternalLinks: $('#include-external-links').is(':checked'),
-            maxExternalLinks: parseInt($('#max-external-links').val()),
+            externalLinksToIncludeAutomatically: parseInt($('#external-links-to-include-automatically').val()) || undefined,
             externalLinksToUse: splitAndFilter($('#external-links-to-use').val(), '\n'),
             notesForWriter: $('#notes-for-writer').val()
         };

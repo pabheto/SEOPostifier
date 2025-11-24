@@ -243,15 +243,6 @@ if (empty($interview_id)) {
                         </tr>
                         <tr class="edit-internal-links-fields">
                             <th scope="row">
-                                <label for="edit-max-internal-links"><?php _e('Max Internal Links', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="number" id="edit-max-internal-links" name="maxInternalLinks"
-                                       value="3" min="0" class="small-text" />
-                            </td>
-                        </tr>
-                        <tr class="edit-internal-links-fields">
-                            <th scope="row">
                                 <label for="edit-internal-links-to-use"><?php _e('Internal Links URLs', 'seo-postifier'); ?></label>
                             </th>
                             <td>
@@ -271,11 +262,12 @@ if (empty($interview_id)) {
                         </tr>
                         <tr class="edit-external-links-fields" style="display: none;">
                             <th scope="row">
-                                <label for="edit-max-external-links"><?php _e('Max External Links', 'seo-postifier'); ?></label>
+                                <label for="edit-external-links-to-include-automatically"><?php _e('External Links to Include Automatically', 'seo-postifier'); ?></label>
                             </th>
                             <td>
-                                <input type="number" id="edit-max-external-links" name="maxExternalLinks"
+                                <input type="number" id="edit-external-links-to-include-automatically" name="externalLinksToIncludeAutomatically"
                                        value="2" min="0" class="small-text" />
+                                <p class="description"><?php _e('Number of external links to automatically include', 'seo-postifier'); ?></p>
                             </td>
                         </tr>
                         <tr class="edit-external-links-fields" style="display: none;">
@@ -657,10 +649,9 @@ jQuery(document).ready(function($) {
         $('#edit-brand-name').val(interview.brandName || '');
         $('#edit-brand-description').val(interview.brandDescription || '');
         $('#edit-include-internal-links').prop('checked', interview.includeInternalLinks === true);
-        $('#edit-max-internal-links').val(interview.maxInternalLinks || '3');
         $('#edit-internal-links-to-use').val(Array.isArray(interview.internalLinksToUse) ? interview.internalLinksToUse.join('\n') : '');
         $('#edit-include-external-links').prop('checked', interview.includeExternalLinks === true);
-        $('#edit-max-external-links').val(interview.maxExternalLinks || '2');
+        $('#edit-external-links-to-include-automatically').val(interview.externalLinksToIncludeAutomatically || '2');
         $('#edit-external-links-to-use').val(Array.isArray(interview.externalLinksToUse) ? interview.externalLinksToUse.join('\n') : '');
         $('#edit-notes-for-writer').val(interview.notesForWriter || '');
         
@@ -844,10 +835,9 @@ jQuery(document).ready(function($) {
             brandName: $('#edit-brand-name').val() || undefined,
             brandDescription: $('#edit-brand-description').val() || undefined,
             includeInternalLinks: $('#edit-include-internal-links').is(':checked'),
-            maxInternalLinks: $('#edit-max-internal-links').val() ? parseInt($('#edit-max-internal-links').val()) : undefined,
             internalLinksToUse: splitAndFilter($('#edit-internal-links-to-use').val(), '\n'),
             includeExternalLinks: $('#edit-include-external-links').is(':checked'),
-            maxExternalLinks: $('#edit-max-external-links').val() ? parseInt($('#edit-max-external-links').val()) : undefined,
+            externalLinksToIncludeAutomatically: $('#edit-external-links-to-include-automatically').val() ? parseInt($('#edit-external-links-to-include-automatically').val()) : undefined,
             externalLinksToUse: splitAndFilter($('#edit-external-links-to-use').val(), '\n'),
             notesForWriter: $('#edit-notes-for-writer').val() || undefined
         };

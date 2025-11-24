@@ -224,24 +224,14 @@ export class CreatePostInterviewDto {
   brandDescription?: string;
 
   @ApiPropertyOptional({
-    description: 'Máximo de enlaces internos',
+    description: 'Enlaces externos a incluir automáticamente',
     minimum: 0,
     default: undefined,
   })
   @IsOptional()
   @IsInt()
   @Min(0)
-  maxInternalLinks?: number;
-
-  @ApiPropertyOptional({
-    description: 'Máximo de enlaces externos',
-    minimum: 0,
-    default: undefined,
-  })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  maxExternalLinks?: number;
+  externalLinksToIncludeAutomatically?: number;
 
   @ApiPropertyOptional({
     description: 'Enlaces internos a usar',

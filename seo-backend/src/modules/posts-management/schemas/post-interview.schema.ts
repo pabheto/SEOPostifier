@@ -168,13 +168,9 @@ export class PostInterview {
   @Prop({ type: [String], default: [] })
   externalLinksToUse?: string[];
 
-  /** Máximo de enlaces externos */
+  /** Enlaces externos a incluir automáticamente */
   @Prop({ min: 0 })
-  maxExternalLinks?: number;
-
-  /** Máximo de enlaces internos */
-  @Prop({ min: 0 })
-  maxInternalLinks?: number;
+  externalLinksToIncludeAutomatically?: number;
 
   /** Notas adicionales para el redactor/IA */
   @Prop({ type: String })
