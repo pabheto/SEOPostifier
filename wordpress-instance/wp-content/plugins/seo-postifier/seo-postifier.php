@@ -60,7 +60,7 @@ class SEO_Postifier {
      * Initialize WordPress hooks
      */
     private function init_hooks() {
-        // Only load in admin area
+        // Load in admin area
         if (is_admin()) {
             add_action('admin_menu', array('SEO_Postifier_Admin_Page', 'register_menu'));
             add_action('admin_enqueue_scripts', array('SEO_Postifier_Admin_Page', 'enqueue_scripts'));
@@ -68,6 +68,21 @@ class SEO_Postifier {
             // Register AJAX handlers
             SEO_Postifier_AJAX_Handlers::register();
         }
+        
+        // Load frontend styles
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_styles'));
+    }
+    
+    /**
+     * Enqueue frontend styles
+     */
+    public function enqueue_frontend_styles() {
+        wp_enqueue_style(
+            'seo-postifier-frontend',
+            SEO_POSTIFIER_PLUGIN_URL . 'assets/css/frontend.css',
+            array(),
+            SEO_POSTIFIER_VERSION
+        );
     }
 }
 

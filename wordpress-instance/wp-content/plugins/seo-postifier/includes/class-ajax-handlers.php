@@ -564,6 +564,20 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
+        // Add meta title (using H1/title as meta title)
+        if (!empty($post_data['title'])) {
+            $meta_title = sanitize_text_field($post_data['title']);
+            update_post_meta($wp_post_id, '_seo_meta_title', $meta_title);
+            
+            // Also try to set it for common SEO plugins
+            // Yoast SEO
+            update_post_meta($wp_post_id, '_yoast_wpseo_title', $meta_title);
+            // Rank Math
+            update_post_meta($wp_post_id, 'rank_math_title', $meta_title);
+            // All in One SEO
+            update_post_meta($wp_post_id, '_aioseo_title', $meta_title);
+        }
+
         // Get edit URL
         $edit_url = admin_url('post.php?action=edit&post=' . $wp_post_id);
 
@@ -657,23 +671,21 @@ class SEO_Postifier_AJAX_Handlers {
                         $content .= '<h2 class="wp-block-heading">FAQ</h2>' . "\n";
                         $content .= '<!-- /wp:heading -->' . "\n\n";
                         
-                        // FAQ items
+                        // FAQ items as accordion using HTML block
                         for ($i = 0; $i < count($block['questions']); $i++) {
-                            if (isset($block['questions'][$i])) {
+                            if (isset($block['questions'][$i]) && isset($block['answers'][$i])) {
                                 $question = wp_kses_post($block['questions'][$i]);
-                                
-                                // Question as heading
-                                $content .= '<!-- wp:heading {"level":3} -->' . "\n";
-                                $content .= '<h3 class="wp-block-heading">' . $question . '</h3>' . "\n";
-                                $content .= '<!-- /wp:heading -->' . "\n\n";
-                            }
-                            if (isset($block['answers'][$i])) {
                                 $answer = wp_kses_post($block['answers'][$i]);
                                 
-                                // Answer as paragraph
-                                $content .= '<!-- wp:paragraph -->' . "\n";
-                                $content .= '<p class="wp-block-paragraph">' . $answer . '</p>' . "\n";
-                                $content .= '<!-- /wp:paragraph -->' . "\n\n";
+                                // Use HTML block with details/summary for accordion
+                                $content .= '<!-- wp:html -->' . "\n";
+                                $content .= '<details class="wp-block-html faq-item">' . "\n";
+                                $content .= '<summary class="faq-question">' . $question . '</summary>' . "\n";
+                                $content .= '<div class="faq-answer">' . "\n";
+                                $content .= '<p>' . $answer . '</p>' . "\n";
+                                $content .= '</div>' . "\n";
+                                $content .= '</details>' . "\n";
+                                $content .= '<!-- /wp:html -->' . "\n\n";
                             }
                         }
                         

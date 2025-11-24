@@ -527,12 +527,15 @@ Return ONLY a JSON object with this structure (no additional text):
   ]
 }
 
+NEVER ADD BACKTICKS, CODEBLOCK FENCES, OR FORMATTING CHARACTERS
+
 **VALIDATION:**
 - Total words across all blocks: ${section.lengthRange[0]} - ${section.lengthRange[1]} words
 - Each paragraph: 40-80 words (up to 120 if critical)
 - JSON must be valid (double quotes, no trailing commas)
 
 DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
+
 `;
   };
 
@@ -582,13 +585,17 @@ Aim for approximately 300-600 words total across all questions and answers. Be c
 ${wordCountInstruction}
 
 **Output Format:**
+DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
 Return ONLY a JSON object (no additional text, no formatting characters):
 {
   "questions": string[],
   "answers": string[]
 }
+  
 
 **REMINDER: Total words (questions + answers) = ${faq.lengthRange ? `${faq.lengthRange[0]} - ${faq.lengthRange[1]} words` : '300-600 words'}**
+
+DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
 `;
   };
 }
