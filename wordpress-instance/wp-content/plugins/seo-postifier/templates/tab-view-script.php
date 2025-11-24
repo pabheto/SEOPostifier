@@ -765,7 +765,10 @@ jQuery(document).ready(function($) {
         $status.html('');
 
         // Collect images configuration
-        const aiImagesCount = parseInt($('#edit-ai-images-count').val()) || 0;
+        const aiImagesCountInput = $('#edit-ai-images-count').val();
+        const aiImagesCount = (aiImagesCountInput !== '' && !isNaN(parseInt(aiImagesCountInput))) 
+            ? parseInt(aiImagesCountInput) 
+            : 0;
         const useCustomAiDescriptions = $('#edit-use-custom-ai-descriptions').is(':checked');
         const aiImagesUserDescriptions = [];
         
@@ -806,12 +809,13 @@ jQuery(document).ready(function($) {
         });
         
         // Build images config object
-        const imagesConfig = {};
-        if (aiImagesCount > 0) {
-            imagesConfig.aiImagesCount = aiImagesCount;
-            if (aiImagesUserDescriptions.length > 0) {
-                imagesConfig.aiImagesUserDescriptions = aiImagesUserDescriptions;
-            }
+        // Always include aiImagesCount (even if 0) to ensure it's sent to the API
+        const imagesConfig = {
+            aiImagesCount: aiImagesCount
+        };
+        
+        if (aiImagesUserDescriptions.length > 0) {
+            imagesConfig.aiImagesUserDescriptions = aiImagesUserDescriptions;
         }
         if (userImages.length > 0) {
             imagesConfig.useUserImages = true;
@@ -842,10 +846,8 @@ jQuery(document).ready(function($) {
             notesForWriter: $('#edit-notes-for-writer').val() || undefined
         };
         
-        // Add imagesConfig only if it has any properties
-        if (Object.keys(imagesConfig).length > 0) {
-            formData.imagesConfig = imagesConfig;
-        }
+        // Always include imagesConfig (it always has aiImagesCount at minimum)
+        formData.imagesConfig = imagesConfig;
 
         Object.keys(formData).forEach(key => {
             if (formData[key] === undefined) {
