@@ -42,35 +42,9 @@ export class ScriptsPrompting {
     const totalDesiredImages =
       aiImagesCount + (useUserImages ? userImages.length : 0);
 
-    // Conditional helpers
-    const wantsLinks = includeInternalLinks || includeExternalLinks;
-
     const hasUserImages = useUserImages && userImages.length > 0;
     const hasAnyImages =
       totalDesiredImages > 0 || aiImagesCount > 0 || hasUserImages;
-
-    const linksSection = wantsLinks
-      ? `
-  ### Link Strategy
-  
-  - **Include internal links?** ${includeInternalLinks ? 'Yes' : 'No'}
-  ${
-    includeInternalLinks
-      ? `- **Internal links to consider**: ${internalLinksToUse.length ? internalLinksToUse.join(', ') : '_none provided_'}`
-      : ''
-  }
-  - **Include external links?** ${includeExternalLinks ? 'Yes' : 'No'}
-  ${
-    includeExternalLinks
-      ? `- **External links to consider**: ${externalLinksToUse.length ? externalLinksToUse.join(', ') : '_none provided_'}
-  - **External links to include automatically**: ${externalLinksToIncludeAutomatically ?? 'not specified'}`
-      : ''
-  }
-  `.trim()
-      : `
-  ### Link Strategy
-  
-  - No internal or external links should be suggested for this article.`.trim();
 
     const imageSection = hasAnyImages
       ? `
@@ -125,34 +99,6 @@ export class ScriptsPrompting {
     const faqNote = needsFaqSection
       ? ''
       : `> Note: FAQ section must NOT be included because \`needsFaqSection\` is false.`.trim();
-
-    const linkRules = wantsLinks
-      ? `
-  ## 5. Internal & External Links
-  
-  Respect the user's settings.
-  
-  ### Internal links
-  ${
-    includeInternalLinks
-      ? `- Use ONLY the provided internal URLs.
-  - Suggest natural anchor text.
-  - Include internal link suggestions *inside each relevant section* under “Internal link suggestions”.`
-      : `- Do NOT suggest internal links.`
-  }
-  
-  ### External links
-  ${
-    includeExternalLinks
-      ? `- Suggest the **type** of authoritative source, not competitors.
-  - Include suggestions inside the relevant sections.`
-      : `- Do NOT suggest external links.`
-  }
-  `.trim()
-      : `
-  ## 5. Internal & External Links
-  
-  - No link suggestions of any kind.`.trim();
 
     const brandSection = mentionsBrand
       ? `
@@ -239,8 +185,24 @@ export class ScriptsPrompting {
       ? `YES — ${brandName || 'brand'} (${brandDescription || 'no description'})`
       : 'No'
   }
-  
-  ${linksSection}
+
+  // LINKS
+  ${postInterview.externalLinksToIncludeAutomatically && `- You have to find in search engines up to ${postInterview.externalLinksToIncludeAutomatically} external links to include in the article. Find them with purpose when creating the script. Distribute them in the different sections`}
+  ${
+    postInterview.externalLinksToUse &&
+    `
+    CUSTOM EXTERNAL LINKS USAGE:
+  - You have to use the following external links: ${postInterview.externalLinksToUse.join(', ')} distribute them in the sections during the script creation.
+  `
+  }
+  ${
+    postInterview.internalLinksToUse &&
+    `
+  CUSTOM INTERNAL LINKS USAGE:
+  - You have to use the following internal links: ${postInterview.internalLinksToUse.join(', ')} distribute them in the sections during the script creation.
+  `
+  }
+
   
   ${imageSection}
   
@@ -276,7 +238,7 @@ export class ScriptsPrompting {
   Use this pattern:
   
   \`\`\`markdown
-  ## H2 – [Heading]
+  ## H2|H3|H4 – [Heading]
   
   - **Purpose**
   - **Estimated word count**: [MIN] - [MAX] words (MUST specify exact range: 150-300 for standard sections, 400-500 for core sections only)
@@ -284,8 +246,8 @@ export class ScriptsPrompting {
   - **Main points**
   - **Examples / comparisons**
   - **Keyword usage**
-  - **Internal link suggestions** (if enabled)
-  - **External link suggestions** (if enabled)
+  - **Internal link suggestions (if enabled)**: For every link suggestion, include a short description of the source and usage description.
+  - **External link suggestions (if enabled)**: For every link suggestion, include a short description of the source and usage description.
   ${hasAnyImages ? '- **Image blocks** (if applicable): Include image blocks directly here using the format specified in Image Placement Rules' : ''}
   - **Tone notes**
   \`\`\`
@@ -313,7 +275,7 @@ export class ScriptsPrompting {
   
   ${imagePlacementRules}
   
-  ${linkRules}
+  
   
   ${brandSection}
   
