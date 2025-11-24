@@ -189,19 +189,21 @@ export class ScriptsPrompting {
   }
 
   // LINKS
-  ${postInterview.externalLinksToIncludeAutomatically && `- You have to find in search engines up to ${postInterview.externalLinksToIncludeAutomatically} external links to include in the article. Find them with purpose when creating the script. Distribute them in the different sections`}
+  ${postInterview.externalLinksToIncludeAutomatically && `- You have to find in search engines up to ${postInterview.externalLinksToIncludeAutomatically} external links to include in the article. Find them with purpose when creating the script. Distribute them in the different sections. Format each link as \`[link text](full-url) - description\`.`}
   ${
     postInterview.externalLinksToUse &&
     `
     CUSTOM EXTERNAL LINKS USAGE:
-  - You have to use the following external links: ${postInterview.externalLinksToUse.join(', ')} distribute them in the sections during the script creation.
+  - You have to use the following external links: ${postInterview.externalLinksToUse.join(', ')}. Distribute them in the sections during the script creation.
+  - When including these links in the script, format each as: \`[descriptive link text](url)\` - description of the source and usage.
   `
   }
   ${
     postInterview.internalLinksToUse &&
     `
   CUSTOM INTERNAL LINKS USAGE:
-  - You have to use the following internal links: ${postInterview.internalLinksToUse.join(', ')} distribute them in the sections during the script creation.
+  - You have to use the following internal links: ${postInterview.internalLinksToUse.join(', ')}. Distribute them in the sections during the script creation.
+  - When including these links in the script, format each as: \`[descriptive link text](slug-or-url)\` - description of the source and usage.
   `
   }
 
@@ -249,8 +251,8 @@ export class ScriptsPrompting {
   - **Main points**
   - **Examples / comparisons**
   - **Keyword usage**
-  - **Internal link suggestions (if enabled)**: For every link suggestion, include a short description of the source and usage description.
-  - **External link suggestions (if enabled)**: For every link suggestion, include a short description of the source and usage description.
+  - **Internal link suggestions (if enabled)**: For every link suggestion, use the format \`[link text](slug-or-url)\` followed by a description. Example: \`[SEO best practices](/seo-guide)\` - Guide to SEO fundamentals, use when discussing optimization techniques.
+  - **External link suggestions (if enabled)**: For every link suggestion, use the format \`[link text](full-url)\` followed by a description. Example: \`[Google Search Central](https://developers.google.com/search)\` - Official Google SEO documentation, use to cite authoritative sources.
   ${hasAnyImages ? '- **Image blocks** (if applicable): Include image blocks directly here using the format specified in Image Placement Rules' : ''}
   - **Tone notes**
   \`\`\`
@@ -398,9 +400,9 @@ Important instructions:
        - alt (optional): from block or generate SEO-friendly alt text
      - If no blocks found: leave images undefined/empty
    - links:
-     - internal: Array of suggested internal link targets (slugs/placeholders)
-     - external: Array of generic resource descriptions (e.g., "Google ranking factors study")
-     - Do NOT include real URLs
+     - internal: Array of internal links in format \`[link text](slug-or-url)\` with description. Extract EXACTLY as written in the script. Example: \`[SEO best practices](/seo-guide) - Guide to SEO fundamentals\`
+     - external: Array of external links in format \`[link text](full-url)\` with description. Extract EXACTLY as written in the script, including the full URL. Example: \`[Google Search Central](https://developers.google.com/search) - Official Google SEO documentation\`
+     - **CRITICAL**: Preserve the complete link format \`[link](url/description)\` exactly as specified in the script. Do NOT extract just the URL or just the description - keep the full markdown link format with description.
 
 4. "faq" RULES
    - description: Clear explanation of FAQ content (guidelines for writer/AI). Include questions and answers (one line per Q&A)
