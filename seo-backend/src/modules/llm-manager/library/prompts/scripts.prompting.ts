@@ -232,6 +232,7 @@ export class ScriptsPrompting {
   
   ### 3.2. "General Structure of the Article"
   List H2/H3/H4 headings with 1–2 line summaries. Add the estimated word count for each section (150-300 words standard, 400-500 for core sections only). Ensure the sum of all sections + introduction + FAQ matches the user word range requirement.
+  ALWAYS SPECIFY THE HEADING LEVEL (H2|H3|H4) AND THE DESIRED WORD COUNT.
   
   ### 3.3. Detailed Section Scripts
   
@@ -530,6 +531,8 @@ Return ONLY a JSON object with this structure (no additional text):
 - Total words across all blocks: ${section.lengthRange[0]} - ${section.lengthRange[1]} words
 - Each paragraph: 40-80 words (up to 120 if critical)
 - JSON must be valid (double quotes, no trailing commas)
+
+DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
 `;
   };
 
