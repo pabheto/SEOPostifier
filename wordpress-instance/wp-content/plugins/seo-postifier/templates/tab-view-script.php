@@ -66,282 +66,339 @@ if (empty($interview_id)) {
             <div id="step-1-container" class="step-container">
                 <div class="step-header">
                     <h3><?php _e('Step 1: Define Parameters', 'seo-postifier'); ?></h3>
-                    <p><?php _e('View your draft parameters. Click "Edit Draft" above to modify these settings.', 'seo-postifier'); ?></p>
+                    <p><?php _e('Configure the SEO parameters for your post. Once completed, the script text will be automatically generated.', 'seo-postifier'); ?></p>
                 </div>
 
-                <!-- Read-only display of parameters -->
-                <div id="interview-parameters-display" class="step-content-form">
-                    <!-- SEO Configuration -->
-                    <h3><?php _e('SEO Configuration', 'seo-postifier'); ?></h3>
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-main-keyword"><?php _e('Main Keyword', 'seo-postifier'); ?> *</label>
-                            </th>
-                            <td>
-                                <input type="text" id="edit-main-keyword" name="mainKeyword" class="regular-text" required />
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-secondary-keywords"><?php _e('Secondary Keywords', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="text" id="edit-secondary-keywords" name="secondaryKeywords" class="large-text" />
-                                <p class="description"><?php _e('Comma-separated list of secondary keywords', 'seo-postifier'); ?></p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-keyword-density"><?php _e('Keyword Density Target', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="number" id="edit-keyword-density" name="keywordDensityTarget"
-                                       value="0.015" min="0" max="1" step="0.001" class="small-text" />
-                            </td>
-                        </tr>
-                    </table>
+                <!-- Tab Navigation -->
+                <div class="seo-postifier-form-tabs">
+                    <button type="button" class="form-tab active" data-tab="draft">
+                        <?php _e('New Draft', 'seo-postifier'); ?>
+                    </button>
+                    <button type="button" class="form-tab" data-tab="settings">
+                        <?php _e('Settings', 'seo-postifier'); ?>
+                    </button>
+                </div>
 
-                    <!-- Content Configuration -->
-                    <h3><?php _e('Content Configuration', 'seo-postifier'); ?></h3>
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-user-description"><?php _e('Topic Description', 'seo-postifier'); ?> *</label>
-                            </th>
-                            <td>
-                                <textarea id="edit-user-description" name="userDescription" rows="4"
-                                          class="large-text" required></textarea>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-language"><?php _e('Language', 'seo-postifier'); ?> *</label>
-                            </th>
-                            <td>
-                                <select id="edit-language" name="language" required>
-                                    <option value="en">English</option>
-                                    <option value="es" selected>Español</option>
-                                    <option value="fr">Français</option>
-                                    <option value="de">Deutsch</option>
-                                    <option value="it">Italiano</option>
-                                    <option value="pt">Português</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-search-intent"><?php _e('Search Intent', 'seo-postifier'); ?> *</label>
-                            </th>
-                            <td>
-                                <select id="edit-search-intent" name="searchIntent" required>
-                                    <option value="informational" selected>Informational</option>
-                                    <option value="transactional">Transactional</option>
-                                    <option value="commercial">Commercial</option>
-                                    <option value="navigational">Navigational</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-target-audience"><?php _e('Target Audience', 'seo-postifier'); ?> *</label>
-                            </th>
-                            <td>
-                                <input type="text" id="edit-target-audience" name="targetAudience"
-                                       class="regular-text" required />
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-tone-of-voice"><?php _e('Tone of Voice', 'seo-postifier'); ?> *</label>
-                            </th>
-                            <td>
-                                <select id="edit-tone-of-voice" name="toneOfVoice" required>
-                                    <option value="professional">Professional</option>
-                                    <option value="friendly" selected>Friendly</option>
-                                    <option value="technical">Technical</option>
-                                    <option value="educational">Educational</option>
-                                    <option value="casual">Casual</option>
-                                    <option value="formal">Formal</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </table>
+                <!-- Edit Form with new structure -->
+                <form id="edit-interview-form" class="step-content-form" style="margin-top: 20px;">
+                    
+                    <!-- Tab 1: New Draft -->
+                    <div id="tab-draft" class="form-tab-content active">
+                        <h3><?php _e('Draft Information', 'seo-postifier'); ?></h3>
+                        <table class="form-table">
+                            <tr>
+                                <th scope="row">
+                                    <label for="edit-main-keyword"><?php _e('Main Keyword', 'seo-postifier'); ?> *</label>
+                                </th>
+                                <td>
+                                    <input type="text" id="edit-main-keyword" name="mainKeyword" class="regular-text" required />
+                                    <p class="description"><?php _e('Primary keyword to optimize for', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="edit-secondary-keywords"><?php _e('Secondary Keywords', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="text" id="edit-secondary-keywords" name="secondaryKeywords" class="large-text" />
+                                    <p class="description"><?php _e('Comma-separated list of secondary keywords', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="edit-user-description"><?php _e('Post Description', 'seo-postifier'); ?> *</label>
+                                </th>
+                                <td>
+                                    <textarea id="edit-user-description" name="userDescription" rows="6"
+                                              class="large-text" required></textarea>
+                                    <p class="description"><?php _e('Describe what the post should be about', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
 
-                    <!-- Structure Configuration -->
-                    <h3><?php _e('Structure Configuration', 'seo-postifier'); ?></h3>
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-min-word-count"><?php _e('Minimum Word Count', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="number" id="edit-min-word-count" name="minWordCount"
-                                       value="1500" min="100" class="small-text" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-max-word-count"><?php _e('Maximum Word Count', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="number" id="edit-max-word-count" name="maxWordCount"
-                                       value="3000" min="100" class="small-text" />
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-needs-faq"><?php _e('Include FAQ Section', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="checkbox" id="edit-needs-faq" name="needsFaqSection" value="1" checked />
-                                <label for="edit-needs-faq"><?php _e('Add FAQ section at the end', 'seo-postifier'); ?></label>
-                            </td>
-                        </tr>
-                    </table>
+                    <!-- Tab 2: Settings -->
+                    <div id="tab-settings" class="form-tab-content">
+                        <h3><?php _e('Advanced Settings', 'seo-postifier'); ?></h3>
+                        <p class="description"><?php _e('Configure additional settings for your draft. Click on each section to expand.', 'seo-postifier'); ?></p>
 
-                    <!-- Brand Configuration -->
-                    <h3><?php _e('Brand Configuration', 'seo-postifier'); ?></h3>
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-mentions-brand"><?php _e('Mention Brand', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="checkbox" id="edit-mentions-brand" name="mentionsBrand" value="1" />
-                                <label for="edit-mentions-brand"><?php _e('Include brand mentions', 'seo-postifier'); ?></label>
-                            </td>
-                        </tr>
-                        <tr class="edit-brand-fields" style="display: none;">
-                            <th scope="row">
-                                <label for="edit-brand-name"><?php _e('Brand Name', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="text" id="edit-brand-name" name="brandName" class="regular-text" />
-                            </td>
-                        </tr>
-                        <tr class="edit-brand-fields" style="display: none;">
-                            <th scope="row">
-                                <label for="edit-brand-description"><?php _e('Brand Description', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <textarea id="edit-brand-description" name="brandDescription" rows="2"
-                                          class="large-text"></textarea>
-                            </td>
-                        </tr>
-                    </table>
+                        <!-- Accordion: Images -->
+                        <div class="settings-accordion">
+                            <div class="accordion-header">
+                                <h4><?php _e('Images', 'seo-postifier'); ?></h4>
+                                <span class="accordion-toggle">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <table class="form-table">
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-ai-images-count"><?php _e('AI Images Count', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <input type="number" id="edit-ai-images-count" name="aiImagesCount"
+                                                   value="0" min="0" class="small-text" />
+                                            <p class="description"><?php _e('Number of AI-generated images to create', 'seo-postifier'); ?></p>
+                                        </td>
+                                    </tr>
+                                    <tr id="edit-ai-images-custom-descriptions-row" style="display: none;">
+                                        <th scope="row">
+                                            <label for="edit-use-custom-ai-descriptions"><?php _e('Custom AI Descriptions', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <input type="checkbox" id="edit-use-custom-ai-descriptions" name="useCustomAiDescriptions" value="1" />
+                                            <label for="edit-use-custom-ai-descriptions"><?php _e('Provide custom descriptions for each AI image', 'seo-postifier'); ?></label>
+                                        </td>
+                                    </tr>
+                                    <tr id="edit-ai-images-descriptions-container" style="display: none;">
+                                        <td colspan="2">
+                                            <div id="edit-ai-images-descriptions-list"></div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            <label><?php _e('User Images', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <button type="button" id="edit-add-user-image" class="button button-secondary">
+                                                <?php _e('+ Add User Image', 'seo-postifier'); ?>
+                                            </button>
+                                            <p class="description"><?php _e('Add your own images to be used in the post', 'seo-postifier'); ?></p>
+                                            <div id="edit-user-images-list" style="margin-top: 15px;"></div>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
 
-                    <!-- Links Configuration -->
-                    <h3><?php _e('Links Configuration', 'seo-postifier'); ?></h3>
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-include-internal-links"><?php _e('Internal Links', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="checkbox" id="edit-include-internal-links"
-                                       name="includeInternalLinks" value="1" checked />
-                                <label for="edit-include-internal-links"><?php _e('Include internal links', 'seo-postifier'); ?></label>
-                            </td>
-                        </tr>
-                        <tr class="edit-internal-links-fields">
-                            <th scope="row">
-                                <label for="edit-internal-links-to-use"><?php _e('Internal Links URLs', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <textarea id="edit-internal-links-to-use" name="internalLinksToUse" rows="3"
-                                          class="large-text" placeholder="One URL per line"></textarea>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-include-external-links"><?php _e('External Links', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="checkbox" id="edit-include-external-links"
-                                       name="includeExternalLinks" value="1" />
-                                <label for="edit-include-external-links"><?php _e('Include external links', 'seo-postifier'); ?></label>
-                            </td>
-                        </tr>
-                        <tr class="edit-external-links-fields" style="display: none;">
-                            <th scope="row">
-                                <label for="edit-external-links-to-include-automatically"><?php _e('External Links to Include Automatically', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="number" id="edit-external-links-to-include-automatically" name="externalLinksToIncludeAutomatically"
-                                       value="2" min="0" class="small-text" />
-                                <p class="description"><?php _e('Number of external links to automatically include', 'seo-postifier'); ?></p>
-                            </td>
-                        </tr>
-                        <tr class="edit-external-links-fields" style="display: none;">
-                            <th scope="row">
-                                <label for="edit-external-links-to-use"><?php _e('External Links URLs', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <textarea id="edit-external-links-to-use" name="externalLinksToUse" rows="3"
-                                          class="large-text" placeholder="One URL per line"></textarea>
-                            </td>
-                        </tr>
-                    </table>
+                        <!-- Accordion: Keyword Usage -->
+                        <div class="settings-accordion">
+                            <div class="accordion-header">
+                                <h4><?php _e('Keyword Usage', 'seo-postifier'); ?></h4>
+                                <span class="accordion-toggle">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <table class="form-table">
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-keyword-density"><?php _e('Keyword Density Target', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <input type="number" id="edit-keyword-density" name="keywordDensityTarget"
+                                                   value="0.015" min="0" max="1" step="0.001" class="small-text" />
+                                            <p class="description"><?php _e('Target keyword density (0-1, default: 0.015)', 'seo-postifier'); ?></p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
 
-                    <!-- Images Configuration -->
-                    <h3><?php _e('Images Configuration', 'seo-postifier'); ?></h3>
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-ai-images-count"><?php _e('AI Images Count', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="number" id="edit-ai-images-count" name="aiImagesCount"
-                                       value="0" min="0" class="small-text" />
-                                <p class="description"><?php _e('Number of AI-generated images to create', 'seo-postifier'); ?></p>
-                            </td>
-                        </tr>
-                        <tr id="edit-ai-images-custom-descriptions-row" style="display: none;">
-                            <th scope="row">
-                                <label for="edit-use-custom-ai-descriptions"><?php _e('Custom AI Descriptions', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="checkbox" id="edit-use-custom-ai-descriptions" name="useCustomAiDescriptions" value="1" />
-                                <label for="edit-use-custom-ai-descriptions"><?php _e('Provide custom descriptions for each AI image', 'seo-postifier'); ?></label>
-                            </td>
-                        </tr>
-                        <tr id="edit-ai-images-descriptions-container" style="display: none;">
-                            <td colspan="2">
-                                <div id="edit-ai-images-descriptions-list"></div>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label><?php _e('User Images', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <button type="button" id="edit-add-user-image" class="button button-secondary">
-                                    <?php _e('+ Add User Image', 'seo-postifier'); ?>
-                                </button>
-                                <p class="description"><?php _e('Add your own images to be used in the post', 'seo-postifier'); ?></p>
-                                <div id="edit-user-images-list" style="margin-top: 15px;"></div>
-                            </td>
-                        </tr>
-                    </table>
+                        <!-- Accordion: Style and Audience -->
+                        <div class="settings-accordion">
+                            <div class="accordion-header">
+                                <h4><?php _e('Style and Audience', 'seo-postifier'); ?></h4>
+                                <span class="accordion-toggle">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <table class="form-table">
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-language"><?php _e('Language', 'seo-postifier'); ?> *</label>
+                                        </th>
+                                        <td>
+                                            <select id="edit-language" name="language" required>
+                                                <option value="en">English</option>
+                                                <option value="es" selected>Español</option>
+                                                <option value="fr">Français</option>
+                                                <option value="de">Deutsch</option>
+                                                <option value="it">Italiano</option>
+                                                <option value="pt">Português</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-search-intent"><?php _e('Search Intent', 'seo-postifier'); ?> *</label>
+                                        </th>
+                                        <td>
+                                            <select id="edit-search-intent" name="searchIntent" required>
+                                                <option value="informational" selected>Informational</option>
+                                                <option value="transactional">Transactional</option>
+                                                <option value="commercial">Commercial</option>
+                                                <option value="navigational">Navigational</option>
+                                            </select>
+                                            <p class="description"><?php _e('User\'s search intent type', 'seo-postifier'); ?></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-target-audience"><?php _e('Target Audience', 'seo-postifier'); ?> *</label>
+                                        </th>
+                                        <td>
+                                            <input type="text" id="edit-target-audience" name="targetAudience"
+                                                   class="regular-text" required />
+                                            <p class="description"><?php _e('Describe your target audience', 'seo-postifier'); ?></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-tone-of-voice"><?php _e('Tone of Voice', 'seo-postifier'); ?> *</label>
+                                        </th>
+                                        <td>
+                                            <select id="edit-tone-of-voice" name="toneOfVoice" required>
+                                                <option value="professional">Professional</option>
+                                                <option value="friendly" selected>Friendly</option>
+                                                <option value="technical">Technical</option>
+                                                <option value="educational">Educational</option>
+                                                <option value="casual">Casual</option>
+                                                <option value="formal">Formal</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-min-word-count"><?php _e('Minimum Word Count', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <input type="number" id="edit-min-word-count" name="minWordCount"
+                                                   value="1500" min="100" class="small-text" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-max-word-count"><?php _e('Maximum Word Count', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <input type="number" id="edit-max-word-count" name="maxWordCount"
+                                                   value="3000" min="100" class="small-text" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-needs-faq"><?php _e('Include FAQ Section', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <input type="checkbox" id="edit-needs-faq" name="needsFaqSection" value="1" checked />
+                                            <label for="edit-needs-faq"><?php _e('Add FAQ section at the end', 'seo-postifier'); ?></label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-notes-for-writer"><?php _e('Additional Instructions', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <textarea id="edit-notes-for-writer" name="notesForWriter" rows="3"
+                                                      class="large-text"></textarea>
+                                            <p class="description"><?php _e('Any additional instructions or requirements', 'seo-postifier'); ?></p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
 
-                    <!-- Additional Notes -->
-                    <h3><?php _e('Additional Instructions', 'seo-postifier'); ?></h3>
-                    <table class="form-table">
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-notes-for-writer"><?php _e('Notes for Writer', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <textarea id="edit-notes-for-writer" name="notesForWriter" rows="3"
-                                          class="large-text"></textarea>
-                            </td>
-                        </tr>
-                    </table>
+                        <!-- Accordion: Link Mentions -->
+                        <div class="settings-accordion">
+                            <div class="accordion-header">
+                                <h4><?php _e('Link Mentions', 'seo-postifier'); ?></h4>
+                                <span class="accordion-toggle">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <table class="form-table">
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-include-internal-links"><?php _e('Internal Links', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <input type="checkbox" id="edit-include-internal-links"
+                                                   name="includeInternalLinks" value="1" checked />
+                                            <label for="edit-include-internal-links"><?php _e('Include internal links', 'seo-postifier'); ?></label>
+                                        </td>
+                                    </tr>
+                                    <tr class="edit-internal-links-fields">
+                                        <th scope="row">
+                                            <label for="edit-internal-links-to-use"><?php _e('Internal Links URLs', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <textarea id="edit-internal-links-to-use" name="internalLinksToUse" rows="3"
+                                                      class="large-text" placeholder="One URL per line"></textarea>
+                                            <p class="description"><?php _e('Specific internal links to include (one per line)', 'seo-postifier'); ?></p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-include-external-links"><?php _e('External Links', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <input type="checkbox" id="edit-include-external-links"
+                                                   name="includeExternalLinks" value="1" />
+                                            <label for="edit-include-external-links"><?php _e('Include external links', 'seo-postifier'); ?></label>
+                                        </td>
+                                    </tr>
+                                    <tr class="edit-external-links-fields" style="display: none;">
+                                        <th scope="row">
+                                            <label for="edit-external-links-to-include-automatically"><?php _e('External Links to Include Automatically', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <input type="number" id="edit-external-links-to-include-automatically" name="externalLinksToIncludeAutomatically"
+                                                   value="2" min="0" class="small-text" />
+                                            <p class="description"><?php _e('Number of external links to automatically include', 'seo-postifier'); ?></p>
+                                        </td>
+                                    </tr>
+                                    <tr class="edit-external-links-fields" style="display: none;">
+                                        <th scope="row">
+                                            <label for="edit-external-links-to-use"><?php _e('External Links URLs', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <textarea id="edit-external-links-to-use" name="externalLinksToUse" rows="3"
+                                                      class="large-text" placeholder="One URL per line"></textarea>
+                                            <p class="description"><?php _e('Specific external links to include (one per line)', 'seo-postifier'); ?></p>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
 
-                    <p class="submit">
+                        <!-- Accordion: Brand Mentions -->
+                        <div class="settings-accordion">
+                            <div class="accordion-header">
+                                <h4><?php _e('Brand Mentions', 'seo-postifier'); ?></h4>
+                                <span class="accordion-toggle">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <table class="form-table">
+                                    <tr>
+                                        <th scope="row">
+                                            <label for="edit-mentions-brand"><?php _e('Mention Brand', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <input type="checkbox" id="edit-mentions-brand" name="mentionsBrand" value="1" />
+                                            <label for="edit-mentions-brand"><?php _e('Include brand mentions', 'seo-postifier'); ?></label>
+                                        </td>
+                                    </tr>
+                                    <tr class="edit-brand-fields" style="display: none;">
+                                        <th scope="row">
+                                            <label for="edit-brand-name"><?php _e('Brand Name', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <input type="text" id="edit-brand-name" name="brandName" class="regular-text" />
+                                        </td>
+                                    </tr>
+                                    <tr class="edit-brand-fields" style="display: none;">
+                                        <th scope="row">
+                                            <label for="edit-brand-description"><?php _e('Brand Description', 'seo-postifier'); ?></label>
+                                        </th>
+                                        <td>
+                                            <textarea id="edit-brand-description" name="brandDescription" rows="2"
+                                                      class="large-text"></textarea>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="submit" style="margin-top: 20px;">
                         <button type="submit" id="complete-step-1-btn" class="button button-primary button-large">
-                            <?php _e('Complete Step 1 & Generate Script Text', 'seo-postifier'); ?>
+                            <?php _e('Update & Generate Script Text', 'seo-postifier'); ?>
                         </button>
                     </p>
                     <div id="step-1-status" style="margin-top: 15px;"></div>
@@ -491,6 +548,30 @@ jQuery(document).ready(function($) {
         }
     }
 
+    // Form tabs switching
+    $('.form-tab').on('click', function() {
+        const tab = $(this).data('tab');
+        $('.form-tab').removeClass('active');
+        $(this).addClass('active');
+        $('.form-tab-content').removeClass('active');
+        $('#tab-' + tab).addClass('active');
+    });
+
+    // Accordion functionality
+    $('.accordion-header').on('click', function() {
+        const $accordion = $(this).closest('.settings-accordion');
+        const $content = $accordion.find('.accordion-content');
+        const $toggle = $(this).find('.accordion-toggle');
+        
+        $accordion.toggleClass('active');
+        $content.slideToggle(200);
+        $toggle.toggleClass('expanded');
+    });
+
+    // Initialize accordions - all closed by default
+    $('.accordion-content').hide();
+    $('.accordion-toggle').addClass('expanded');
+
     // Markdown editor tabs
     $('.editor-tab').on('click', function() {
         const tab = $(this).data('tab');
@@ -516,15 +597,27 @@ jQuery(document).ready(function($) {
 
     // Toggle conditional fields
     $('#edit-mentions-brand').on('change', function() {
-        $('.edit-brand-fields').toggle($(this).is(':checked'));
+        if ($(this).is(':checked')) {
+            $('.edit-brand-fields').show();
+        } else {
+            $('.edit-brand-fields').hide();
+        }
     });
     
     $('#edit-include-internal-links').on('change', function() {
-        $('.edit-internal-links-fields').toggle($(this).is(':checked'));
+        if ($(this).is(':checked')) {
+            $('.edit-internal-links-fields').show();
+        } else {
+            $('.edit-internal-links-fields').hide();
+        }
     });
     
     $('#edit-include-external-links').on('change', function() {
-        $('.edit-external-links-fields').toggle($(this).is(':checked'));
+        if ($(this).is(':checked')) {
+            $('.edit-external-links-fields').show();
+        } else {
+            $('.edit-external-links-fields').hide();
+        }
     });
 
     // Image configuration handlers
