@@ -91,7 +91,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                                 </th>
                                 <td>
                                     <input type="number" id="ai-images-count" name="aiImagesCount"
-                                           value="0" min="0" class="small-text" />
+                                           value="3" min="0" class="small-text" />
                                     <p class="description"><?php _e('Number of AI-generated images to create', 'seo-postifier'); ?></p>
                                 </td>
                             </tr>
@@ -190,7 +190,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                                 </th>
                                 <td>
                                     <input type="text" id="target-audience" name="targetAudience"
-                                           class="regular-text" required />
+                                           class="regular-text" value="General audience" required />
                                     <p class="description"><?php _e('Describe your target audience', 'seo-postifier'); ?></p>
                                 </td>
                             </tr>
@@ -215,7 +215,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                                 </th>
                                 <td>
                                     <input type="number" id="min-word-count" name="minWordCount"
-                                           value="1500" min="100" class="small-text" />
+                                           value="2000" min="100" class="small-text" />
                                 </td>
                             </tr>
                             <tr>
@@ -224,7 +224,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                                 </th>
                                 <td>
                                     <input type="number" id="max-word-count" name="maxWordCount"
-                                           value="3000" min="100" class="small-text" />
+                                           value="2500" min="100" class="small-text" />
                                 </td>
                             </tr>
                             <tr>
@@ -353,7 +353,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
 
             <p class="submit">
                 <button type="submit" class="button button-primary button-large" id="submit-button">
-                    <?php echo $is_edit_mode ? __('Update & Generate Script', 'seo-postifier') : __('Create & Generate Script', 'seo-postifier'); ?>
+                    <?php echo $is_edit_mode ? __('Update & Generate Post', 'seo-postifier') : __('Create & Generate Post', 'seo-postifier'); ?>
                 </button>
                 <a href="?page=seo-postifier&tab=scripts" class="button button-secondary">
                     <?php _e('Cancel', 'seo-postifier'); ?>
@@ -374,7 +374,7 @@ jQuery(document).ready(function($) {
     
     // Counter for user images
     let userImageCounter = 0;
-    let aiImagesCount = 0;
+    let aiImagesCount = 3;
 
     // Tab switching
     $('.form-tab').on('click', function() {
@@ -429,7 +429,7 @@ jQuery(document).ready(function($) {
 
     // Handle AI images count change
     $('#ai-images-count').on('change', function() {
-        aiImagesCount = parseInt($(this).val()) || 0;
+        aiImagesCount = parseInt($(this).val()) || 3;
         if (aiImagesCount > 1) {
             $('#ai-images-custom-descriptions-row').show();
         } else {
@@ -459,7 +459,7 @@ jQuery(document).ready(function($) {
             return;
         }
 
-        const count = parseInt($('#ai-images-count').val()) || 0;
+        const count = parseInt($('#ai-images-count').val()) || 3;
         for (let i = 0; i < count; i++) {
             const item = $('<div class="ai-image-description-item" style="margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
             item.append('<label style="display: block; font-weight: 600; margin-bottom: 5px;">' + 
@@ -566,7 +566,7 @@ jQuery(document).ready(function($) {
         const aiImagesCountInput = $('#ai-images-count').val();
         const aiImagesCount = (aiImagesCountInput !== '' && !isNaN(parseInt(aiImagesCountInput))) 
             ? parseInt(aiImagesCountInput) 
-            : 0;
+            : 3;
         const useCustomAiDescriptions = $('#use-custom-ai-descriptions').is(':checked');
         const aiImagesUserDescriptions = [];
         
@@ -664,14 +664,14 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 if (response.success) {
                     const newInterviewId = response.data.interview.interviewId || interviewId;
-                    $status.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
+                    $status.html('<div class="notice notice-info inline"><p><?php _e('Draft saved. Generating script text...', 'seo-postifier'); ?></p></div>');
+                    $button.text('<?php _e('Generating Script Text...', 'seo-postifier'); ?>');
                     
-                    // If this is a new interview or we just updated, start generating script text
-                    $button.text('<?php _e('Generating Script...', 'seo-postifier'); ?>');
-                    
+                    // Step 1: Generate script text
                     $.ajax({
                         url: seoPostifierData.ajaxUrl,
                         type: 'POST',
+                        timeout: 180000,
                         data: {
                             action: 'seo_postifier_generate_script_text',
                             nonce: seoPostifierData.nonce,
@@ -679,30 +679,93 @@ jQuery(document).ready(function($) {
                         },
                         success: function(genResponse) {
                             if (genResponse.success) {
-                                $status.html('<div class="notice notice-success inline"><p><?php _e('Draft created and script generation started!', 'seo-postifier'); ?></p></div>');
+                                $status.html('<div class="notice notice-info inline"><p><?php _e('Script text generated. Generating script definition...', 'seo-postifier'); ?></p></div>');
+                                $button.text('<?php _e('Generating Script Definition...', 'seo-postifier'); ?>');
                                 
-                                // Redirect to view script page
-                                setTimeout(function() {
-                                    window.location.href = '?page=seo-postifier&tab=view-script&interviewId=' + newInterviewId;
-                                }, 1000);
+                                // Step 2: Generate script definition
+                                $.ajax({
+                                    url: seoPostifierData.ajaxUrl,
+                                    type: 'POST',
+                                    timeout: 180000,
+                                    data: {
+                                        action: 'seo_postifier_generate_script_definition',
+                                        nonce: seoPostifierData.nonce,
+                                        interview_id: newInterviewId
+                                    },
+                                    success: function(defResponse) {
+                                        if (defResponse.success) {
+                                            $status.html('<div class="notice notice-info inline"><p><?php _e('Script definition generated. Generating post...', 'seo-postifier'); ?></p></div>');
+                                            $button.text('<?php _e('Generating Post...', 'seo-postifier'); ?>');
+                                            
+                                            // Step 3: Generate post
+                                            $.ajax({
+                                                url: seoPostifierData.ajaxUrl,
+                                                type: 'POST',
+                                                timeout: 300000,
+                                                data: {
+                                                    action: 'seo_postifier_generate_post',
+                                                    nonce: seoPostifierData.nonce,
+                                                    interview_id: newInterviewId
+                                                },
+                                                success: function(postResponse) {
+                                                    if (postResponse.success) {
+                                                        const postId = postResponse.data.post._id || postResponse.data.post.id;
+                                                        $status.html('<div class="notice notice-info inline"><p><?php _e('Post generated. Creating WordPress draft...', 'seo-postifier'); ?></p></div>');
+                                                        $button.text('<?php _e('Creating WordPress Draft...', 'seo-postifier'); ?>');
+                                                        
+                                                        // Step 4: Create WordPress draft
+                                                        $.ajax({
+                                                            url: seoPostifierData.ajaxUrl,
+                                                            type: 'POST',
+                                                            data: {
+                                                                action: 'seo_postifier_create_wp_draft',
+                                                                nonce: seoPostifierData.nonce,
+                                                                post_id: postId
+                                                            },
+                                                            success: function(draftResponse) {
+                                                                if (draftResponse.success) {
+                                                                    $status.html('<div class="notice notice-success inline"><p><?php _e('WordPress draft created successfully! Redirecting...', 'seo-postifier'); ?></p></div>');
+                                                                    setTimeout(function() {
+                                                                        window.location.href = draftResponse.data.edit_url;
+                                                                    }, 1000);
+                                                                } else {
+                                                                    $status.html('<div class="notice notice-warning inline"><p><?php _e('Post generated but draft creation failed: ', 'seo-postifier'); ?>' + (draftResponse.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>') + '</p></div>');
+                                                                    $button.prop('disabled', false).text(originalText);
+                                                                }
+                                                            },
+                                                            error: function() {
+                                                                $status.html('<div class="notice notice-warning inline"><p><?php _e('Post generated but draft creation failed. Please try creating manually.', 'seo-postifier'); ?></p></div>');
+                                                                $button.prop('disabled', false).text(originalText);
+                                                            }
+                                                        });
+                                                    } else {
+                                                        $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate post: ', 'seo-postifier'); ?>' + (postResponse.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>') + '</p></div>');
+                                                        $button.prop('disabled', false).text(originalText);
+                                                    }
+                                                },
+                                                error: function() {
+                                                    $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate post. Please try again.', 'seo-postifier'); ?></p></div>');
+                                                    $button.prop('disabled', false).text(originalText);
+                                                }
+                                            });
+                                        } else {
+                                            $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script definition: ', 'seo-postifier'); ?>' + (defResponse.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>') + '</p></div>');
+                                            $button.prop('disabled', false).text(originalText);
+                                        }
+                                    },
+                                    error: function() {
+                                        $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script definition. Please try again.', 'seo-postifier'); ?></p></div>');
+                                        $button.prop('disabled', false).text(originalText);
+                                    }
+                                });
                             } else {
-                                $status.html('<div class="notice notice-warning inline"><p><?php _e('Draft saved, but script generation failed: ', 'seo-postifier'); ?>' + (genResponse.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>') + '</p></div>');
+                                $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script text: ', 'seo-postifier'); ?>' + (genResponse.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>') + '</p></div>');
                                 $button.prop('disabled', false).text(originalText);
-                                
-                                // Still redirect to view page
-                                setTimeout(function() {
-                                    window.location.href = '?page=seo-postifier&tab=view-script&interviewId=' + newInterviewId;
-                                }, 2000);
                             }
                         },
                         error: function() {
-                            $status.html('<div class="notice notice-warning inline"><p><?php _e('Draft saved, but script generation failed. Please try generating manually.', 'seo-postifier'); ?></p></div>');
+                            $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script text. Please try again.', 'seo-postifier'); ?></p></div>');
                             $button.prop('disabled', false).text(originalText);
-                            
-                            // Still redirect to view page
-                            setTimeout(function() {
-                                window.location.href = '?page=seo-postifier&tab=view-script&interviewId=' + newInterviewId;
-                            }, 2000);
                         }
                     });
                 } else {
@@ -760,8 +823,8 @@ jQuery(document).ready(function($) {
                     $('#search-intent').val(interview.searchIntent || 'informational');
                     $('#target-audience').val(interview.targetAudience || '');
                     $('#tone-of-voice').val(interview.toneOfVoice || 'friendly');
-                    $('#min-word-count').val(interview.minWordCount || '1500');
-                    $('#max-word-count').val(interview.maxWordCount || '3000');
+                    $('#min-word-count').val(interview.minWordCount || '2000');
+                    $('#max-word-count').val(interview.maxWordCount || '2500');
                     $('#needs-faq').prop('checked', interview.needsFaqSection !== false);
                     $('#mentions-brand').prop('checked', interview.mentionsBrand === true);
                     $('#brand-name').val(interview.brandName || '');
@@ -775,7 +838,7 @@ jQuery(document).ready(function($) {
                     
                     // Populate image configuration
                     const imagesConfig = interview.imagesConfig || {};
-                    $('#ai-images-count').val(imagesConfig.aiImagesCount || 0);
+                    $('#ai-images-count').val(imagesConfig.aiImagesCount || 3);
                     $('#ai-images-count').trigger('change');
                     
                     if (imagesConfig.useCustomAiDescriptions && imagesConfig.aiImagesUserDescriptions) {
