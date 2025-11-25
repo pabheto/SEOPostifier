@@ -42,6 +42,7 @@ if (!defined('ABSPATH')) {
                 include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-settings.php';
                 break;
             case 'create-script':
+            case 'edit-script':
                 include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-create-script.php';
                 break;
             case 'view-script':

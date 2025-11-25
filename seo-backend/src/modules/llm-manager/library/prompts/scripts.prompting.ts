@@ -406,6 +406,7 @@ ${wordCountValidation}
 5. STYLE & CONSISTENCY
    - Preserve original outline language
    - You may: complete unclear titles, group scattered points, add intro/conclusion if needed
+   - Remove redundancies along sections to make sure every paragraph is unique and adds value to the content.
    - Ensure consistent hierarchy: h1 → h2 → h3 → h4
    - Research web when needed - include sources/details in descriptions (don't summarize, preserve full information for writer)
 

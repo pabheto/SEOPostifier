@@ -25,6 +25,9 @@ if (empty($interview_id)) {
             <a href="?page=seo-postifier&tab=scripts" class="button button-secondary">
                 <?php _e('← Back to My Drafts', 'seo-postifier'); ?>
             </a>
+            <a href="?page=seo-postifier&tab=create-script&interviewId=<?php echo esc_attr($interview_id); ?>" class="button button-primary" style="margin-left: 10px;">
+                <?php _e('Edit Draft', 'seo-postifier'); ?>
+            </a>
         </p>
 
         <div id="loading-interview" style="margin: 20px 0;">
@@ -63,11 +66,11 @@ if (empty($interview_id)) {
             <div id="step-1-container" class="step-container">
                 <div class="step-header">
                     <h3><?php _e('Step 1: Define Parameters', 'seo-postifier'); ?></h3>
-                    <p><?php _e('Configure the SEO parameters for your post. Once completed, the script text will be automatically generated.', 'seo-postifier'); ?></p>
+                    <p><?php _e('View your draft parameters. Click "Edit Draft" above to modify these settings.', 'seo-postifier'); ?></p>
                 </div>
 
-                <!-- Edit Form (same as before but simplified) -->
-                <form id="edit-interview-form" class="step-content-form">
+                <!-- Read-only display of parameters -->
+                <div id="interview-parameters-display" class="step-content-form">
                     <!-- SEO Configuration -->
                     <h3><?php _e('SEO Configuration', 'seo-postifier'); ?></h3>
                     <table class="form-table">
