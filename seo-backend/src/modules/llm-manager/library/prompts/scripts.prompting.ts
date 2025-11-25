@@ -370,6 +370,7 @@ Important instructions:
    - level: h2 (main sections), h3/h4 (subsections, nested logically)
    - title: Clean, descriptive title
    - id: Unique string "sec-1", "sec-2", etc. (sequential)
+   - **CRITICAL**: DO NOT include FAQ sections (e.g., "Frequently Asked Questions", "Preguntas Frecuentes", "FAQ") in body.sections. FAQ content must ONLY go in the "faq" field, never in body.sections.
    - lengthRange: [minWords, maxWords] - **EXTRACT EXACTLY from script**
      - Look for: "Estimated word count: X-Y words", "Word count: X-Y", "X-Y words"
      - If specified in script: use EXACTLY
@@ -400,6 +401,7 @@ Important instructions:
    - description: Clear explanation of FAQ content (guidelines for writer/AI). Include questions and answers (one line per Q&A)
    - lengthRange (optional): [minWords, maxWords] - extract from script if specified, otherwise undefined
    ${needsFaqSection ? '- FAQ section MUST be included if present in script' : '- FAQ section is optional'}
+   - **CRITICAL**: If the script contains an FAQ section (e.g., "Frequently Asked Questions", "Preguntas Frecuentes", "FAQ"), extract its content into this "faq" field and REMOVE it from body.sections. FAQ sections should NEVER appear in body.sections.
 
 ${wordCountValidation}
 
