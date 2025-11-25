@@ -163,7 +163,7 @@ export class PostsManagementService {
           model: section.requiresDeepResearch
             ? GROQ_COMPOUND
             : MEDIUM_GENERATION_MODEL,
-          maxTokens: 20000,
+          maxTokens: section.requiresDeepResearch ? 8096 : 8096,
         },
       );
 

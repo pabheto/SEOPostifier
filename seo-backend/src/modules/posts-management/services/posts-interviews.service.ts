@@ -8,8 +8,8 @@ import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
 import {
   GPT_OSS_120B_MODEL,
-  GroqService,
   GROQ_COMPOUND,
+  GroqService,
 } from '../../llm-manager';
 import { ScriptsPrompting } from '../../llm-manager/library/prompts/scripts.prompting';
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';

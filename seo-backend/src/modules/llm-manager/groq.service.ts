@@ -119,7 +119,7 @@ export class GroqService {
     } catch (error) {
       this.logger.error('Error generating completion:', error);
       throw new Error(
-        `Failed to generate completion: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `Failed to generate completion for model ${model}: ${error instanceof Error ? error.message : 'Unknown error'}`,
       );
     }
   }
