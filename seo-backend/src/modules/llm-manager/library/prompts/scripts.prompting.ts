@@ -218,7 +218,12 @@ export class ScriptsPrompting {
   ## 3. Output Format (Markdown)
   
   ### 3.1. Title & Meta
-  - **H1**: Include the main keyword naturally
+  - **H1**: Create a compelling, SEO-optimized title that:
+    - Includes the main keyword naturally
+    - Uses power words (e.g., "Ultimate", "Complete", "Essential", "Proven", "Secret", "Powerful", "Effective", "Best", "Top", "Expert", "Advanced", "Comprehensive", "Definitive", "Master", "Revolutionary", "Breakthrough", "Game-Changing", "Must-Know", "Critical", "Vital")
+    - Contains a positive or negative statement when appropriate (e.g., "Why X Works" vs "Why X Fails", "The Truth About X" vs "The Hidden Dangers of X", "How to Avoid X" vs "How to Achieve X")
+    - If compatible with the user description and topic, includes a number (e.g., "5 Ways to...", "10 Best...", "7 Secrets of...", "3 Steps to...", "The Top 12...")
+    - Balances all these elements naturally without forcing them
   - **Introduction description**: Explain the problem the article solves, mention the main keyword once, include micro-storytelling or relevant facts/statistics, describe points for the writer to develop later, include real-world information with sources
   - **Introduction word count**: Specify exact range (e.g., "Introduction word count: 250 - 350 words")
   - **Target article length**: ${minWordCount && maxWordCount ? `${minWordCount} - ${maxWordCount} words` : 'Specify target length'}
