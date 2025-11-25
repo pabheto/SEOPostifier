@@ -25,7 +25,6 @@ export class ScriptsPrompting {
       brandName,
       brandDescription,
       imagesConfig,
-      notesForWriter,
     } = postInterview;
 
     // Extract image configuration with proper defaults
@@ -176,7 +175,6 @@ export class ScriptsPrompting {
       : 'unspecified (default 1500–4000)'
   }
   - **User description**: ${userDescription || '_none provided_'}
-  - **Notes for writer**: ${notesForWriter || '_none provided_'}
   - **Brand required**: ${
     mentionsBrand
       ? `YES — ${brandName || 'brand'} (${brandDescription || 'no description'})`

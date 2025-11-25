@@ -146,7 +146,6 @@ export class PostInterviewsService {
       'externalLinksToUse',
       'includeExternalLinks',
       'includeInternalLinks',
-      'notesForWriter',
     ];
 
     for (const field of fieldsToUpdate) {

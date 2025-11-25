@@ -196,10 +196,5 @@ export class UpdatePostInterviewDto {
   @IsOptional()
   @IsBoolean()
   includeInternalLinks?: boolean;
-
-  @ApiPropertyOptional({ description: 'Notas adicionales para el redactor/IA' })
-  @IsOptional()
-  @IsString()
-  notesForWriter?: string;
 }
 

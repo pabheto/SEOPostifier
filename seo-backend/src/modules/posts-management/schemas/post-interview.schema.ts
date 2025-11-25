@@ -172,10 +172,6 @@ export class PostInterview {
   @Prop({ min: 0 })
   externalLinksToIncludeAutomatically?: number;
 
-  /** Notas adicionales para el redactor/IA */
-  @Prop({ type: String })
-  notesForWriter?: string;
-
   // ============================================
   // SECCIÓN 4: Metadatos y estado
   // ============================================

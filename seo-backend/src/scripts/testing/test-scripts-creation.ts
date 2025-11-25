@@ -49,7 +49,6 @@ async function bootstrap() {
     internalLinksToUse: [],
     externalLinksToUse: [],
     externalLinksToIncludeAutomatically: 10,
-    notesForWriter: '',
     status: InterviewStatus.DRAFT,
     projectId: 'testProjectId',
     userId: 'testUserId',

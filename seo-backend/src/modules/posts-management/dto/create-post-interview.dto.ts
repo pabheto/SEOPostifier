@@ -289,11 +289,6 @@ export class CreatePostInterviewDto {
   @IsBoolean()
   includeInternalLinks?: boolean = false;
 
-  @ApiPropertyOptional({ description: 'Notas adicionales para el redactor/IA' })
-  @IsOptional()
-  @IsString()
-  notesForWriter?: string;
-
   @ApiPropertyOptional({
     description: 'Configuración completa de imágenes',
     type: ImagesConfigDto,
