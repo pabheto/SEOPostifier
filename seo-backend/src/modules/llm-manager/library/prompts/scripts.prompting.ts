@@ -25,11 +25,6 @@ export class ScriptsPrompting {
       brandName,
       brandDescription,
       imagesConfig,
-      includeInternalLinks = true,
-      includeExternalLinks = true,
-      internalLinksToUse = [],
-      externalLinksToUse = [],
-      externalLinksToIncludeAutomatically,
       notesForWriter,
     } = postInterview;
 
@@ -206,10 +201,8 @@ export class ScriptsPrompting {
   - When including these links in the script, format each as: \`[descriptive link text](slug-or-url)\` - description of the source and usage.
   `
   }
-
   
   ${imageSection}
-  
   ---
   
   ## 2. Your Goal
@@ -221,8 +214,7 @@ export class ScriptsPrompting {
   4. Includes keyword guidance, link placement (if enabled), and image blocks (if enabled)
   5. Distributes word counts across sections to match the target article length (${minWordCount && maxWordCount ? `${minWordCount} - ${maxWordCount} words` : 'as specified'})
   
-  **Research Requirement:** When you need updated information, research the web and include sources and details in section/introduction descriptions so the writer (without internet access) can use them.
-  
+  **Research Requirement:** When you need updated information, research the web and include sources and details in section/introduction descriptions so the writer (without internet access) can use them.  
   ---
   
   ## 3. Output Format (Markdown)
@@ -251,8 +243,8 @@ export class ScriptsPrompting {
   - **Main points**
   - **Examples / comparisons**
   - **Keyword usage**
-  - **Internal link suggestions (if enabled)**: For every link suggestion, use the format \`[link text](slug-or-url)\` followed by a description. Example: \`[SEO best practices](/seo-guide)\` - Guide to SEO fundamentals, use when discussing optimization techniques.
-  - **External link suggestions (if enabled)**: For every link suggestion, use the format \`[link text](full-url)\` followed by a description. Example: \`[Google Search Central](https://developers.google.com/search)\` - Official Google SEO documentation, use to cite authoritative sources.
+  ${postInterview.internalLinksToUse && postInterview.internalLinksToUse.length > 0 ? '- **Internal link suggestions (if enabled)**: For every link suggestion, use the format `[link text](slug-or-url)` followed by a description. Example: `[SEO best practices](/seo-guide)` - Guide to SEO fundamentals, use when discussing optimization techniques.' : ''}
+  ${postInterview.externalLinksToUse && postInterview.externalLinksToUse.length > 0 ? '- **External link suggestions (if enabled)**: For every link suggestion, use the format `[link text](full-url)` followed by a description. Example: `[Google Search Central](https://developers.google.com/search)` - Official Google SEO documentation, use to cite authoritative sources.' : ''}
   ${hasAnyImages ? '- **Image blocks** (if applicable): Include image blocks directly here using the format specified in Image Placement Rules' : ''}
   - **Tone notes**
   \`\`\`
@@ -332,6 +324,7 @@ type ScriptSection = {
   lengthRange: [number, number];
   description: string;
   images?: Image[];
+  requiresDeepResearch?: boolean;
   links: {
     internal: string[];
     external: string[];
@@ -399,9 +392,10 @@ Important instructions:
        - description (optional): AI prompt or user image context (detailed description for caption)
        - alt (optional): from block or generate SEO-friendly alt text
      - If no blocks found: leave images undefined/empty
+   - requiresDeepResearch (optional): If you consider that the content of the section requires updated information, set this to true so the writer can search the facts in google. If that's the case, in the description, add a suggestion to the writer of what to search for.
    - links:
-     - internal: Array of internal links in format \`[link text](slug-or-url)\` with description. Extract EXACTLY as written in the script. Example: \`[SEO best practices](/seo-guide) - Guide to SEO fundamentals\`
-     - external: Array of external links in format \`[link text](full-url)\` with description. Extract EXACTLY as written in the script, including the full URL. Example: \`[Google Search Central](https://developers.google.com/search) - Official Google SEO documentation\`
+     - internal: Array of internal links in format \`[link text](slug-or-url)\` with description. Extract EXACTLY as written in the script. DON'T ADD INTERNAL LINKS IF IT'S NOT SPECIFIED IN THE SCRIPT. Example: \`[SEO best practices](/seo-guide) - Guide to SEO fundamentals\`
+     - external: Array of external links in format \`[link text](full-url)\` with description. Extract EXACTLY as written in the script, including the full URL. DON'T ADD EXTERNAL LINKS IF IT'S NOT SPECIFIED IN THE SCRIPT. Example: \`[Google Search Central](https://developers.google.com/search) - Official Google SEO documentation\`
      - **CRITICAL**: Preserve the complete link format \`[link](url/description)\` exactly as specified in the script. Do NOT extract just the URL or just the description - keep the full markdown link format with description.
 
 4. "faq" RULES
@@ -449,12 +443,12 @@ This is a HARD REQUIREMENT. Your response must be within this range:
 - Maximum: ${lengthRange[1]} words
 
 Count your words carefully. If your draft is too short, expand it with more detail, examples, or context. If it's too long, condense it while keeping all key points.
-
 The word count is STRICTLY ENFORCED. Do not exceed or fall below these limits.
+
+Make sure to create paragraphs of a maximum of 40 - 80 words. Only use 120-word paragraphs when absolutely necessary and highly readable.
 `
       : `
 ## Word Count Guidance
-
 Aim for approximately 200-400 words for the introduction. Be comprehensive but concise.
 `;
 

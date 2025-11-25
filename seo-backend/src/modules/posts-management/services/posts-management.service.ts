@@ -7,7 +7,10 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { NanoBananaImageGenerationService } from 'src/modules/image-generation/services/nano-banana-image-generation.service';
-import { MEDIUM_GENERATION_MODEL } from 'src/modules/llm-manager';
+import {
+  GROQ_COMPOUND,
+  MEDIUM_GENERATION_MODEL,
+} from 'src/modules/llm-manager';
 import { GroqService } from 'src/modules/llm-manager/groq.service';
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
 import { InterviewStatus } from '../library/interfaces/post-interview.interface';
@@ -156,7 +159,9 @@ export class PostsManagementService {
           section,
         ),
         {
-          model: MEDIUM_GENERATION_MODEL,
+          model: section.requiresDeepResearch
+            ? GROQ_COMPOUND
+            : MEDIUM_GENERATION_MODEL,
           maxTokens: 20000,
         },
       );

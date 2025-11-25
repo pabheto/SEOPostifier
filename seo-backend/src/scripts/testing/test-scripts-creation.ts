@@ -4,7 +4,7 @@ import * as path from 'path';
 import {
   GroqService,
   MEDIUM_GENERATION_MODEL,
-  SCRIPT_CREATION_MODEL,
+  GROQ_COMPOUND,
 } from 'src/modules/llm-manager';
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
 import {
@@ -74,7 +74,7 @@ async function bootstrap() {
 
   // ----- 2. Generate the script (Markdown) -----
   const script = await groqService.generate(generationPrompt, {
-    model: SCRIPT_CREATION_MODEL,
+    model: GROQ_COMPOUND,
     maxTokens: 8096,
   });
 
@@ -87,7 +87,7 @@ async function bootstrap() {
       testPostInterview.needsFaqSection,
     ),
     {
-      model: SCRIPT_CREATION_MODEL,
+      model: GROQ_COMPOUND,
       maxTokens: 8096,
     },
   );

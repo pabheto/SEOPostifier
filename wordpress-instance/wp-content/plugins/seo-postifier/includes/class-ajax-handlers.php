@@ -853,7 +853,7 @@ class SEO_Postifier_AJAX_Handlers {
                         $content .= '<h2 class="wp-block-heading">FAQ</h2>' . "\n";
                         $content .= '<!-- /wp:heading -->' . "\n\n";
                         
-                        // FAQ items as accordion using WordPress core/details block
+                        // FAQ items as accordion using HTML block (details/summary)
                         for ($i = 0; $i < count($block['questions']); $i++) {
                             if (isset($block['questions'][$i]) && isset($block['answers'][$i])) {
                                 $question = wp_kses_post($block['questions'][$i]);
@@ -861,20 +861,17 @@ class SEO_Postifier_AJAX_Handlers {
                                 $answer = self::convert_markdown_links_to_html($block['answers'][$i]);
                                 $answer = wp_kses_post($answer);
                                 
-                                // Use WordPress core/details block for accordion
-                                // The summary attribute contains the question text
-                                $attributes = json_encode(array(
-                                    'summary' => $question
-                                ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+                                // Use HTML block for details/summary (valid HTML5 elements)
+                                // Escape the HTML content properly for the HTML block
+                                $faq_html = '<details class="faq-item">' . "\n";
+                                $faq_html .= '<summary class="faq-question">' . $question . '</summary>' . "\n";
+                                $faq_html .= '<div class="faq-answer">' . $answer . '</div>' . "\n";
+                                $faq_html .= '</details>';
                                 
-                                $content .= '<!-- wp:details ' . $attributes . ' -->' . "\n";
-                                $content .= '<details class="wp-block-details faq-item">' . "\n";
-                                $content .= '<summary class="faq-question">' . $question . '</summary>' . "\n";
-                                $content .= '<!-- wp:paragraph -->' . "\n";
-                                $content .= '<p class="wp-block-paragraph faq-answer">' . $answer . '</p>' . "\n";
-                                $content .= '<!-- /wp:paragraph -->' . "\n";
-                                $content .= '</details>' . "\n";
-                                $content .= '<!-- /wp:details -->' . "\n\n";
+                                // Use wp:html block for custom HTML
+                                $content .= '<!-- wp:html -->' . "\n";
+                                $content .= $faq_html . "\n";
+                                $content .= '<!-- /wp:html -->' . "\n\n";
                             }
                         }
                         

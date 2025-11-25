@@ -37,6 +37,7 @@ export type ScriptSection = {
   lengthRange: [number, number];
   description: string;
   images?: IUserImage[];
+  requiresDeepResearch?: boolean;
   links: {
     internal: string[];
     external: string[];

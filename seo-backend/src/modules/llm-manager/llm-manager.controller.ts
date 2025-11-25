@@ -1,10 +1,10 @@
 import { Body, Controller, Post } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GroqService } from './groq.service';
 import {
-  SCRIPT_CREATION_MODEL,
-  MEDIUM_GENERATION_MODEL,
   CHEAP_GENERATION_MODEL,
+  GROQ_COMPOUND,
+  MEDIUM_GENERATION_MODEL,
 } from './llm.constants';
 
 class GenerateTextDto {
@@ -39,7 +39,7 @@ export class LlmManagerController {
           type: 'string',
           description: 'Model to use for generation',
           enum: [
-            SCRIPT_CREATION_MODEL,
+            GROQ_COMPOUND,
             MEDIUM_GENERATION_MODEL,
             CHEAP_GENERATION_MODEL,
           ],

@@ -9,7 +9,7 @@ import { Model } from 'mongoose';
 import {
   GPT_OSS_120B_MODEL,
   GroqService,
-  SCRIPT_CREATION_MODEL,
+  GROQ_COMPOUND,
 } from '../../llm-manager';
 import { ScriptsPrompting } from '../../llm-manager/library/prompts/scripts.prompting';
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';
@@ -68,7 +68,7 @@ export class PostInterviewsService {
     const prompt = ScriptsPrompting.GENERATE_SEO_SCRIPT_PROMPT(postInterview);
 
     const script = await this.groqService.generate(prompt, {
-      model: SCRIPT_CREATION_MODEL,
+      model: GROQ_COMPOUND,
       maxTokens: 8096,
     });
 
