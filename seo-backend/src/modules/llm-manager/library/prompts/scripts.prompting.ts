@@ -437,7 +437,7 @@ ${script}
       ? `
 ## CRITICAL WORD COUNT REQUIREMENT
 
-**YOU MUST write EXACTLY ${lengthRange[0]} - ${lengthRange[1]} words.**
+**YOU MUST write EXACTLY ${lengthRange[0]} - ${lengthRange[1]} words total for the introduction.**
 
 This is a HARD REQUIREMENT. Your response must be within this range:
 - Minimum: ${lengthRange[0]} words
@@ -446,11 +446,25 @@ This is a HARD REQUIREMENT. Your response must be within this range:
 Count your words carefully. If your draft is too short, expand it with more detail, examples, or context. If it's too long, condense it while keeping all key points.
 The word count is STRICTLY ENFORCED. Do not exceed or fall below these limits.
 
-Make sure to create paragraphs of a maximum of 40 - 80 words. Only use 120-word paragraphs when absolutely necessary and highly readable.
+### Paragraph Word Count Rules (STRICTLY ENFORCED)
+- **Standard paragraphs**: 40-80 words each
+- **Critical paragraphs**: Up to 120 words maximum (only when absolutely necessary and highly readable)
+- **Introduction structure**: Create multiple paragraphs (typically 3-8 paragraphs) to reach the introduction word count target
+- **If content exceeds limits**: Split long paragraphs into multiple shorter ones
+
+**How to structure the introduction:**
+1. Break content into multiple paragraphs of 40-80 words each
+2. Use 120-word paragraphs only for critical, complex explanations that cannot be split
+3. Ensure the total word count of ALL paragraphs combined = ${lengthRange[0]} - ${lengthRange[1]} words
 `
       : `
 ## Word Count Guidance
 Aim for approximately 200-400 words for the introduction. Be comprehensive but concise.
+
+### Paragraph Structure
+- Create multiple paragraphs of 40-80 words each
+- Use 120-word paragraphs only when absolutely necessary
+- Typically 3-8 paragraphs to reach the target word count
 `;
 
     return `You are an expert SEO copywriter. Write a compelling, SEO-optimized introduction.
@@ -470,7 +484,29 @@ Aim for approximately 200-400 words for the introduction. Be comprehensive but c
 
 ${wordCountInstruction}
 
-Return ONLY the introduction paragraph (no additional text or instructions).
+**Output Format:**
+Return ONLY a JSON object with this structure (no additional text):
+{
+  "blocks": [
+    {
+      "type": "paragraph",
+      "content": "First paragraph (40-80 words)..."
+    },
+    {
+      "type": "paragraph",
+      "content": "Second paragraph (40-80 words)..."
+    }
+  ]
+}
+
+DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
+
+**VALIDATION:**
+${lengthRange ? `- Total words across all blocks: ${lengthRange[0]} - ${lengthRange[1]} words` : '- Total words: approximately 200-400 words'}
+- Each paragraph: 40-80 words (up to 120 if critical)
+- JSON must be valid (double quotes, no trailing commas)
+
+DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
 `;
   };
 

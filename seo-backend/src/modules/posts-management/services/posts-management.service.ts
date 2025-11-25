@@ -77,11 +77,12 @@ export class PostsManagementService {
       },
     );
 
+    // Parse introduction blocks from JSON response
     // Don't add H1 heading block as WordPress already uses the post title as H1
-    blocks.push({
-      type: PostBlockType.PARAGRAPH,
-      content: introductionResult.content,
-    });
+    const introductionBlocks = JSON.parse(introductionResult.content) as {
+      blocks: PostBlock[];
+    };
+    blocks.push(...introductionBlocks.blocks);
 
     for (const section of postInterview.generatedScriptDefinition.body
       .sections) {
