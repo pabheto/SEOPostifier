@@ -25,6 +25,9 @@ if (empty($interview_id)) {
             <a href="?page=seo-postifier&tab=scripts" class="button button-secondary">
                 <?php _e('← Back to My Drafts', 'seo-postifier'); ?>
             </a>
+            <button type="button" id="create-wp-draft-btn" class="button button-primary" style="display: none; margin-left: 10px;">
+                <?php _e('Create WordPress Draft', 'seo-postifier'); ?>
+            </button>
         </p>
 
         <div id="loading-interview" style="margin: 20px 0;">
@@ -978,6 +981,15 @@ jQuery(document).ready(function($) {
                 if (response.success) {
                     currentInterview = response.data.interview;
                     populateEditForm(currentInterview);
+                    
+                    // Show Create WordPress Draft button if post exists
+                    const postId = currentInterview.associatedPostId?._id || currentInterview.associatedPostId?.id || currentInterview.associatedPostId || null;
+                    if (postId) {
+                        $('#create-wp-draft-btn').data('post-id', postId).show();
+                    } else {
+                        $('#create-wp-draft-btn').hide();
+                    }
+                    
                     $container.show();
                 } else {
                     $error.html('<div class="notice notice-error"><p>' + response.data.message + '</p></div>');
@@ -991,6 +1003,47 @@ jQuery(document).ready(function($) {
             }
         });
     }
+
+    // Handle Create WordPress Draft button click
+    $('#create-wp-draft-btn').on('click', function() {
+        const $button = $(this);
+        const postId = $button.data('post-id');
+        const originalText = $button.text();
+        
+        if (!postId) {
+            alert('<?php _e('Post ID not found', 'seo-postifier'); ?>');
+            return;
+        }
+        
+        $button.prop('disabled', true).text('<?php _e('Creating...', 'seo-postifier'); ?>');
+        
+        $.ajax({
+            url: seoPostifierData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'seo_postifier_create_wp_draft',
+                nonce: seoPostifierData.nonce,
+                post_id: postId
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert('<?php _e('WordPress draft created successfully! Redirecting...', 'seo-postifier'); ?>');
+                    if (response.data.edit_url) {
+                        window.location.href = response.data.edit_url;
+                    } else {
+                        $button.prop('disabled', false).text(originalText);
+                    }
+                } else {
+                    alert('<?php _e('Failed to create WordPress draft: ', 'seo-postifier'); ?>' + (response.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>'));
+                    $button.prop('disabled', false).text(originalText);
+                }
+            },
+            error: function() {
+                alert('<?php _e('Failed to create WordPress draft. Please try again.', 'seo-postifier'); ?>');
+                $button.prop('disabled', false).text(originalText);
+            }
+        });
+    });
 
     // Load interview on page load
     loadInterview();

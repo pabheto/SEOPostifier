@@ -80,6 +80,13 @@ jQuery(document).ready(function($) {
                             if (interview.scriptDefinition) {
                                 status = '<?php _e('Definition Ready', 'seo-postifier'); ?>';
                             }
+                            if (interview.associatedPostId) {
+                                status = '<?php _e('Post Generated', 'seo-postifier'); ?>';
+                            }
+                            
+                            // Get post ID - could be _id, id, or associatedPostId
+                            const postId = interview.associatedPostId?._id || interview.associatedPostId?.id || interview.associatedPostId || null;
+                            const hasPost = !!postId;
                             
                             html += '<tr>';
                             html += '<td>' + dateStr + '</td>';
@@ -88,6 +95,9 @@ jQuery(document).ready(function($) {
                             html += '<td>' + status + '</td>';
                             html += '<td>';
                             html += '<a href="?page=seo-postifier&tab=view-script&interviewId=' + interview.interviewId + '" class="button button-small"><?php _e('View', 'seo-postifier'); ?></a>';
+                            if (hasPost) {
+                                html += ' <button type="button" class="button button-small button-primary create-wp-draft-btn" data-post-id="' + postId + '" style="margin-left: 5px;"><?php _e('Create WP Draft', 'seo-postifier'); ?></button>';
+                            }
                             html += '</td>';
                             html += '</tr>';
                         });
@@ -109,6 +119,45 @@ jQuery(document).ready(function($) {
             }
         });
     }
+
+    // Handle Create WordPress Draft button clicks
+    $(document).on('click', '.create-wp-draft-btn', function() {
+        const $button = $(this);
+        const postId = $button.data('post-id');
+        const originalText = $button.text();
+        
+        if (!postId) {
+            alert('<?php _e('Post ID not found', 'seo-postifier'); ?>');
+            return;
+        }
+        
+        $button.prop('disabled', true).text('<?php _e('Creating...', 'seo-postifier'); ?>');
+        
+        $.ajax({
+            url: seoPostifierData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'seo_postifier_create_wp_draft',
+                nonce: seoPostifierData.nonce,
+                post_id: postId
+            },
+            success: function(response) {
+                if (response.success) {
+                    alert('<?php _e('WordPress draft created successfully!', 'seo-postifier'); ?>');
+                    if (response.data.edit_url) {
+                        window.location.href = response.data.edit_url;
+                    }
+                } else {
+                    alert('<?php _e('Failed to create WordPress draft: ', 'seo-postifier'); ?>' + (response.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>'));
+                    $button.prop('disabled', false).text(originalText);
+                }
+            },
+            error: function() {
+                alert('<?php _e('Failed to create WordPress draft. Please try again.', 'seo-postifier'); ?>');
+                $button.prop('disabled', false).text(originalText);
+            }
+        });
+    });
 
     // Load scripts on page load
     loadScripts();
