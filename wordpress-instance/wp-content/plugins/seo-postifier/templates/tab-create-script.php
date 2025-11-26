@@ -87,11 +87,24 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                         <table class="form-table">
                             <tr>
                                 <th scope="row">
-                                    <label for="ai-images-count"><?php _e('AI Images Count', 'seo-postifier'); ?></label>
+                                    <label for="ai-images-mode"><?php _e('AI Images', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <select id="ai-images-mode" name="aiImagesMode">
+                                        <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
+                                        <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
+                                        <option value="custom"><?php _e('Custom', 'seo-postifier'); ?></option>
+                                    </select>
+                                    <p class="description"><?php _e('Select how AI images should be generated', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                            <tr id="ai-images-custom-count-row" style="display: none;">
+                                <th scope="row">
+                                    <label for="ai-images-count"><?php _e('Number of Images', 'seo-postifier'); ?></label>
                                 </th>
                                 <td>
                                     <input type="number" id="ai-images-count" name="aiImagesCount"
-                                           value="3" min="0" class="small-text" />
+                                           value="5" min="1" class="small-text" />
                                     <p class="description"><?php _e('Number of AI-generated images to create', 'seo-postifier'); ?></p>
                                 </td>
                             </tr>
@@ -260,15 +273,18 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                         <table class="form-table">
                             <tr>
                                 <th scope="row">
-                                    <label for="include-internal-links"><?php _e('Internal Links', 'seo-postifier'); ?></label>
+                                    <label for="internal-links-mode"><?php _e('Internal Links', 'seo-postifier'); ?></label>
                                 </th>
                                 <td>
-                                    <input type="checkbox" id="include-internal-links"
-                                           name="includeInternalLinks" value="1" checked />
-                                    <label for="include-internal-links"><?php _e('Include internal links', 'seo-postifier'); ?></label>
+                                    <select id="internal-links-mode" name="internalLinksMode">
+                                        <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
+                                        <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
+                                        <option value="custom"><?php _e('Custom', 'seo-postifier'); ?></option>
+                                    </select>
+                                    <p class="description"><?php _e('Select how internal links should be handled', 'seo-postifier'); ?></p>
                                 </td>
                             </tr>
-                            <tr class="internal-links-fields">
+                            <tr class="internal-links-custom-fields" style="display: none;">
                                 <th scope="row">
                                     <label for="internal-links-to-use"><?php _e('Internal Links URLs', 'seo-postifier'); ?></label>
                                 </th>
@@ -280,25 +296,27 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="include-external-links"><?php _e('External Links', 'seo-postifier'); ?></label>
+                                    <label for="external-links-research-mode"><?php _e('External Link Research', 'seo-postifier'); ?></label>
                                 </th>
                                 <td>
-                                    <input type="checkbox" id="include-external-links"
-                                           name="includeExternalLinks" value="1" />
-                                    <label for="include-external-links"><?php _e('Include external links', 'seo-postifier'); ?></label>
+                                    <select id="external-links-research-mode" name="externalLinksResearchMode">
+                                        <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
+                                        <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
+                                    </select>
+                                    <p class="description"><?php _e('Automatically research and include external links', 'seo-postifier'); ?></p>
                                 </td>
                             </tr>
-                            <tr class="external-links-fields" style="display: none;">
+                            <tr>
                                 <th scope="row">
-                                    <label for="external-links-to-include-automatically"><?php _e('External Links to Include Automatically', 'seo-postifier'); ?></label>
+                                    <label for="use-custom-external-links"><?php _e('Use Custom External Links', 'seo-postifier'); ?></label>
                                 </th>
                                 <td>
-                                    <input type="number" id="external-links-to-include-automatically" name="externalLinksToIncludeAutomatically"
-                                           value="2" min="0" class="small-text" />
-                                    <p class="description"><?php _e('Number of external links to automatically include', 'seo-postifier'); ?></p>
+                                    <input type="checkbox" id="use-custom-external-links"
+                                           name="useCustomExternalLinks" value="1" />
+                                    <label for="use-custom-external-links"><?php _e('Provide specific external links to include', 'seo-postifier'); ?></label>
                                 </td>
                             </tr>
-                            <tr class="external-links-fields" style="display: none;">
+                            <tr class="external-links-custom-fields" style="display: none;">
                                 <th scope="row">
                                     <label for="external-links-to-use"><?php _e('External Links URLs', 'seo-postifier'); ?></label>
                                 </th>
@@ -409,27 +427,26 @@ jQuery(document).ready(function($) {
         }
     });
 
-    // Toggle internal links fields
-    $('#include-internal-links').on('change', function() {
-        if ($(this).is(':checked')) {
-            $('.internal-links-fields').show();
+    // Handle AI images mode change
+    $('#ai-images-mode').on('change', function() {
+        const mode = $(this).val();
+        if (mode === 'custom') {
+            $('#ai-images-custom-count-row').show();
+            $('#ai-images-count').trigger('change');
         } else {
-            $('.internal-links-fields').hide();
+            $('#ai-images-custom-count-row').hide();
+            $('#ai-images-custom-descriptions-row').hide();
+            $('#use-custom-ai-descriptions').prop('checked', false);
+            $('#ai-images-descriptions-container').hide();
         }
     });
 
-    // Toggle external links fields
-    $('#include-external-links').on('change', function() {
-        if ($(this).is(':checked')) {
-            $('.external-links-fields').show();
-        } else {
-            $('.external-links-fields').hide();
-        }
-    });
-
-    // Handle AI images count change
+    // Handle AI images count change (only when in custom mode)
     $('#ai-images-count').on('change', function() {
-        aiImagesCount = parseInt($(this).val()) || 3;
+        if ($('#ai-images-mode').val() !== 'custom') {
+            return;
+        }
+        aiImagesCount = parseInt($(this).val()) || 5;
         if (aiImagesCount > 1) {
             $('#ai-images-custom-descriptions-row').show();
         } else {
@@ -438,6 +455,30 @@ jQuery(document).ready(function($) {
             $('#ai-images-descriptions-container').hide();
         }
         updateAiDescriptionsList();
+    });
+
+    // Handle internal links mode change
+    $('#internal-links-mode').on('change', function() {
+        const mode = $(this).val();
+        if (mode === 'custom') {
+            $('.internal-links-custom-fields').show();
+        } else {
+            $('.internal-links-custom-fields').hide();
+        }
+    });
+
+    // Handle external links research mode change
+    $('#external-links-research-mode').on('change', function() {
+        // Mode change doesn't affect custom links checkbox
+    });
+
+    // Toggle custom external links fields
+    $('#use-custom-external-links').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('.external-links-custom-fields').show();
+        } else {
+            $('.external-links-custom-fields').hide();
+        }
     });
 
     // Handle custom AI descriptions checkbox
@@ -528,8 +569,8 @@ jQuery(document).ready(function($) {
         });
     });
 
-    // Initialize AI images count handler
-    $('#ai-images-count').trigger('change');
+    // Initialize AI images mode handler
+    $('#ai-images-mode').trigger('change');
 
     // Form submission handler
     function handleFormSubmit(e) {
@@ -563,14 +604,25 @@ jQuery(document).ready(function($) {
         };
 
         // Collect images configuration
-        const aiImagesCountInput = $('#ai-images-count').val();
-        const aiImagesCount = (aiImagesCountInput !== '' && !isNaN(parseInt(aiImagesCountInput))) 
-            ? parseInt(aiImagesCountInput) 
-            : 3;
+        const aiImagesMode = $('#ai-images-mode').val();
+        let aiImagesCount;
+        
+        if (aiImagesMode === 'auto') {
+            aiImagesCount = -1;
+        } else if (aiImagesMode === 'custom') {
+            const aiImagesCountInput = $('#ai-images-count').val();
+            aiImagesCount = (aiImagesCountInput !== '' && !isNaN(parseInt(aiImagesCountInput))) 
+                ? parseInt(aiImagesCountInput) 
+                : 5;
+        } else {
+            // disabled
+            aiImagesCount = 0;
+        }
+        
         const useCustomAiDescriptions = $('#use-custom-ai-descriptions').is(':checked');
         const aiImagesUserDescriptions = [];
         
-        if (useCustomAiDescriptions && aiImagesCount > 0) {
+        if (useCustomAiDescriptions && aiImagesMode === 'custom' && aiImagesCount > 0) {
             $('.ai-image-description').each(function() {
                 const desc = $(this).val().trim();
                 if (desc) {
@@ -635,11 +687,12 @@ jQuery(document).ready(function($) {
             mentionsBrand: $('#mentions-brand').is(':checked'),
             brandName: $('#brand-name').val(),
             brandDescription: $('#brand-description').val(),
-            includeInternalLinks: $('#include-internal-links').is(':checked'),
-            internalLinksToUse: splitAndFilter($('#internal-links-to-use').val(), '\n'),
-            includeExternalLinks: $('#include-external-links').is(':checked'),
-            externalLinksToIncludeAutomatically: parseInt($('#external-links-to-include-automatically').val()) || undefined,
-            externalLinksToUse: splitAndFilter($('#external-links-to-use').val(), '\n'),
+            internalLinksMode: $('#internal-links-mode').val(),
+            internalLinksToUse: $('#internal-links-mode').val() === 'custom' ? splitAndFilter($('#internal-links-to-use').val(), '\n') : undefined,
+            externalLinksResearchMode: $('#external-links-research-mode').val(),
+            externalLinksToIncludeAutomatically: $('#external-links-research-mode').val() === 'auto' ? -1 : undefined,
+            useCustomExternalLinks: $('#use-custom-external-links').is(':checked'),
+            externalLinksToUse: $('#use-custom-external-links').is(':checked') ? splitAndFilter($('#external-links-to-use').val(), '\n') : undefined,
             notesForWriter: $('#notes-for-writer').val(),
             imagesConfig: imagesConfig
         };
@@ -829,17 +882,49 @@ jQuery(document).ready(function($) {
                     $('#mentions-brand').prop('checked', interview.mentionsBrand === true);
                     $('#brand-name').val(interview.brandName || '');
                     $('#brand-description').val(interview.brandDescription || '');
-                    $('#include-internal-links').prop('checked', interview.includeInternalLinks === true);
+                    // Handle internal links mode
+                    if (interview.internalLinksMode) {
+                        $('#internal-links-mode').val(interview.internalLinksMode);
+                    } else if (interview.includeInternalLinks === false) {
+                        $('#internal-links-mode').val('disabled');
+                    } else if (interview.internalLinksToUse && interview.internalLinksToUse.length > 0) {
+                        $('#internal-links-mode').val('custom');
+                    } else {
+                        $('#internal-links-mode').val('auto');
+                    }
+                    $('#internal-links-mode').trigger('change');
                     $('#internal-links-to-use').val(Array.isArray(interview.internalLinksToUse) ? interview.internalLinksToUse.join('\n') : '');
-                    $('#include-external-links').prop('checked', interview.includeExternalLinks === true);
-                    $('#external-links-to-include-automatically').val(interview.externalLinksToIncludeAutomatically || '2');
+                    
+                    // Handle external links research mode
+                    if (interview.externalLinksResearchMode) {
+                        $('#external-links-research-mode').val(interview.externalLinksResearchMode);
+                    } else if (interview.externalLinksToIncludeAutomatically === -1 || interview.includeExternalLinks === true) {
+                        $('#external-links-research-mode').val('auto');
+                    } else {
+                        $('#external-links-research-mode').val('disabled');
+                    }
+                    
+                    // Handle custom external links
+                    if (interview.useCustomExternalLinks || (interview.externalLinksToUse && interview.externalLinksToUse.length > 0)) {
+                        $('#use-custom-external-links').prop('checked', true);
+                        $('#use-custom-external-links').trigger('change');
+                    }
                     $('#external-links-to-use').val(Array.isArray(interview.externalLinksToUse) ? interview.externalLinksToUse.join('\n') : '');
                     $('#notes-for-writer').val(interview.notesForWriter || '');
                     
                     // Populate image configuration
                     const imagesConfig = interview.imagesConfig || {};
-                    $('#ai-images-count').val(imagesConfig.aiImagesCount || 3);
-                    $('#ai-images-count').trigger('change');
+                    const aiImagesCount = imagesConfig.aiImagesCount || -1;
+                    
+                    if (aiImagesCount === -1) {
+                        $('#ai-images-mode').val('auto');
+                    } else if (aiImagesCount === 0) {
+                        $('#ai-images-mode').val('disabled');
+                    } else {
+                        $('#ai-images-mode').val('custom');
+                        $('#ai-images-count').val(aiImagesCount);
+                    }
+                    $('#ai-images-mode').trigger('change');
                     
                     if (imagesConfig.useCustomAiDescriptions && imagesConfig.aiImagesUserDescriptions) {
                         $('#use-custom-ai-descriptions').prop('checked', true);
@@ -876,8 +961,6 @@ jQuery(document).ready(function($) {
                     
                     // Trigger conditional field visibility
                     $('#mentions-brand').trigger('change');
-                    $('#include-internal-links').trigger('change');
-                    $('#include-external-links').trigger('change');
                 }
             }
         });

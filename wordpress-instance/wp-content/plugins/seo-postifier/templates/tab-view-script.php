@@ -95,11 +95,24 @@ if (empty($interview_id)) {
                             <table class="form-table">
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-ai-images-count"><?php _e('AI Images Count', 'seo-postifier'); ?></label>
+                                        <label for="edit-ai-images-mode"><?php _e('AI Images', 'seo-postifier'); ?></label>
+                                    </th>
+                                    <td>
+                                        <select id="edit-ai-images-mode" name="aiImagesMode">
+                                            <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
+                                            <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
+                                            <option value="custom"><?php _e('Custom', 'seo-postifier'); ?></option>
+                                        </select>
+                                        <p class="description"><?php _e('Select how AI images should be generated', 'seo-postifier'); ?></p>
+                                    </td>
+                                </tr>
+                                <tr id="edit-ai-images-custom-count-row" style="display: none;">
+                                    <th scope="row">
+                                        <label for="edit-ai-images-count"><?php _e('Number of Images', 'seo-postifier'); ?></label>
                                     </th>
                                     <td>
                                         <input type="number" id="edit-ai-images-count" name="aiImagesCount"
-                                               value="3" min="0" class="small-text" />
+                                               value="5" min="1" class="small-text" />
                                         <p class="description"><?php _e('Number of AI-generated images to create', 'seo-postifier'); ?></p>
                                     </td>
                                 </tr>
@@ -268,15 +281,18 @@ if (empty($interview_id)) {
                             <table class="form-table">
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-include-internal-links"><?php _e('Internal Links', 'seo-postifier'); ?></label>
+                                        <label for="edit-internal-links-mode"><?php _e('Internal Links', 'seo-postifier'); ?></label>
                                     </th>
                                     <td>
-                                        <input type="checkbox" id="edit-include-internal-links"
-                                               name="includeInternalLinks" value="1" checked />
-                                        <label for="edit-include-internal-links"><?php _e('Include internal links', 'seo-postifier'); ?></label>
+                                        <select id="edit-internal-links-mode" name="internalLinksMode">
+                                            <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
+                                            <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
+                                            <option value="custom"><?php _e('Custom', 'seo-postifier'); ?></option>
+                                        </select>
+                                        <p class="description"><?php _e('Select how internal links should be handled', 'seo-postifier'); ?></p>
                                     </td>
                                 </tr>
-                                <tr class="edit-internal-links-fields">
+                                <tr class="edit-internal-links-custom-fields" style="display: none;">
                                     <th scope="row">
                                         <label for="edit-internal-links-to-use"><?php _e('Internal Links URLs', 'seo-postifier'); ?></label>
                                     </th>
@@ -288,25 +304,27 @@ if (empty($interview_id)) {
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-include-external-links"><?php _e('External Links', 'seo-postifier'); ?></label>
+                                        <label for="edit-external-links-research-mode"><?php _e('External Link Research', 'seo-postifier'); ?></label>
                                     </th>
                                     <td>
-                                        <input type="checkbox" id="edit-include-external-links"
-                                               name="includeExternalLinks" value="1" />
-                                        <label for="edit-include-external-links"><?php _e('Include external links', 'seo-postifier'); ?></label>
+                                        <select id="edit-external-links-research-mode" name="externalLinksResearchMode">
+                                            <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
+                                            <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
+                                        </select>
+                                        <p class="description"><?php _e('Automatically research and include external links', 'seo-postifier'); ?></p>
                                     </td>
                                 </tr>
-                                <tr class="edit-external-links-fields" style="display: none;">
+                                <tr>
                                     <th scope="row">
-                                        <label for="edit-external-links-to-include-automatically"><?php _e('External Links to Include Automatically', 'seo-postifier'); ?></label>
+                                        <label for="edit-use-custom-external-links"><?php _e('Use Custom External Links', 'seo-postifier'); ?></label>
                                     </th>
                                     <td>
-                                        <input type="number" id="edit-external-links-to-include-automatically" name="externalLinksToIncludeAutomatically"
-                                               value="2" min="0" class="small-text" />
-                                        <p class="description"><?php _e('Number of external links to automatically include', 'seo-postifier'); ?></p>
+                                        <input type="checkbox" id="edit-use-custom-external-links"
+                                               name="useCustomExternalLinks" value="1" />
+                                        <label for="edit-use-custom-external-links"><?php _e('Provide specific external links to include', 'seo-postifier'); ?></label>
                                     </td>
                                 </tr>
-                                <tr class="edit-external-links-fields" style="display: none;">
+                                <tr class="edit-external-links-custom-fields" style="display: none;">
                                     <th scope="row">
                                         <label for="edit-external-links-to-use"><?php _e('External Links URLs', 'seo-postifier'); ?></label>
                                     </th>
@@ -418,29 +436,26 @@ jQuery(document).ready(function($) {
         }
     });
     
-    $('#edit-include-internal-links').on('change', function() {
-        if ($(this).is(':checked')) {
-            $('.edit-internal-links-fields').show();
+    // Handle AI images mode change
+    $('#edit-ai-images-mode').on('change', function() {
+        const mode = $(this).val();
+        if (mode === 'custom') {
+            $('#edit-ai-images-custom-count-row').show();
+            $('#edit-ai-images-count').trigger('change');
         } else {
-            $('.edit-internal-links-fields').hide();
-        }
-    });
-    
-    $('#edit-include-external-links').on('change', function() {
-        if ($(this).is(':checked')) {
-            $('.edit-external-links-fields').show();
-        } else {
-            $('.edit-external-links-fields').hide();
+            $('#edit-ai-images-custom-count-row').hide();
+            $('#edit-ai-images-custom-descriptions-row').hide();
+            $('#edit-use-custom-ai-descriptions').prop('checked', false);
+            $('#edit-ai-images-descriptions-container').hide();
         }
     });
 
-    // Image configuration handlers
-    let editUserImageCounter = 0;
-    let editAiImagesCount = 3;
-
-    // Handle AI images count change
+    // Handle AI images count change (only when in custom mode)
     $('#edit-ai-images-count').on('change', function() {
-        editAiImagesCount = parseInt($(this).val()) || 3;
+        if ($('#edit-ai-images-mode').val() !== 'custom') {
+            return;
+        }
+        editAiImagesCount = parseInt($(this).val()) || 5;
         if (editAiImagesCount > 1) {
             $('#edit-ai-images-custom-descriptions-row').show();
         } else {
@@ -450,6 +465,34 @@ jQuery(document).ready(function($) {
         }
         updateEditAiDescriptionsList();
     });
+
+    // Handle internal links mode change
+    $('#edit-internal-links-mode').on('change', function() {
+        const mode = $(this).val();
+        if (mode === 'custom') {
+            $('.edit-internal-links-custom-fields').show();
+        } else {
+            $('.edit-internal-links-custom-fields').hide();
+        }
+    });
+
+    // Handle external links research mode change
+    $('#edit-external-links-research-mode').on('change', function() {
+        // Mode change doesn't affect custom links checkbox
+    });
+
+    // Toggle custom external links fields
+    $('#edit-use-custom-external-links').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('.edit-external-links-custom-fields').show();
+        } else {
+            $('.edit-external-links-custom-fields').hide();
+        }
+    });
+
+    // Image configuration handlers
+    let editUserImageCounter = 0;
+    let editAiImagesCount = 5;
 
     // Handle custom AI descriptions checkbox
     $('#edit-use-custom-ai-descriptions').on('change', function() {
@@ -470,7 +513,7 @@ jQuery(document).ready(function($) {
             return;
         }
 
-        const count = parseInt($('#edit-ai-images-count').val()) || 3;
+        const count = parseInt($('#edit-ai-images-count').val()) || 5;
         for (let i = 0; i < count; i++) {
             const item = $('<div class="ai-image-description-item" style="margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
             item.append('<label style="display: block; font-weight: 600; margin-bottom: 5px;">' + 
@@ -539,8 +582,8 @@ jQuery(document).ready(function($) {
         });
     });
 
-    // Initialize AI images count handler
-    $('#edit-ai-images-count').trigger('change');
+    // Initialize AI images mode handler
+    $('#edit-ai-images-mode').trigger('change');
 
     // Populate edit form with interview data
     function populateEditForm(interview) {
@@ -567,8 +610,17 @@ jQuery(document).ready(function($) {
         
         // Populate image configuration
         const imagesConfig = interview.imagesConfig || {};
-        $('#edit-ai-images-count').val(imagesConfig.aiImagesCount || 3);
-        $('#edit-ai-images-count').trigger('change');
+        const aiImagesCount = imagesConfig.aiImagesCount || -1;
+        
+        if (aiImagesCount === -1) {
+            $('#edit-ai-images-mode').val('auto');
+        } else if (aiImagesCount === 0) {
+            $('#edit-ai-images-mode').val('disabled');
+        } else {
+            $('#edit-ai-images-mode').val('custom');
+            $('#edit-ai-images-count').val(aiImagesCount);
+        }
+        $('#edit-ai-images-mode').trigger('change');
         
         if (imagesConfig.useCustomAiDescriptions && imagesConfig.aiImagesUserDescriptions) {
             $('#edit-use-custom-ai-descriptions').prop('checked', true);
@@ -604,8 +656,6 @@ jQuery(document).ready(function($) {
         
         // Toggle conditional fields
         $('.edit-brand-fields').toggle($('#edit-mentions-brand').is(':checked'));
-        $('.edit-internal-links-fields').toggle($('#edit-include-internal-links').is(':checked'));
-        $('.edit-external-links-fields').toggle($('#edit-include-external-links').is(':checked'));
     }
 
     // Helper function to split string into array
@@ -628,14 +678,25 @@ jQuery(document).ready(function($) {
         $status.html('');
 
         // Collect images configuration
-        const aiImagesCountInput = $('#edit-ai-images-count').val();
-        const aiImagesCount = (aiImagesCountInput !== '' && !isNaN(parseInt(aiImagesCountInput))) 
-            ? parseInt(aiImagesCountInput) 
-            : 3;
+        const aiImagesMode = $('#edit-ai-images-mode').val();
+        let aiImagesCount;
+        
+        if (aiImagesMode === 'auto') {
+            aiImagesCount = -1;
+        } else if (aiImagesMode === 'custom') {
+            const aiImagesCountInput = $('#edit-ai-images-count').val();
+            aiImagesCount = (aiImagesCountInput !== '' && !isNaN(parseInt(aiImagesCountInput))) 
+                ? parseInt(aiImagesCountInput) 
+                : 5;
+        } else {
+            // disabled
+            aiImagesCount = 0;
+        }
+        
         const useCustomAiDescriptions = $('#edit-use-custom-ai-descriptions').is(':checked');
         const aiImagesUserDescriptions = [];
         
-        if (useCustomAiDescriptions && aiImagesCount > 0) {
+        if (useCustomAiDescriptions && aiImagesMode === 'custom' && aiImagesCount > 0) {
             $('.edit-ai-image-description').each(function() {
                 const desc = $(this).val().trim();
                 if (desc) {
@@ -670,6 +731,7 @@ jQuery(document).ready(function($) {
             }
         });
         
+        // Build images config object
         const imagesConfig = {
             aiImagesCount: aiImagesCount
         };
@@ -698,11 +760,12 @@ jQuery(document).ready(function($) {
             mentionsBrand: $('#edit-mentions-brand').is(':checked'),
             brandName: $('#edit-brand-name').val() || undefined,
             brandDescription: $('#edit-brand-description').val() || undefined,
-            includeInternalLinks: $('#edit-include-internal-links').is(':checked'),
-            internalLinksToUse: splitAndFilter($('#edit-internal-links-to-use').val(), '\n'),
-            includeExternalLinks: $('#edit-include-external-links').is(':checked'),
-            externalLinksToIncludeAutomatically: $('#edit-external-links-to-include-automatically').val() ? parseInt($('#edit-external-links-to-include-automatically').val()) : undefined,
-            externalLinksToUse: splitAndFilter($('#edit-external-links-to-use').val(), '\n'),
+            internalLinksMode: $('#edit-internal-links-mode').val(),
+            internalLinksToUse: $('#edit-internal-links-mode').val() === 'custom' ? splitAndFilter($('#edit-internal-links-to-use').val(), '\n') : undefined,
+            externalLinksResearchMode: $('#edit-external-links-research-mode').val(),
+            externalLinksToIncludeAutomatically: $('#edit-external-links-research-mode').val() === 'auto' ? -1 : undefined,
+            useCustomExternalLinks: $('#edit-use-custom-external-links').is(':checked'),
+            externalLinksToUse: $('#edit-use-custom-external-links').is(':checked') ? splitAndFilter($('#edit-external-links-to-use').val(), '\n') : undefined,
             notesForWriter: $('#edit-notes-for-writer').val() || undefined,
             imagesConfig: imagesConfig
         };
