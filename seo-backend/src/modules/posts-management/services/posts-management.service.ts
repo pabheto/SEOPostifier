@@ -70,6 +70,7 @@ export class PostsManagementService {
         postInterview.generatedScriptDefinition.head.introductionDescription,
         postInterview.targetAudience,
         postInterview.toneOfVoice,
+        postInterview.language,
         postInterview.generatedScriptDefinition.head.introductionLengthRange,
       ),
       {

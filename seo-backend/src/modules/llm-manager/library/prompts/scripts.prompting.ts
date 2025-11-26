@@ -470,6 +470,7 @@ ${script}
     introductionDescription: string,
     targetAudience: string,
     targetTone: string,
+    lang: string,
     lengthRange?: [number, number],
   ) => {
     const wordCountInstruction = lengthRange
@@ -481,6 +482,8 @@ ${script}
 This is a HARD REQUIREMENT. Your response must be within this range:
 - Minimum: ${lengthRange[0]} words
 - Maximum: ${lengthRange[1]} words
+
+The language of the introduction is ${lang}.
 
 Count your words carefully. If your draft is too short, expand it with more detail, examples, or context. If it's too long, condense it while keeping all key points.
 The word count is STRICTLY ENFORCED. Do not exceed or fall below these limits.

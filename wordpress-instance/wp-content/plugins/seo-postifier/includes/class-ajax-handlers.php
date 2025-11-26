@@ -539,6 +539,11 @@ class SEO_Postifier_AJAX_Handlers {
             'post_author' => get_current_user_id(),
         );
 
+        // Add slug from post data if available
+        if (!empty($post_data['slug'])) {
+            $wp_post_data['post_name'] = sanitize_title($post_data['slug']);
+        }
+
         // Add excerpt if available (extract from first paragraph if no explicit excerpt)
         if (!empty($post_data['excerpt'])) {
             $wp_post_data['post_excerpt'] = sanitize_textarea_field($post_data['excerpt']);

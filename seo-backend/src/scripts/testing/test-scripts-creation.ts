@@ -2,9 +2,9 @@ import { NestFactory } from '@nestjs/core';
 import * as fs from 'fs';
 import * as path from 'path';
 import {
+  GROQ_COMPOUND,
   GroqService,
   MEDIUM_GENERATION_MODEL,
-  GROQ_COMPOUND,
 } from 'src/modules/llm-manager';
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
 import {
@@ -111,6 +111,7 @@ async function bootstrap() {
       formattedScriptObject.head.introductionDescription,
       testPostInterview.targetAudience,
       testPostInterview.toneOfVoice,
+      testPostInterview.language,
       formattedScriptObject.head.introductionLengthRange,
     ),
     {
