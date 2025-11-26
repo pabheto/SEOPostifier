@@ -67,7 +67,7 @@ export class ImagesConfigDto {
   })
   @IsOptional()
   @IsInt()
-  @Min(0)
+  @Min(-1)
   aiImagesCount?: number = 0;
 
   @ApiPropertyOptional({
@@ -230,7 +230,7 @@ export class CreatePostInterviewDto {
   })
   @IsOptional()
   @IsInt()
-  @Min(0)
+  @Min(-1)
   externalLinksToIncludeAutomatically?: number;
 
   @ApiPropertyOptional({

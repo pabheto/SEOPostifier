@@ -39,7 +39,10 @@ export class UpdatePostInterviewDto {
   @Transform(({ value }) => {
     if (Array.isArray(value)) return value;
     if (typeof value === 'string') {
-      return value.split(',').map((item) => item.trim()).filter((item) => item.length > 0);
+      return value
+        .split(',')
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
     }
     return [];
   })
@@ -91,7 +94,10 @@ export class UpdatePostInterviewDto {
   @IsNotEmpty()
   targetAudience?: string;
 
-  @ApiPropertyOptional({ description: 'Tono de voz del contenido', enum: ToneOfVoice })
+  @ApiPropertyOptional({
+    description: 'Tono de voz del contenido',
+    enum: ToneOfVoice,
+  })
   @IsOptional()
   @IsEnum(ToneOfVoice)
   toneOfVoice?: ToneOfVoice;
@@ -144,7 +150,7 @@ export class UpdatePostInterviewDto {
   })
   @IsOptional()
   @IsInt()
-  @Min(0)
+  @Min(-1)
   externalLinksToIncludeAutomatically?: number;
 
   @ApiPropertyOptional({
@@ -154,9 +160,12 @@ export class UpdatePostInterviewDto {
   })
   @IsOptional()
   @Transform(({ value }) => {
-    if (Array.isArray(value)) return value;
+    if (Array.isArray(value)) return value as string[];
     if (typeof value === 'string') {
-      return value.split(/\r?\n/).map((item) => item.trim()).filter((item) => item.length > 0);
+      return value
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
     }
     return [];
   })
@@ -173,7 +182,10 @@ export class UpdatePostInterviewDto {
   @Transform(({ value }) => {
     if (Array.isArray(value)) return value;
     if (typeof value === 'string') {
-      return value.split(/\r?\n/).map((item) => item.trim()).filter((item) => item.length > 0);
+      return value
+        .split(/\r?\n/)
+        .map((item) => item.trim())
+        .filter((item) => item.length > 0);
     }
     return [];
   })
@@ -212,4 +224,3 @@ export class UpdatePostInterviewDto {
   @IsString()
   blogInternalLinksMeta?: string;
 }
-

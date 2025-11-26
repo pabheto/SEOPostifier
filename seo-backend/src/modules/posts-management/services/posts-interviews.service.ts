@@ -98,12 +98,36 @@ export class PostInterviewsService {
 
     const scriptDefinitionResult = await this.groqService.generate(prompt, {
       model: GPT_OSS_120B_MODEL,
-      maxTokens: 8096,
+      maxTokens: 20000,
     });
 
-    const scriptDefinitionObject = JSON.parse(
-      scriptDefinitionResult.content,
-    ) as ScriptFormatDefinition;
+    let scriptDefinitionObject: ScriptFormatDefinition;
+    try {
+      scriptDefinitionObject = JSON.parse(
+        scriptDefinitionResult.content,
+      ) as ScriptFormatDefinition;
+    } catch (parseError) {
+      // If JSON parsing fails, request a fix from the LLM
+      const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
+        scriptDefinitionResult.content,
+        parseError instanceof Error ? parseError.message : String(parseError),
+      );
+
+      const fixedJsonResult = await this.groqService.generate(fixPrompt, {
+        model: GPT_OSS_120B_MODEL,
+        maxTokens: 20000,
+      });
+
+      try {
+        scriptDefinitionObject = JSON.parse(
+          fixedJsonResult.content,
+        ) as ScriptFormatDefinition;
+      } catch (retryParseError) {
+        throw new BadRequestException(
+          `Failed to parse JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
+        );
+      }
+    }
 
     postInterview.generatedScriptDefinition = scriptDefinitionObject;
     postInterview.status = InterviewStatus.SCRIPT_DEFINITION_GENERATED;

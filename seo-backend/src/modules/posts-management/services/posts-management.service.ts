@@ -79,9 +79,33 @@ export class PostsManagementService {
 
     // Parse introduction blocks from JSON response
     // Don't add H1 heading block as WordPress already uses the post title as H1
-    const introductionBlocks = JSON.parse(introductionResult.content) as {
-      blocks: PostBlock[];
-    };
+    let introductionBlocks: { blocks: PostBlock[] };
+    try {
+      introductionBlocks = JSON.parse(introductionResult.content) as {
+        blocks: PostBlock[];
+      };
+    } catch (parseError) {
+      // If JSON parsing fails, request a fix from the LLM
+      const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
+        introductionResult.content,
+        parseError instanceof Error ? parseError.message : String(parseError),
+      );
+
+      const fixedJsonResult = await this.groqService.generate(fixPrompt, {
+        model: MEDIUM_GENERATION_MODEL,
+        maxTokens: 8096,
+      });
+
+      try {
+        introductionBlocks = JSON.parse(fixedJsonResult.content) as {
+          blocks: PostBlock[];
+        };
+      } catch (retryParseError) {
+        throw new BadRequestException(
+          `Failed to parse introduction JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
+        );
+      }
+    }
     blocks.push(...introductionBlocks.blocks);
 
     for (const section of postInterview.generatedScriptDefinition.body
@@ -167,9 +191,35 @@ export class PostsManagementService {
         },
       );
 
-      const sectionContentBlocks = JSON.parse(sectionContentResult.content) as {
-        blocks: PostBlock[];
-      };
+      let sectionContentBlocks: { blocks: PostBlock[] };
+      try {
+        sectionContentBlocks = JSON.parse(sectionContentResult.content) as {
+          blocks: PostBlock[];
+        };
+      } catch (parseError) {
+        // If JSON parsing fails, request a fix from the LLM
+        const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
+          sectionContentResult.content,
+          parseError instanceof Error ? parseError.message : String(parseError),
+        );
+
+        const fixedJsonResult = await this.groqService.generate(fixPrompt, {
+          model: section.requiresDeepResearch
+            ? GROQ_COMPOUND
+            : MEDIUM_GENERATION_MODEL,
+          maxTokens: 8096,
+        });
+
+        try {
+          sectionContentBlocks = JSON.parse(fixedJsonResult.content) as {
+            blocks: PostBlock[];
+          };
+        } catch (retryParseError) {
+          throw new BadRequestException(
+            `Failed to parse section content JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
+          );
+        }
+      }
       blocks.push({
         type: PostBlockType.HEADING,
         level: section.level,
@@ -214,10 +264,35 @@ export class PostsManagementService {
         },
       );
 
-      const faqObject = JSON.parse(faqResult.content) as {
-        questions: string[];
-        answers: string[];
-      };
+      let faqObject: { questions: string[]; answers: string[] };
+      try {
+        faqObject = JSON.parse(faqResult.content) as {
+          questions: string[];
+          answers: string[];
+        };
+      } catch (parseError) {
+        // If JSON parsing fails, request a fix from the LLM
+        const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
+          faqResult.content,
+          parseError instanceof Error ? parseError.message : String(parseError),
+        );
+
+        const fixedJsonResult = await this.groqService.generate(fixPrompt, {
+          model: MEDIUM_GENERATION_MODEL,
+          maxTokens: 8096,
+        });
+
+        try {
+          faqObject = JSON.parse(fixedJsonResult.content) as {
+            questions: string[];
+            answers: string[];
+          };
+        } catch (retryParseError) {
+          throw new BadRequestException(
+            `Failed to parse FAQ JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
+          );
+        }
+      }
 
       blocks.push({
         type: PostBlockType.FAQ,
