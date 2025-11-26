@@ -221,6 +221,17 @@ export class ScriptsPrompting {
   - When including these links in the script, format each as: \`[descriptive link text](slug-or-url)\` - description of the source and usage.
   `
   }
+
+  ${
+    postInterview.includeInternalLinksAutomatically &&
+    `
+  VERY IMPORTANT: These are other posts of the user webpage
+  If they are suitable for the script, plan the usage of them in a natural way.
+  ONLY USE THOSE THAT SOUNDS NATURAL WITH THE SECTION
+  HERE IS THE META:
+  ${postInterview.blogInternalLinksMeta}
+  `
+  }
   
   ${imageSection}
   ---
@@ -242,6 +253,7 @@ export class ScriptsPrompting {
   ### 3.1. Title & Meta
   - **H1**: Create a compelling, SEO-optimized title that:
     - Includes the main keyword naturally
+    VERY IMPORTANT SUGGESTIONS WHEN ELABORATING THE SCRIPT:
     - Uses power words (e.g., "Ultimate", "Complete", "Essential", "Proven", "Secret", "Powerful", "Effective", "Best", "Top", "Expert", "Advanced", "Comprehensive", "Definitive", "Master", "Revolutionary", "Breakthrough", "Game-Changing", "Must-Know", "Critical", "Vital")
     - Contains a positive or negative statement when appropriate (e.g., "Why X Works" vs "Why X Fails", "The Truth About X" vs "The Hidden Dangers of X", "How to Avoid X" vs "How to Achieve X")
     - If compatible with the user description and topic, includes a number (e.g., "5 Ways to...", "10 Best...", "7 Secrets of...", "3 Steps to...", "The Top 12...")
@@ -268,8 +280,8 @@ export class ScriptsPrompting {
   - **Main points**
   - **Examples / comparisons**
   - **Keyword usage**
-  ${postInterview.internalLinksToUse && postInterview.internalLinksToUse.length > 0 ? '- **Internal link suggestions (if enabled)**: For every link suggestion, use the format `[link text](slug-or-url)` followed by a description. Example: `[SEO best practices](/seo-guide)` - Guide to SEO fundamentals, use when discussing optimization techniques.' : ''}
-  ${postInterview.externalLinksToUse && postInterview.externalLinksToUse.length > 0 ? '- **External link suggestions (if enabled)**: For every link suggestion, use the format `[link text](full-url)` followed by a description. Example: `[Google Search Central](https://developers.google.com/search)` - Official Google SEO documentation, use to cite authoritative sources.' : ''}
+  - **Link Usage**: Integrate links that sound natural with the section. DON'T CREATE INTERNAL LINKS THAT ARE NOT MENTIONED IN THE PARAMETERS.
+  FOR THE LINK USAGE, ALWAYS ALWAYS USE THIS FORMAT: use the format [link content description](slug-or-url)
   ${hasAnyImages ? '- **Image blocks** (if applicable): Include image blocks directly here using the format specified in Image Placement Rules' : ''}
   - **Tone notes**
   \`\`\`
