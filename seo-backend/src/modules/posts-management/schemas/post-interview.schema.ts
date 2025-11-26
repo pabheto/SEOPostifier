@@ -40,7 +40,7 @@ const UserImageSchema = SchemaFactory.createForClass(UserImage);
 @Schema({ _id: false })
 export class ImagesConfig {
   /** Cuántas imágenes debe generar la IA */
-  @Prop({ min: 0, default: 0 })
+  @Prop({ min: -1, default: -1 })
   aiImagesCount?: number;
 
   /** Descripciones de las imágenes generadas por la IA */
@@ -169,7 +169,7 @@ export class PostInterview {
   externalLinksToUse?: string[];
 
   /** Enlaces externos a incluir automáticamente */
-  @Prop({ min: 0 })
+  @Prop({ min: -1 })
   externalLinksToIncludeAutomatically?: number;
 
   // ============================================

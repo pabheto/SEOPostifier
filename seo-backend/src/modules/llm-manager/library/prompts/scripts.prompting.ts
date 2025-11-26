@@ -28,24 +28,32 @@ export class ScriptsPrompting {
     } = postInterview;
 
     // Extract image configuration with proper defaults
-    const aiImagesCount = imagesConfig?.aiImagesCount ?? 0;
+    // -1 means "default/auto" - let the AI decide what's reasonable
+    const aiImagesCountRaw = imagesConfig?.aiImagesCount ?? 0;
+    const isAutoImageMode = aiImagesCountRaw === -1;
+    const aiImagesCount = isAutoImageMode ? undefined : aiImagesCountRaw;
     const useUserImages = imagesConfig?.useUserImages ?? false;
     const userImages = imagesConfig?.userImages ?? [];
 
     // Calculate total desired images
+    // If aiImagesCount is -1 (auto mode), we'll let AI decide, so we only count user images
     const totalDesiredImages =
-      aiImagesCount + (useUserImages ? userImages.length : 0);
+      (isAutoImageMode ? 0 : (aiImagesCount ?? 0)) +
+      (useUserImages ? userImages.length : 0);
 
     const hasUserImages = useUserImages && userImages.length > 0;
+    // hasAnyImages is true if: auto mode (-1), specific count > 0, or user provided images
     const hasAnyImages =
-      totalDesiredImages > 0 || aiImagesCount > 0 || hasUserImages;
+      isAutoImageMode || // Auto mode - let AI decide
+      (aiImagesCount !== undefined && aiImagesCount > 0) || // Specific count > 0
+      hasUserImages; // User provided images
 
     const imageSection = hasAnyImages
       ? `
   ### Image Strategy
   
-  - **Total desired images**: ${totalDesiredImages}
-  - **Max AI-generated images**: ${aiImagesCount}
+  - **Total desired images**: ${isAutoImageMode ? 'You decide what is reasonable for this article (consider article length, topic complexity, and content structure)' : totalDesiredImages}
+  - **Max AI-generated images**: ${isAutoImageMode ? 'You decide what is reasonable for this article based on content needs' : aiImagesCount}
   - **User will provide images?** ${useUserImages ? 'YES' : 'NO'}
   - **User images available**:
   ${
@@ -116,11 +124,18 @@ export class ScriptsPrompting {
       ? `
   ### Image Placement Rules (within sections)
   
-  1. Total image blocks MUST NOT exceed \`totalDesiredImages\`.
+  ${
+    isAutoImageMode
+      ? `1. **AI Images Count**: You decide what is reasonable for this article. Consider the article length, topic complexity, and content structure when determining how many images would enhance the content.
+  2. If user images exist, prioritize them.
+  3. Use AI images when they would enhance the content.
+  4. Include image blocks **directly within the relevant section** where they should appear.`
+      : `1. Total image blocks MUST NOT exceed \`totalDesiredImages\`.
   2. AI image blocks MUST NOT exceed \`aiImagesCount\`.
   3. If user images exist, prioritize them.
   4. Only use AI images when slots remain.
-  5. Include image blocks **directly within the relevant section** where they should appear.
+  5. Include image blocks **directly within the relevant section** where they should appear.`
+  }
   
   ### Image Block Format (include in section descriptions)
   
@@ -182,7 +197,14 @@ export class ScriptsPrompting {
   }
 
   // LINKS
-  ${postInterview.externalLinksToIncludeAutomatically && `- You have to find in search engines up to ${postInterview.externalLinksToIncludeAutomatically} external links to include in the article. Find them with purpose when creating the script. Distribute them in the different sections. Format each link as \`[link text](full-url) - description\`.`}
+  ${
+    postInterview.externalLinksToIncludeAutomatically !== undefined &&
+    postInterview.externalLinksToIncludeAutomatically !== null
+      ? postInterview.externalLinksToIncludeAutomatically === -1
+        ? `- **External links**: You decide what is reasonable for this article. Find authoritative external links in search engines that would enhance the content. Consider the article length, topic complexity, and content structure when determining how many external links would be appropriate. Distribute them in the different sections. Format each link as \`[link text](full-url) - description\`.`
+        : `- You have to find in search engines up to ${postInterview.externalLinksToIncludeAutomatically} external links to include in the article. Find them with purpose when creating the script. Distribute them in the different sections. Format each link as \`[link text](full-url) - description\`.`
+      : ''
+  }
   ${
     postInterview.externalLinksToUse &&
     `
