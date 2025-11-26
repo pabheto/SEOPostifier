@@ -55,6 +55,7 @@ export class PostsManagementService {
       userId: postInterview.userId,
       status: PostStatus.DRAFT,
       title: postInterview.generatedScriptDefinition.head.h1,
+      slug: postInterview.generatedScriptDefinition.head.slug,
       language: postInterview.language,
     });
     await post.save();
