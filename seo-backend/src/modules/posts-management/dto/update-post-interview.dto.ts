@@ -196,5 +196,20 @@ export class UpdatePostInterviewDto {
   @IsOptional()
   @IsBoolean()
   includeInternalLinks?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Si incluir enlaces internos automáticamente',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  includeInternalLinksAutomatically?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Metadatos de enlaces internos del blog',
+  })
+  @IsOptional()
+  @IsString()
+  blogInternalLinksMeta?: string;
 }
 

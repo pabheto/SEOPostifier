@@ -672,6 +672,7 @@ jQuery(document).ready(function($) {
         }
 
         // Collect form data
+        const internalLinksMode = $('#internal-links-mode').val();
         const formData = {
             mainKeyword: $('#main-keyword').val(),
             secondaryKeywords: splitAndFilter($('#secondary-keywords').val(), ','),
@@ -687,8 +688,10 @@ jQuery(document).ready(function($) {
             mentionsBrand: $('#mentions-brand').is(':checked'),
             brandName: $('#brand-name').val(),
             brandDescription: $('#brand-description').val(),
-            internalLinksMode: $('#internal-links-mode').val(),
-            internalLinksToUse: $('#internal-links-mode').val() === 'custom' ? splitAndFilter($('#internal-links-to-use').val(), '\n') : undefined,
+            internalLinksMode: internalLinksMode,
+            internalLinksToUse: internalLinksMode === 'custom' ? splitAndFilter($('#internal-links-to-use').val(), '\n') : undefined,
+            includeInternalLinks: internalLinksMode !== 'disabled',
+            includeInternalLinksAutomatically: internalLinksMode === 'auto',
             externalLinksResearchMode: $('#external-links-research-mode').val(),
             externalLinksToIncludeAutomatically: $('#external-links-research-mode').val() === 'auto' ? -1 : undefined,
             useCustomExternalLinks: $('#use-custom-external-links').is(':checked'),
@@ -705,6 +708,31 @@ jQuery(document).ready(function($) {
             formData.interviewId = interviewId;
         }
 
+        // If internal links mode is auto, fetch blog links
+        if (internalLinksMode === 'auto') {
+            $.ajax({
+                url: seoPostifierData.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'seo_postifier_get_blog_links',
+                    nonce: seoPostifierData.nonce
+                },
+                success: function(linksResponse) {
+                    if (linksResponse.success && linksResponse.data.formatted) {
+                        formData.blogInternalLinksMeta = linksResponse.data.formatted;
+                    }
+                    submitInterview();
+                },
+                error: function() {
+                    // Continue without blog links if fetch fails
+                    submitInterview();
+                }
+            });
+        } else {
+            submitInterview();
+        }
+
+        function submitInterview() {
         // First, create or update the interview
         $.ajax({
             url: seoPostifierData.ajaxUrl,
@@ -831,6 +859,7 @@ jQuery(document).ready(function($) {
                 $button.prop('disabled', false).text(originalText);
             }
         });
+        } // End submitInterview function
         
         return false;
     }
@@ -887,6 +916,8 @@ jQuery(document).ready(function($) {
                         $('#internal-links-mode').val(interview.internalLinksMode);
                     } else if (interview.includeInternalLinks === false) {
                         $('#internal-links-mode').val('disabled');
+                    } else if (interview.includeInternalLinksAutomatically === true) {
+                        $('#internal-links-mode').val('auto');
                     } else if (interview.internalLinksToUse && interview.internalLinksToUse.length > 0) {
                         $('#internal-links-mode').val('custom');
                     } else {

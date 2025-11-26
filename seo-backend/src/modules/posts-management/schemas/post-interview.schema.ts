@@ -172,6 +172,12 @@ export class PostInterview {
   @Prop({ min: -1 })
   externalLinksToIncludeAutomatically?: number;
 
+  @Prop({ default: false })
+  includeInternalLinksAutomatically?: boolean;
+
+  @Prop({ type: String, required: false })
+  blogInternalLinksMeta?: string;
+
   // ============================================
   // SECCIÓN 4: Metadatos y estado
   // ============================================

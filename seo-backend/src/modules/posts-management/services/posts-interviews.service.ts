@@ -146,6 +146,8 @@ export class PostInterviewsService {
       'externalLinksToUse',
       'includeExternalLinks',
       'includeInternalLinks',
+      'includeInternalLinksAutomatically',
+      'blogInternalLinksMeta',
     ];
 
     for (const field of fieldsToUpdate) {

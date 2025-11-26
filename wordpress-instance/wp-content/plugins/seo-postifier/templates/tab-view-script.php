@@ -601,10 +601,36 @@ jQuery(document).ready(function($) {
         $('#edit-mentions-brand').prop('checked', interview.mentionsBrand === true);
         $('#edit-brand-name').val(interview.brandName || '');
         $('#edit-brand-description').val(interview.brandDescription || '');
-        $('#edit-include-internal-links').prop('checked', interview.includeInternalLinks === true);
+        
+        // Handle internal links mode
+        if (interview.internalLinksMode) {
+            $('#edit-internal-links-mode').val(interview.internalLinksMode);
+        } else if (interview.includeInternalLinks === false) {
+            $('#edit-internal-links-mode').val('disabled');
+        } else if (interview.includeInternalLinksAutomatically === true) {
+            $('#edit-internal-links-mode').val('auto');
+        } else if (interview.internalLinksToUse && interview.internalLinksToUse.length > 0) {
+            $('#edit-internal-links-mode').val('custom');
+        } else {
+            $('#edit-internal-links-mode').val('auto');
+        }
+        $('#edit-internal-links-mode').trigger('change');
         $('#edit-internal-links-to-use').val(Array.isArray(interview.internalLinksToUse) ? interview.internalLinksToUse.join('\n') : '');
-        $('#edit-include-external-links').prop('checked', interview.includeExternalLinks === true);
-        $('#edit-external-links-to-include-automatically').val(interview.externalLinksToIncludeAutomatically || '2');
+        
+        // Handle external links research mode
+        if (interview.externalLinksResearchMode) {
+            $('#edit-external-links-research-mode').val(interview.externalLinksResearchMode);
+        } else if (interview.externalLinksToIncludeAutomatically === -1 || interview.includeExternalLinks === true) {
+            $('#edit-external-links-research-mode').val('auto');
+        } else {
+            $('#edit-external-links-research-mode').val('disabled');
+        }
+        
+        // Handle custom external links
+        if (interview.useCustomExternalLinks || (interview.externalLinksToUse && interview.externalLinksToUse.length > 0)) {
+            $('#edit-use-custom-external-links').prop('checked', true);
+            $('#edit-use-custom-external-links').trigger('change');
+        }
         $('#edit-external-links-to-use').val(Array.isArray(interview.externalLinksToUse) ? interview.externalLinksToUse.join('\n') : '');
         $('#edit-notes-for-writer').val(interview.notesForWriter || '');
         
@@ -744,6 +770,7 @@ jQuery(document).ready(function($) {
             imagesConfig.userImages = userImages;
         }
 
+        const internalLinksMode = $('#edit-internal-links-mode').val();
         const formData = {
             interviewId: interviewId,
             mainKeyword: $('#edit-main-keyword').val(),
@@ -760,8 +787,10 @@ jQuery(document).ready(function($) {
             mentionsBrand: $('#edit-mentions-brand').is(':checked'),
             brandName: $('#edit-brand-name').val() || undefined,
             brandDescription: $('#edit-brand-description').val() || undefined,
-            internalLinksMode: $('#edit-internal-links-mode').val(),
-            internalLinksToUse: $('#edit-internal-links-mode').val() === 'custom' ? splitAndFilter($('#edit-internal-links-to-use').val(), '\n') : undefined,
+            internalLinksMode: internalLinksMode,
+            internalLinksToUse: internalLinksMode === 'custom' ? splitAndFilter($('#edit-internal-links-to-use').val(), '\n') : undefined,
+            includeInternalLinks: internalLinksMode !== 'disabled',
+            includeInternalLinksAutomatically: internalLinksMode === 'auto',
             externalLinksResearchMode: $('#edit-external-links-research-mode').val(),
             externalLinksToIncludeAutomatically: $('#edit-external-links-research-mode').val() === 'auto' ? -1 : undefined,
             useCustomExternalLinks: $('#edit-use-custom-external-links').is(':checked'),
@@ -776,6 +805,31 @@ jQuery(document).ready(function($) {
             }
         });
 
+        // If internal links mode is auto, fetch blog links
+        if (internalLinksMode === 'auto') {
+            $.ajax({
+                url: seoPostifierData.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'seo_postifier_get_blog_links',
+                    nonce: seoPostifierData.nonce
+                },
+                success: function(linksResponse) {
+                    if (linksResponse.success && linksResponse.data.formatted) {
+                        formData.blogInternalLinksMeta = linksResponse.data.formatted;
+                    }
+                    submitUpdate();
+                },
+                error: function() {
+                    // Continue without blog links if fetch fails
+                    submitUpdate();
+                }
+            });
+        } else {
+            submitUpdate();
+        }
+
+        function submitUpdate() {
         $.ajax({
             url: seoPostifierData.ajaxUrl,
             type: 'POST',
@@ -905,6 +959,7 @@ jQuery(document).ready(function($) {
                 $button.prop('disabled', false).text(originalText);
             }
         });
+        } // End submitUpdate function
     });
 
     // Load interview data

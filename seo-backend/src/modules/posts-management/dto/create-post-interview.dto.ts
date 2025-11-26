@@ -290,6 +290,21 @@ export class CreatePostInterviewDto {
   includeInternalLinks?: boolean = false;
 
   @ApiPropertyOptional({
+    description: 'Si incluir enlaces internos automáticamente',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  includeInternalLinksAutomatically?: boolean = false;
+
+  @ApiPropertyOptional({
+    description: 'Metadatos de enlaces internos del blog',
+  })
+  @IsOptional()
+  @IsString()
+  blogInternalLinksMeta?: string;
+
+  @ApiPropertyOptional({
     description: 'Configuración completa de imágenes',
     type: ImagesConfigDto,
   })

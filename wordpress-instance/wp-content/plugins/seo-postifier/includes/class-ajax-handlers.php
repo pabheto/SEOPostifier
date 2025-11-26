@@ -29,6 +29,7 @@ class SEO_Postifier_AJAX_Handlers {
         add_action('wp_ajax_seo_postifier_generate_post', array(__CLASS__, 'generate_post'));
         add_action('wp_ajax_seo_postifier_get_post', array(__CLASS__, 'get_post'));
         add_action('wp_ajax_seo_postifier_create_wp_draft', array(__CLASS__, 'create_wp_draft'));
+        add_action('wp_ajax_seo_postifier_get_blog_links', array(__CLASS__, 'get_blog_links'));
     }
 
     /**
@@ -883,6 +884,87 @@ class SEO_Postifier_AJAX_Handlers {
         }
 
         return trim($content);
+    }
+
+    /**
+     * Get all blog links formatted for internal linking
+     * Returns format: [Post title: post meta description](Post internal link)
+     * 
+     * @return array Array of formatted link strings
+     */
+    public static function get_blog_links() {
+        check_ajax_referer('seo_postifier_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        // Query all published posts
+        $args = array(
+            'post_type' => 'post',
+            'post_status' => 'publish',
+            'posts_per_page' => -1,
+            'orderby' => 'date',
+            'order' => 'DESC',
+        );
+
+        $posts_query = new WP_Query($args);
+        $posts = $posts_query->posts;
+        $formatted_links = array();
+
+        foreach ($posts as $post) {
+            $title = $post->post_title;
+            $permalink = get_permalink($post->ID);
+            
+            // Try to get meta description from various SEO plugins
+            $meta_description = '';
+            
+            // Yoast SEO
+            $yoast_meta = get_post_meta($post->ID, '_yoast_wpseo_metadesc', true);
+            if (!empty($yoast_meta)) {
+                $meta_description = $yoast_meta;
+            }
+            
+            // Rank Math
+            if (empty($meta_description)) {
+                $rank_math_meta = get_post_meta($post->ID, 'rank_math_description', true);
+                if (!empty($rank_math_meta)) {
+                    $meta_description = $rank_math_meta;
+                }
+            }
+            
+            // All in One SEO
+            if (empty($meta_description)) {
+                $aioseo_meta = get_post_meta($post->ID, '_aioseo_description', true);
+                if (!empty($aioseo_meta)) {
+                    $meta_description = $aioseo_meta;
+                }
+            }
+            
+            // Fallback to excerpt
+            if (empty($meta_description)) {
+                $meta_description = $post->post_excerpt;
+            }
+            
+            // Fallback to first 155 characters of content if no excerpt
+            if (empty($meta_description)) {
+                $meta_description = wp_trim_words(strip_tags($post->post_content), 25, '...');
+            }
+            
+            // Clean and sanitize meta description
+            $meta_description = sanitize_text_field($meta_description);
+            $meta_description = trim($meta_description);
+            
+            // Format as: [Post title: post meta description](Post internal link)
+            $formatted_link = '[' . $title . ': ' . $meta_description . '](' . $permalink . ')';
+            $formatted_links[] = $formatted_link;
+        }
+
+        wp_send_json_success(array(
+            'links' => $formatted_links,
+            'formatted' => implode("\n", $formatted_links)
+        ));
     }
 
 }
