@@ -584,6 +584,29 @@ class SEO_Postifier_AJAX_Handlers {
             update_post_meta($wp_post_id, '_aioseo_title', $meta_title);
         }
 
+        // Set RankMath focus keyword from mainKeyword
+        if (!empty($post_data['mainKeyword'])) {
+            $focus_keyword = sanitize_text_field($post_data['mainKeyword']);
+            update_post_meta($wp_post_id, 'rank_math_focus_keyword', $focus_keyword);
+        }
+
+        // Set meta description for SEO plugins
+        $meta_description = '';
+        if (!empty($post_data['excerpt'])) {
+            $meta_description = sanitize_textarea_field($post_data['excerpt']);
+        } elseif (!empty($wp_post_data['post_excerpt'])) {
+            $meta_description = sanitize_textarea_field($wp_post_data['post_excerpt']);
+        }
+
+        if (!empty($meta_description)) {
+            // Rank Math meta description
+            update_post_meta($wp_post_id, 'rank_math_description', $meta_description);
+            // Yoast SEO meta description
+            update_post_meta($wp_post_id, '_yoast_wpseo_metadesc', $meta_description);
+            // All in One SEO meta description
+            update_post_meta($wp_post_id, '_aioseo_description', $meta_description);
+        }
+
         // Get edit URL
         $edit_url = admin_url('post.php?action=edit&post=' . $wp_post_id);
 
