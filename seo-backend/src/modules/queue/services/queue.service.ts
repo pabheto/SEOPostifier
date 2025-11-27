@@ -1,13 +1,7 @@
 import { InjectQueue } from '@nestjs/bull';
 import { Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
-import {
-  GenerateFaqJobData,
-  GenerateImageJobData,
-  GenerateIntroductionJobData,
-  GeneratePostJobData,
-  GenerateSectionJobData,
-} from '../interfaces/post-generation-job.interface';
+import { GeneratePostContentJobData } from '../interfaces/post-generation-job.interface';
 import { JOB_NAMES, QUEUE_NAMES } from '../queue.constants';
 
 @Injectable()
@@ -18,53 +12,61 @@ export class QueueService {
   ) {}
 
   /**
-   * Add a job to generate a complete post
+   * Add a job to generate post content (introduction, section, image, or FAQ)
    */
-  async addGeneratePostJob(data: GeneratePostJobData) {
-    return this.postGenerationQueue.add(JOB_NAMES.GENERATE_POST, data, {
-      priority: 1,
-      jobId: `post-${data.postId}`,
+  async addGeneratePostContentJob(data: GeneratePostContentJobData) {
+    // Generate job ID based on content type
+    const jobId = this.generateJobId(data);
+
+    // Set priority based on content type
+    const priority = this.getPriorityForContentType(data.contentType);
+
+    return this.postGenerationQueue.add(JOB_NAMES.GENERATE_POST_CONTENT, data, {
+      priority,
+      jobId,
     });
   }
 
   /**
-   * Add a job to generate post introduction
+   * Generate a unique job ID based on content type and data
    */
-  async addGenerateIntroductionJob(data: GenerateIntroductionJobData) {
-    return this.postGenerationQueue.add(JOB_NAMES.GENERATE_INTRODUCTION, data, {
-      priority: 2,
-      jobId: `intro-${data.postId}`,
-    });
+  private generateJobId(data: GeneratePostContentJobData): string {
+    const { contentType, postId } = data;
+    if (contentType === 'introduction') {
+      return `intro-${postId}`;
+    }
+    if (contentType === 'section') {
+      return `section-${postId}-${data.section.title}`;
+    }
+    if (contentType === 'image') {
+      return `image-${postId}-${data.sectionTitle}-${Date.now()}`;
+    }
+    if (contentType === 'faq') {
+      return `faq-${postId}`;
+    }
+    // This should never happen due to TypeScript exhaustiveness checking
+    throw new Error(`Unknown content type: ${contentType}`);
   }
 
   /**
-   * Add a job to generate a post section
+   * Get priority for different content types
+   * Lower number = higher priority
    */
-  async addGenerateSectionJob(data: GenerateSectionJobData) {
-    return this.postGenerationQueue.add(JOB_NAMES.GENERATE_SECTION, data, {
-      priority: 2,
-      jobId: `section-${data.postId}-${data.section.title}`,
-    });
-  }
-
-  /**
-   * Add a job to generate an image
-   */
-  async addGenerateImageJob(data: GenerateImageJobData) {
-    return this.postGenerationQueue.add(JOB_NAMES.GENERATE_IMAGE, data, {
-      priority: 3,
-      jobId: `image-${data.postId}-${Date.now()}`,
-    });
-  }
-
-  /**
-   * Add a job to generate FAQ section
-   */
-  async addGenerateFaqJob(data: GenerateFaqJobData) {
-    return this.postGenerationQueue.add(JOB_NAMES.GENERATE_FAQ, data, {
-      priority: 2,
-      jobId: `faq-${data.postId}`,
-    });
+  private getPriorityForContentType(
+    contentType: GeneratePostContentJobData['contentType'],
+  ): number {
+    switch (contentType) {
+      case 'introduction':
+        return 1; // Highest priority - needed first
+      case 'section':
+        return 2; // High priority - main content
+      case 'faq':
+        return 2; // High priority - but can be generated in parallel
+      case 'image':
+        return 3; // Lower priority - can be generated in parallel with sections
+      default:
+        return 5;
+    }
   }
 
   /**
@@ -77,9 +79,9 @@ export class QueueService {
     }
 
     const state = await job.getState();
-    const progress = job.progress;
-    const returnValue = job.returnvalue;
-    const failedReason = job.failedReason;
+    const progress = job.progress as number;
+    const returnValue = job.returnvalue as unknown;
+    const failedReason = job.failedReason as string | undefined;
 
     return {
       id: job.id,
@@ -88,7 +90,7 @@ export class QueueService {
       progress,
       returnValue,
       failedReason,
-      data: job.data,
+      data: job.data as GeneratePostContentJobData,
     };
   }
 

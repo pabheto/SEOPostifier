@@ -8,4 +8,3 @@ import { ImageStorageService } from './services/image-storage.service';
   exports: [ImageStorageService],
 })
 export class StorageModule {}
-

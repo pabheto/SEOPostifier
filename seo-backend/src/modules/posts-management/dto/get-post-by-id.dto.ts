@@ -11,5 +11,3 @@ export class GetPostByIdDto {
   @IsMongoId({ message: 'postId must be a valid MongoDB ObjectId' })
   postId: string;
 }
-
-
