@@ -11,9 +11,12 @@ import {
   ImageUploadResult,
 } from '../../storage/services/image-storage.service';
 
+export type AspectRatio = '16:9' | '4:3' | '3:2' | '1:1' | '9:16';
+
 export interface GenerateImageOptions {
   prompt: string;
   model?: string;
+  aspectRatio?: AspectRatio;
 }
 
 export interface EditImageOptions {
@@ -21,6 +24,7 @@ export interface EditImageOptions {
   imageBuffer: Buffer;
   imageMimeType?: string;
   model?: string;
+  aspectRatio?: AspectRatio;
 }
 
 export interface GeneratedImageResult extends ImageUploadResult {
@@ -56,7 +60,10 @@ export class NanoBananaImageGenerationService {
   /**
    * Enhances a prompt to generate realistic, stock photo-like images
    */
-  private enhancePromptForRealisticImage(originalPrompt: string): string {
+  private enhancePromptForRealisticImage(
+    originalPrompt: string,
+    aspectRatio?: AspectRatio,
+  ): string {
     const enhancementInstructions = [
       'professional stock photography',
       'high-quality realistic photograph',
@@ -74,7 +81,22 @@ export class NanoBananaImageGenerationService {
       'lifelike and believable',
     ].join(', ');
 
-    return `${originalPrompt}. Style: ${enhancementInstructions}. The image should look like a professional stock photo taken with a high-end camera, completely natural and realistic with no signs of AI generation.`;
+    let aspectRatioInstruction = '';
+    if (aspectRatio) {
+      const aspectRatioDescriptions: Record<AspectRatio, string> = {
+        '16:9':
+          'widescreen landscape format (16:9 aspect ratio, rectangular horizontal)',
+        '4:3':
+          'standard landscape format (4:3 aspect ratio, rectangular horizontal)',
+        '3:2':
+          'photography standard format (3:2 aspect ratio, rectangular horizontal)',
+        '1:1': 'square format (1:1 aspect ratio)',
+        '9:16': 'portrait format (9:16 aspect ratio, rectangular vertical)',
+      };
+      aspectRatioInstruction = ` The image must be in ${aspectRatioDescriptions[aspectRatio]}.`;
+    }
+
+    return `${originalPrompt}. Style: ${enhancementInstructions}.${aspectRatioInstruction} The image should look like a professional stock photo taken with a high-end camera, completely natural and realistic with no signs of AI generation.`;
   }
 
   /**
@@ -83,14 +105,17 @@ export class NanoBananaImageGenerationService {
   async generateImage(
     options: GenerateImageOptions,
   ): Promise<GeneratedImageResult> {
-    const { prompt, model = this.defaultModel } = options;
+    const { prompt, model = this.defaultModel, aspectRatio = '16:9' } = options;
 
     if (!prompt || prompt.trim().length === 0) {
       throw new BadRequestException('Prompt is required');
     }
 
-    // Enhance the prompt for realistic, stock photo-like images
-    const enhancedPrompt = this.enhancePromptForRealisticImage(prompt);
+    // Enhance the prompt for realistic, stock photo-like images with aspect ratio
+    const enhancedPrompt = this.enhancePromptForRealisticImage(
+      prompt,
+      aspectRatio,
+    );
 
     this.logger.debug(
       `Generating image with Nano Banana (${model}), original prompt: ${prompt}`,
@@ -151,6 +176,7 @@ export class NanoBananaImageGenerationService {
       imageBuffer,
       imageMimeType = 'image/png',
       model = this.defaultModel,
+      aspectRatio,
     } = options;
 
     if (!prompt || prompt.trim().length === 0) {
@@ -161,8 +187,11 @@ export class NanoBananaImageGenerationService {
       throw new BadRequestException('Image buffer is required');
     }
 
-    // Enhance the prompt for realistic, stock photo-like images
-    const enhancedPrompt = this.enhancePromptForRealisticImage(prompt);
+    // Enhance the prompt for realistic, stock photo-like images with aspect ratio
+    const enhancedPrompt = this.enhancePromptForRealisticImage(
+      prompt,
+      aspectRatio,
+    );
 
     this.logger.debug(
       `Editing image with Nano Banana (${model}), original prompt: ${prompt}`,

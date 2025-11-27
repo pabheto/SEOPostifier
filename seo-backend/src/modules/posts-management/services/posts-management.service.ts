@@ -125,6 +125,7 @@ export class PostsManagementService {
                 await this.imageGenerationService.generateImage({
                   prompt:
                     image.description || `Image for section: ${sectionTitle}`,
+                  aspectRatio: '16:9', // Use widescreen format for blog post images
                 });
 
               // Create image block with generated image data
