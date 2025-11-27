@@ -190,11 +190,7 @@ export class ScriptsPrompting {
       : 'unspecified (default 1500–4000)'
   }
   - **User description**: ${userDescription || '_none provided_'}
-  - **Brand required**: ${
-    mentionsBrand
-      ? `YES — ${brandName || 'brand'} (${brandDescription || 'no description'})`
-      : 'No'
-  }
+  ${mentionsBrand ? `- **Brand required**: YES — ${brandName || 'brand'} (${brandDescription || 'no description'})` : ''}
 
   // LINKS
   ${
