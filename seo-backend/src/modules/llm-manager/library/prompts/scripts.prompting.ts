@@ -261,7 +261,7 @@ export class ScriptsPrompting {
   - **Introduction description**: Explain the problem the article solves, mention the main keyword once, include micro-storytelling or relevant facts/statistics, describe points for the writer to develop later, include real-world information with sources
   - **Introduction word count**: Specify exact range (e.g., "Introduction word count: 250 - 350 words")
   - **Target article length**: ${minWordCount && maxWordCount ? `${minWordCount} - ${maxWordCount} words` : 'Specify target length'}
-  - **Optional**: slug + tags (3-8 keywords)
+  - **Optional**: slug (3-5 words, 20-50 characters, URL-friendly: lowercase, hyphens, no special characters) + tags (3-8 keywords)
   
   ### 3.2. "General Structure of the Article"
   List H2/H3/H4 headings with 1–2 line summaries. Add the estimated word count for each section (150-300 words standard, 400-500 for core sections only). Ensure the sum of all sections + introduction + FAQ matches the user word range requirement.
@@ -401,7 +401,7 @@ Important instructions:
    - h1: Main title (extract from outline or create if missing)
    - introductionDescription: Full introduction description including storytelling and planned points
    - introductionLengthRange (optional): [minWords, maxWords] - extract from script if specified, otherwise undefined
-   - slug: URL-friendly version of h1 (lowercase, hyphens, no special characters)
+   - slug: URL-friendly version of h1 (lowercase, hyphens, no special characters). MUST be 3-5 words and 20-50 characters total. Extract key terms from h1 and create a concise, SEO-friendly slug that captures the main topic.
    - tags: 3-8 core keywords/topics as array of strings
 
 3. "body.sections" RULES
