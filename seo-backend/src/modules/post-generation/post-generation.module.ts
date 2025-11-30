@@ -3,7 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { PostGenerationProcessor } from './processors/post-generation.processor';
 import { QUEUE_NAMES } from './queue.constants';
-import { QueueService } from './services/queue.service';
+import { PostGenerationService } from './services/post-generation.service';
 
 @Module({
   imports: [
@@ -38,7 +38,7 @@ import { QueueService } from './services/queue.service';
       name: QUEUE_NAMES.POST_GENERATION,
     }),
   ],
-  providers: [QueueService, PostGenerationProcessor],
-  exports: [BullModule, QueueService],
+  providers: [PostGenerationService, PostGenerationProcessor],
+  exports: [BullModule, PostGenerationService],
 })
-export class QueueModule {}
+export class PostGenerationModule {}

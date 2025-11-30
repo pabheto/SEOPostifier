@@ -7,9 +7,9 @@ import { LoggerMiddleware } from './middleware/logger.middleware';
 import { ImageGenerationModule } from './modules/image-generation/image-generation.module';
 import { LlmManagerModule } from './modules/llm-manager';
 import { PostsManagementModule } from './modules/posts-management/posts-management.module';
-import { QueueModule } from './modules/queue/queue.module';
 import { StorageModule } from './modules/storage';
 import { UsersModule } from './modules/users/users.module';
+import { PostGenerationModule } from './modules/post-generation/post-generation.module';
 
 @Module({
   imports: [
@@ -25,7 +25,7 @@ import { UsersModule } from './modules/users/users.module';
       },
     ),
 
-    QueueModule,
+    PostGenerationModule,
     ImageGenerationModule,
     LlmManagerModule,
     PostsManagementModule,
