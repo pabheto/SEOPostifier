@@ -570,6 +570,30 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
+        // Helper function to set RankMath meta with proper sanitization
+        $set_rank_math_meta = function($post_id, $key, $value) {
+            if (empty($value)) {
+                return;
+            }
+            
+            $meta_key = 'rank_math_' . $key;
+            
+            // Use RankMath's sanitization if available
+            if (class_exists('\RankMath\Rest\Sanitize')) {
+                $sanitizer = \RankMath\Rest\Sanitize::get();
+                $value = $sanitizer->sanitize($meta_key, $value);
+            } else {
+                // Fallback to WordPress sanitization
+                if ($key === 'description') {
+                    $value = sanitize_textarea_field($value);
+                } else {
+                    $value = sanitize_text_field($value);
+                }
+            }
+            
+            update_post_meta($post_id, $meta_key, $value);
+        };
+
         // Add meta title (using H1/title as meta title)
         if (!empty($post_data['title'])) {
             $meta_title = sanitize_text_field($post_data['title']);
@@ -578,8 +602,8 @@ class SEO_Postifier_AJAX_Handlers {
             // Also try to set it for common SEO plugins
             // Yoast SEO
             update_post_meta($wp_post_id, '_yoast_wpseo_title', $meta_title);
-            // Rank Math
-            update_post_meta($wp_post_id, 'rank_math_title', $meta_title);
+            // Rank Math - use helper function with proper sanitization
+            $set_rank_math_meta($wp_post_id, 'title', $meta_title);
             // All in One SEO
             update_post_meta($wp_post_id, '_aioseo_title', $meta_title);
         }
@@ -587,7 +611,7 @@ class SEO_Postifier_AJAX_Handlers {
         // Set RankMath focus keyword from mainKeyword
         if (!empty($post_data['mainKeyword'])) {
             $focus_keyword = sanitize_text_field($post_data['mainKeyword']);
-            update_post_meta($wp_post_id, 'rank_math_focus_keyword', $focus_keyword);
+            $set_rank_math_meta($wp_post_id, 'focus_keyword', $focus_keyword);
         }
 
         // Set meta description for SEO plugins
@@ -599,12 +623,31 @@ class SEO_Postifier_AJAX_Handlers {
         }
 
         if (!empty($meta_description)) {
-            // Rank Math meta description
-            update_post_meta($wp_post_id, 'rank_math_description', $meta_description);
+            // Rank Math meta description - use helper function with proper sanitization
+            $set_rank_math_meta($wp_post_id, 'description', $meta_description);
             // Yoast SEO meta description
             update_post_meta($wp_post_id, '_yoast_wpseo_metadesc', $meta_description);
             // All in One SEO meta description
             update_post_meta($wp_post_id, '_aioseo_description', $meta_description);
+        }
+
+        // Trigger RankMath to refresh and detect the meta fields automatically
+        // This ensures RankMath properly recognizes the meta data we just set
+        if (function_exists('rank_math') || class_exists('RankMath')) {
+            // Clear RankMath cache for this post if Helper class exists
+            if (class_exists('\RankMath\Helper')) {
+                if (method_exists('\RankMath\Helper', 'clear_cache')) {
+                    \RankMath\Helper::clear_cache(array('post' => $wp_post_id));
+                }
+            }
+            
+            // Trigger RankMath's meta update hooks to ensure proper detection
+            // These hooks tell RankMath that meta data has been updated
+            do_action('rank_math/save_post', $wp_post_id);
+            do_action('rank_math/post/update', $wp_post_id);
+            
+            // Clear object cache to ensure RankMath reads fresh meta data
+            clean_post_cache($wp_post_id);
         }
 
         // Get edit URL
