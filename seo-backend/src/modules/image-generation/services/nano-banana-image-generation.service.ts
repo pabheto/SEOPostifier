@@ -6,6 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import sharp from 'sharp';
 import {
   ImageStorageService,
   ImageUploadResult,
@@ -55,6 +56,108 @@ export class NanoBananaImageGenerationService {
     // GoogleGenAI can read from GOOGLE_API_KEY env var automatically
     // but we'll pass it explicitly if provided
     this.ai = new GoogleGenAI(apiKey ? { apiKey } : {});
+  }
+
+  /**
+   * Converts aspect ratio string to width and height dimensions
+   */
+  private getAspectRatioDimensions(
+    aspectRatio: AspectRatio,
+    baseSize: number = 1024,
+  ): { width: number; height: number } {
+    const [widthRatio, heightRatio] = aspectRatio.split(':').map(Number);
+    const ratio = widthRatio / heightRatio;
+
+    if (ratio > 1) {
+      // Landscape: width > height
+      return {
+        width: baseSize,
+        height: Math.round(baseSize / ratio),
+      };
+    } else if (ratio < 1) {
+      // Portrait: height > width
+      return {
+        width: Math.round(baseSize * ratio),
+        height: baseSize,
+      };
+    } else {
+      // Square
+      return {
+        width: baseSize,
+        height: baseSize,
+      };
+    }
+  }
+
+  /**
+   * Processes an image buffer to match the desired aspect ratio by cropping
+   */
+  private async processImageToAspectRatio(
+    imageBuffer: Buffer,
+    aspectRatio: AspectRatio,
+  ): Promise<Buffer> {
+    try {
+      const image = sharp(imageBuffer);
+      const metadata = await image.metadata();
+      const currentWidth = metadata.width || 1024;
+      const currentHeight = metadata.height || 1024;
+      const currentAspectRatio = currentWidth / currentHeight;
+
+      const [targetWidthRatio, targetHeightRatio] = aspectRatio
+        .split(':')
+        .map(Number);
+      const targetAspectRatio = targetWidthRatio / targetHeightRatio;
+
+      // If aspect ratios match (within 1% tolerance), return original
+      if (Math.abs(currentAspectRatio - targetAspectRatio) < 0.01) {
+        this.logger.debug(
+          `Image already matches aspect ratio ${aspectRatio}, skipping processing`,
+        );
+        return imageBuffer;
+      }
+
+      let newWidth: number;
+      let newHeight: number;
+      let left = 0;
+      let top = 0;
+
+      if (currentAspectRatio > targetAspectRatio) {
+        // Current image is wider than target - crop width
+        newHeight = currentHeight;
+        newWidth = Math.round(currentHeight * targetAspectRatio);
+        left = Math.round((currentWidth - newWidth) / 2);
+        top = 0;
+      } else {
+        // Current image is taller than target - crop height
+        newWidth = currentWidth;
+        newHeight = Math.round(currentWidth / targetAspectRatio);
+        left = 0;
+        top = Math.round((currentHeight - newHeight) / 2);
+      }
+
+      this.logger.debug(
+        `Cropping image from ${currentWidth}x${currentHeight} to ${newWidth}x${newHeight} (aspect ratio: ${aspectRatio})`,
+      );
+
+      const processedBuffer = await image
+        .extract({
+          left,
+          top,
+          width: newWidth,
+          height: newHeight,
+        })
+        .toBuffer();
+
+      return processedBuffer;
+    } catch (error) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      this.logger.error(
+        `Failed to process image to aspect ratio: ${errorMessage}`,
+      );
+      // Return original buffer if processing fails
+      return imageBuffer;
+    }
   }
 
   /**
@@ -129,11 +232,22 @@ export class NanoBananaImageGenerationService {
       });
 
       // Extract image from response
-      const imageBuffer = this.extractImageFromResponse(response);
+      let imageBuffer = this.extractImageFromResponse(response);
 
       if (!imageBuffer) {
         throw new InternalServerErrorException(
           'No image data found in Nano Banana response',
+        );
+      }
+
+      // Process image to match the desired aspect ratio
+      if (aspectRatio) {
+        this.logger.debug(
+          `Processing generated image to aspect ratio: ${aspectRatio}`,
+        );
+        imageBuffer = await this.processImageToAspectRatio(
+          imageBuffer,
+          aspectRatio,
         );
       }
 
@@ -219,11 +333,22 @@ export class NanoBananaImageGenerationService {
       });
 
       // Extract image from response
-      const editedImageBuffer = this.extractImageFromResponse(response);
+      let editedImageBuffer = this.extractImageFromResponse(response);
 
       if (!editedImageBuffer) {
         throw new InternalServerErrorException(
           'No image data found in Nano Banana response',
+        );
+      }
+
+      // Process image to match the desired aspect ratio
+      if (aspectRatio) {
+        this.logger.debug(
+          `Processing edited image to aspect ratio: ${aspectRatio}`,
+        );
+        editedImageBuffer = await this.processImageToAspectRatio(
+          editedImageBuffer,
+          aspectRatio,
         );
       }
 

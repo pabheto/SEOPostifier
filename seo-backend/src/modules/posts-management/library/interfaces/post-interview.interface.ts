@@ -26,6 +26,7 @@ export type IUserImage = {
   title?: string;
   description?: string;
   alt?: string;
+  aspectRatio?: '16:9' | '4:3' | '3:2' | '1:1' | '9:16';
 };
 
 export type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4';

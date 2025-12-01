@@ -6,7 +6,10 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { NanoBananaImageGenerationService } from 'src/modules/image-generation/services/nano-banana-image-generation.service';
+import {
+  AspectRatio,
+  NanoBananaImageGenerationService,
+} from 'src/modules/image-generation/services/nano-banana-image-generation.service';
 import {
   GROQ_COMPOUND,
   MEDIUM_GENERATION_MODEL,
@@ -62,8 +65,12 @@ export class PostsManagementService {
 
     const blocks: PostBlock[] = [];
 
-    // Generating the different sections of the post
-    const introductionResult = await this.groqService.generate(
+    // Parallel: Start generating introduction/result, all sections (content and images), and FAQ (if available)
+    const sectionInputs =
+      postInterview.generatedScriptDefinition.body.sections ?? [];
+
+    // Introduction prompt (single)
+    const introductionPromise = this.groqService.generate(
       ScriptsPrompting.COPYWRITER_INTRODUCTION_PROMPT(
         postInterview.generatedScriptDefinition.indexSummary,
         postInterview.generatedScriptDefinition.head.h1,
@@ -79,15 +86,220 @@ export class PostsManagementService {
       },
     );
 
-    // Parse introduction blocks from JSON response
-    // Don't add H1 heading block as WordPress already uses the post title as H1
+    // Each section: parallelize content and image generation
+    const sectionBlockPromises = sectionInputs.map(async (section) => {
+      const sectionTitle = section.title;
+
+      // Parallelize image generation for all images in the section
+      const sectionImageBlockPromises = (section.images ?? []).map(
+        async (image) => {
+          if (image.sourceType === 'ai_generated') {
+            try {
+              const generatedImage =
+                await this.imageGenerationService.generateImage({
+                  prompt:
+                    image.description || `Image for section: ${sectionTitle}`,
+                  aspectRatio: (image.aspectRatio as AspectRatio) || '16:9',
+                });
+
+              const imageTitle: string =
+                image.title ||
+                (image.description
+                  ? image.description.split('.')[0].trim()
+                  : `Image for ${sectionTitle}`);
+
+              return {
+                type: PostBlockType.IMAGE,
+                image: {
+                  sourceType: 'ai_generated',
+                  sourceValue: generatedImage.url,
+                  title: imageTitle,
+                  description:
+                    image.description || `Image related to ${sectionTitle}`,
+                  alt: image.alt || `Image for ${sectionTitle}`,
+                },
+              } as PostBlock;
+            } catch (error: unknown) {
+              // Log error but continue
+              console.error(
+                `Failed to generate AI image for section ${sectionTitle}:`,
+                error,
+              );
+              return null; // skip this image
+            }
+          } else if (image.sourceType === 'user') {
+            const imageTitle: string =
+              image.title ||
+              (image.description
+                ? image.description.split('.')[0].trim()
+                : `Image for ${sectionTitle}`);
+
+            return {
+              type: PostBlockType.IMAGE,
+              image: {
+                sourceType: 'user',
+                sourceValue: image.sourceValue,
+                title: imageTitle,
+                description:
+                  image.description || `Image related to ${sectionTitle}`,
+                alt: image.alt || `Image for ${sectionTitle}`,
+              },
+            } as PostBlock;
+          } else {
+            return null;
+          }
+        },
+      );
+
+      // Section content generation (LLM)
+      const sectionContentPromise = this.groqService.generate(
+        ScriptsPrompting.COPYWRITER_PARAGRAPH_PROMPT(
+          postInterview.generatedScriptDefinition?.indexSummary ?? '',
+          postInterview.targetAudience,
+          postInterview.toneOfVoice,
+          section,
+        ),
+        {
+          model: section.requiresDeepResearch
+            ? GROQ_COMPOUND
+            : MEDIUM_GENERATION_MODEL,
+          maxTokens: section.requiresDeepResearch ? 8096 : 8096,
+        },
+      );
+
+      // Await both (content and images)
+      const [imageBlockResults, sectionContentResult] = await Promise.all([
+        Promise.all(sectionImageBlockPromises),
+        sectionContentPromise,
+      ]);
+      const sectionImageBlocks: PostBlock[] = imageBlockResults.filter(
+        Boolean,
+      ) as PostBlock[];
+
+      // Parse section content blocks as usual (with error correction)
+      let sectionContentBlocks: { blocks: PostBlock[] };
+      try {
+        sectionContentBlocks = JSON.parse(sectionContentResult.content) as {
+          blocks: PostBlock[];
+        };
+      } catch (parseError) {
+        const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
+          sectionContentResult.content,
+          parseError instanceof Error ? parseError.message : String(parseError),
+        );
+        const fixedJsonResult = await this.groqService.generate(fixPrompt, {
+          model: section.requiresDeepResearch
+            ? GROQ_COMPOUND
+            : MEDIUM_GENERATION_MODEL,
+          maxTokens: 8096,
+        });
+        try {
+          sectionContentBlocks = JSON.parse(fixedJsonResult.content) as {
+            blocks: PostBlock[];
+          };
+        } catch (retryParseError) {
+          throw new BadRequestException(
+            `Failed to parse section content JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
+          );
+        }
+      }
+
+      // Build the blocks for the whole section
+      const blocksForSection: PostBlock[] = [
+        {
+          type: PostBlockType.HEADING,
+          level: section.level,
+          title: sectionTitle,
+        },
+      ];
+      // Insert images after first paragraph, rest at end
+      let imageIndex = 0;
+      for (let i = 0; i < sectionContentBlocks.blocks.length; i++) {
+        blocksForSection.push(sectionContentBlocks.blocks[i]);
+        if (
+          i === 0 &&
+          sectionImageBlocks.length > 0 &&
+          sectionContentBlocks.blocks[i].type === PostBlockType.PARAGRAPH
+        ) {
+          blocksForSection.push(sectionImageBlocks[imageIndex]);
+          imageIndex++;
+        }
+      }
+      while (imageIndex < sectionImageBlocks.length) {
+        blocksForSection.push(sectionImageBlocks[imageIndex]);
+        imageIndex++;
+      }
+
+      return blocksForSection;
+    });
+
+    // FAQ: parallelize if available
+    let faqPromise: Promise<{ questions: string[]; answers: string[] } | null> =
+      Promise.resolve(null);
+    if (postInterview.generatedScriptDefinition.faq) {
+      faqPromise = (async () => {
+        const faqResult = await this.groqService.generate(
+          ScriptsPrompting.COPYWRITER_FAQ_PROMPT(
+            postInterview.generatedScriptDefinition?.indexSummary ?? '',
+            postInterview.targetAudience,
+            postInterview.toneOfVoice,
+            postInterview.generatedScriptDefinition?.faq ?? {
+              description: '',
+              lengthRange: [0, 0],
+            },
+          ),
+          {
+            model: MEDIUM_GENERATION_MODEL,
+            maxTokens: 8096,
+          },
+        );
+        let faqObject: { questions: string[]; answers: string[] };
+        try {
+          faqObject = JSON.parse(faqResult.content) as {
+            questions: string[];
+            answers: string[];
+          };
+        } catch (parseError) {
+          // If JSON parsing fails, request a fix from the LLM
+          const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
+            faqResult.content,
+            parseError instanceof Error
+              ? parseError.message
+              : String(parseError),
+          );
+
+          const fixedJsonResult = await this.groqService.generate(fixPrompt, {
+            model: MEDIUM_GENERATION_MODEL,
+            maxTokens: 8096,
+          });
+
+          try {
+            faqObject = JSON.parse(fixedJsonResult.content) as {
+              questions: string[];
+              answers: string[];
+            };
+          } catch (retryParseError) {
+            throw new BadRequestException(
+              `Failed to parse FAQ JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
+            );
+          }
+        }
+        return faqObject;
+      })();
+    }
+
+    // Await the three major groups in parallel
+    const [introductionResult, allSectionBlocks, faqObject] = await Promise.all(
+      [introductionPromise, Promise.all(sectionBlockPromises), faqPromise],
+    );
+
+    // Parse intro (with error correction) same as before
     let introductionBlocks: { blocks: PostBlock[] };
     try {
       introductionBlocks = JSON.parse(introductionResult.content) as {
         blocks: PostBlock[];
       };
     } catch (parseError) {
-      // If JSON parsing fails, request a fix from the LLM
       const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
         introductionResult.content,
         parseError instanceof Error ? parseError.message : String(parseError),
@@ -110,193 +322,13 @@ export class PostsManagementService {
     }
     blocks.push(...introductionBlocks.blocks);
 
-    for (const section of postInterview.generatedScriptDefinition.body
-      .sections) {
-      const sectionTitle = section.title;
-
-      // Process images for this section
-      const sectionImageBlocks: PostBlock[] = [];
-      if (section.images && section.images.length > 0) {
-        for (const image of section.images) {
-          if (image.sourceType === 'ai_generated') {
-            // Generate AI image
-            try {
-              const generatedImage =
-                await this.imageGenerationService.generateImage({
-                  prompt:
-                    image.description || `Image for section: ${sectionTitle}`,
-                  aspectRatio: '16:9', // Use widescreen format for blog post images
-                });
-
-              // Create image block with generated image data
-              // Generate title from description or section if not provided
-              const imageTitle: string =
-                image.title ||
-                (image.description
-                  ? image.description.split('.')[0].trim()
-                  : `Image for ${sectionTitle}`);
-
-              sectionImageBlocks.push({
-                type: PostBlockType.IMAGE,
-                image: {
-                  sourceType: 'ai_generated',
-                  sourceValue: generatedImage.url,
-                  title: imageTitle,
-                  description:
-                    image.description || `Image related to ${sectionTitle}`,
-                  alt: image.alt || `Image for ${sectionTitle}`,
-                },
-              });
-            } catch (error: unknown) {
-              // Log error but continue with post generation
-              console.error(
-                `Failed to generate AI image for section ${sectionTitle}:`,
-                error,
-              );
-              // Optionally create a placeholder image block or skip
-            }
-          } else if (image.sourceType === 'user') {
-            // Use user-provided image
-            // Generate title from description or section if not provided
-            const imageTitle: string =
-              image.title ||
-              (image.description
-                ? image.description.split('.')[0].trim()
-                : `Image for ${sectionTitle}`);
-
-            sectionImageBlocks.push({
-              type: PostBlockType.IMAGE,
-              image: {
-                sourceType: 'user',
-                sourceValue: image.sourceValue,
-                title: imageTitle,
-                description:
-                  image.description || `Image related to ${sectionTitle}`,
-                alt: image.alt || `Image for ${sectionTitle}`,
-              },
-            });
-          }
-        }
-      }
-
-      const sectionContentResult = await this.groqService.generate(
-        ScriptsPrompting.COPYWRITER_PARAGRAPH_PROMPT(
-          postInterview.generatedScriptDefinition.indexSummary,
-          postInterview.targetAudience,
-          postInterview.toneOfVoice,
-          section,
-        ),
-        {
-          model: section.requiresDeepResearch
-            ? GROQ_COMPOUND
-            : MEDIUM_GENERATION_MODEL,
-          maxTokens: section.requiresDeepResearch ? 8096 : 8096,
-        },
-      );
-
-      let sectionContentBlocks: { blocks: PostBlock[] };
-      try {
-        sectionContentBlocks = JSON.parse(sectionContentResult.content) as {
-          blocks: PostBlock[];
-        };
-      } catch (parseError) {
-        // If JSON parsing fails, request a fix from the LLM
-        const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
-          sectionContentResult.content,
-          parseError instanceof Error ? parseError.message : String(parseError),
-        );
-
-        const fixedJsonResult = await this.groqService.generate(fixPrompt, {
-          model: section.requiresDeepResearch
-            ? GROQ_COMPOUND
-            : MEDIUM_GENERATION_MODEL,
-          maxTokens: 8096,
-        });
-
-        try {
-          sectionContentBlocks = JSON.parse(fixedJsonResult.content) as {
-            blocks: PostBlock[];
-          };
-        } catch (retryParseError) {
-          throw new BadRequestException(
-            `Failed to parse section content JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
-          );
-        }
-      }
-      blocks.push({
-        type: PostBlockType.HEADING,
-        level: section.level,
-        title: sectionTitle,
-      });
-
-      // Insert images at appropriate positions within the section content
-      // For now, we'll add images after the first paragraph block
-      // This can be enhanced later to support more sophisticated placement
-      let imageIndex = 0;
-      for (let i = 0; i < sectionContentBlocks.blocks.length; i++) {
-        blocks.push(sectionContentBlocks.blocks[i]);
-        // Insert image after first paragraph if available
-        if (
-          i === 0 &&
-          sectionImageBlocks.length > 0 &&
-          sectionContentBlocks.blocks[i].type === PostBlockType.PARAGRAPH
-        ) {
-          blocks.push(sectionImageBlocks[imageIndex]);
-          imageIndex++;
-        }
-      }
-
-      // Add any remaining images at the end of the section
-      while (imageIndex < sectionImageBlocks.length) {
-        blocks.push(sectionImageBlocks[imageIndex]);
-        imageIndex++;
-      }
+    // Add all section blocks in order
+    for (const sectionBlocks of allSectionBlocks) {
+      blocks.push(...sectionBlocks);
     }
 
-    if (postInterview.generatedScriptDefinition.faq) {
-      const faqResult = await this.groqService.generate(
-        ScriptsPrompting.COPYWRITER_FAQ_PROMPT(
-          postInterview.generatedScriptDefinition.indexSummary,
-          postInterview.targetAudience,
-          postInterview.toneOfVoice,
-          postInterview.generatedScriptDefinition.faq,
-        ),
-        {
-          model: MEDIUM_GENERATION_MODEL,
-          maxTokens: 8096,
-        },
-      );
-
-      let faqObject: { questions: string[]; answers: string[] };
-      try {
-        faqObject = JSON.parse(faqResult.content) as {
-          questions: string[];
-          answers: string[];
-        };
-      } catch (parseError) {
-        // If JSON parsing fails, request a fix from the LLM
-        const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
-          faqResult.content,
-          parseError instanceof Error ? parseError.message : String(parseError),
-        );
-
-        const fixedJsonResult = await this.groqService.generate(fixPrompt, {
-          model: MEDIUM_GENERATION_MODEL,
-          maxTokens: 8096,
-        });
-
-        try {
-          faqObject = JSON.parse(fixedJsonResult.content) as {
-            questions: string[];
-            answers: string[];
-          };
-        } catch (retryParseError) {
-          throw new BadRequestException(
-            `Failed to parse FAQ JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
-          );
-        }
-      }
-
+    // Add FAQ if available
+    if (faqObject) {
       blocks.push({
         type: PostBlockType.FAQ,
         questions: faqObject.questions,
@@ -304,7 +336,6 @@ export class PostsManagementService {
       });
     }
 
-    // Update the post with the generated blocks and change status
     post.blocks = blocks;
     post.status = PostStatus.GENERATED;
     await post.save();
