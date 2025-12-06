@@ -64,3 +64,8 @@ export type ScriptFormatDefinition = {
   };
   faq?: ScriptFAQ;
 };
+
+export interface PostScriptSuggestion {
+  title: string;
+  description: string;
+}
