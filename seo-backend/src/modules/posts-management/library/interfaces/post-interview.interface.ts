@@ -69,3 +69,8 @@ export interface PostScriptSuggestion {
   title: string;
   description: string;
 }
+
+export type KnowledgeBaseItem = {
+  kind: 'LINK' | 'TEXT';
+  content: string;
+};

@@ -1,7 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
 
-import type { ScriptFormatDefinition } from '../library/interfaces/post-interview.interface';
+import type {
+  KnowledgeBaseItem,
+  ScriptFormatDefinition,
+} from '../library/interfaces/post-interview.interface';
 import {
   InterviewStatus,
   SearchIntent,
@@ -177,6 +180,10 @@ export class PostInterview {
 
   @Prop({ type: String, required: false })
   blogInternalLinksMeta?: string;
+
+  /** Knowledge base items to use */
+  @Prop({ type: [Object], default: [] })
+  knowledgeBaseItems?: KnowledgeBaseItem[];
 
   // ============================================
   // SECCIÓN 4: Metadatos y estado
