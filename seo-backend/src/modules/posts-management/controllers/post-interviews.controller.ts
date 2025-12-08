@@ -243,23 +243,18 @@ export class PostsInterviewsController {
       dto.interviewId,
     );
 
-    const suggestionsResponse =
+    const suggestionsObject =
       await this.postInterviewsService.generateSuggestionsFromInterview(
         postInterview,
       );
 
-    // Parse the Groq response which has a 'content' property containing JSON string
-    let suggestions = [];
-    try {
-      if (suggestionsResponse && suggestionsResponse.content) {
-        const parsed = JSON.parse(suggestionsResponse.content);
-        suggestions = parsed.suggestions || [];
-      }
-    } catch (error) {
-      console.error('Failed to parse suggestions:', error);
-      suggestions = [];
-    }
+    // The generator now returns a parsed and validated object with auto-fix
+    const suggestions = suggestionsObject.suggestions || [];
 
-    return { suggestions };
+    // Return with JSON redundancy - both parsed array and stringified version
+    return {
+      suggestions,
+      suggestionsJson: JSON.stringify(suggestionsObject),
+    };
   }
 }

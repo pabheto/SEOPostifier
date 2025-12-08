@@ -104,6 +104,10 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                         <button type="button" class="button button-secondary" id="back-to-form-button">
                             <?php _e('← Back to Edit', 'seo-postifier'); ?>
                         </button>
+                        <button type="button" class="button button-secondary" id="reload-suggestions-button" style="margin-left: 10px;">
+                            <span class="dashicons dashicons-update" style="margin-top: 3px;"></span>
+                            <?php _e('Reload Suggestions', 'seo-postifier'); ?>
+                        </button>
                     </p>
                 </div>
             </div>
@@ -379,6 +383,11 @@ jQuery(document).ready(function($) {
 
         function showSuggestionsStep(interviewId, formData, onSelectCallback) {
             console.log('=== showSuggestionsStep ===');
+            
+            // Store for reload functionality
+            currentInterviewIdForSuggestions = interviewId;
+            currentFormDataForSuggestions = formData;
+            currentCallbackForSuggestions = onSelectCallback;
             
             // Show loading
             $('#suggestions-loading').show();
@@ -788,6 +797,30 @@ jQuery(document).ready(function($) {
             $('#create-script-form').fadeIn(300).addClass('fade-in');
             // Re-enable the submit button
             $submitBtn.prop('disabled', false).text(originalButtonText);
+        });
+    });
+    
+    // Reload suggestions button
+    let currentInterviewIdForSuggestions = null;
+    let currentFormDataForSuggestions = null;
+    let currentCallbackForSuggestions = null;
+    
+    $('#reload-suggestions-button').on('click', function() {
+        console.log('Reload suggestions button clicked');
+        
+        if (!currentInterviewIdForSuggestions) {
+            alert('<?php _e('Cannot reload suggestions. Please try again from the beginning.', 'seo-postifier'); ?>');
+            return;
+        }
+        
+        // Show loading and hide list
+        $('#suggestions-list-container').fadeOut(300, function() {
+            $('#suggestions-loading').fadeIn(300);
+            
+            // Regenerate suggestions
+            if (currentFormDataForSuggestions && currentCallbackForSuggestions) {
+                showSuggestionsStep(currentInterviewIdForSuggestions, currentFormDataForSuggestions, currentCallbackForSuggestions);
+            }
         });
     });
 });

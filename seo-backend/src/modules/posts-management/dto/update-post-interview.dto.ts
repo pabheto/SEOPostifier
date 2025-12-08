@@ -52,11 +52,11 @@ export class UpdatePostInterviewDto {
 
   @ApiPropertyOptional({
     description: 'Descripción del usuario de lo que quiere tratar en este post',
-    maxLength: 300,
+    maxLength: 2000,
   })
   @IsOptional()
   @IsString()
-  @MaxLength(300)
+  @MaxLength(2000)
   userDescription?: string;
 
   @ApiPropertyOptional({

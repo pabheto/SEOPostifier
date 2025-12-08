@@ -17,6 +17,7 @@ export class ScriptsPrompting {
     mentionsBrand: boolean,
     brandName: string,
     brandDescription: string,
+    language: string,
   ): LLMPrompt => {
     const systemPrompt = `
 You are an expert SEO strategist and senior copywriter.
@@ -52,15 +53,21 @@ The format of the output should be:
 
 Answer ONLY WITH THE JSON TEXT, with no formating or other texts
 You must answer with updated information, find in the internet information if needed.
+
+THIS IS A PRODUCTION SYSTEM, DO NOT ADD ANY COMMENTS, EXPLANATIONS, OR NOTES.
+DO NOT ADD MOCK TEXTS, DON'T MENTION FICTITIOUS BRANDS OR PRODUCTS.
+DONT REFERENCE BRANDS THAT DOESNT EXIST
+
 `;
 
     const userPrompt = `
     Search intent keyword: ${mainKeyword}
     ${secondaryKeywords.length > 0 ? `Secondary keywords: ${secondaryKeywords.join(', ')}` : ''}
     Description of the user: ${userDescription}
-    Mentions brand: ${mentionsBrand}
+    ${mentionsBrand ? `Mentions brand: ${mentionsBrand}` : ''}
     Brand name: ${brandName}
     Brand description: ${brandDescription}
+    The language should be: ${language}
     `;
 
     return {
@@ -178,10 +185,7 @@ You must answer with updated information, find in the internet information if ne
   Brand context: ${brandDescription || 'no description provided'}.
   
   Avoid spammy or forced mentions.`.trim()
-      : `
-  ## 6. Brand Mentions
-  
-  - No brand mention is required.`.trim();
+      : ``.trim();
 
     const imagePlacementRules = hasAnyImages
       ? `
@@ -376,6 +380,11 @@ You must answer with updated information, find in the internet information if ne
   
   ## 8. Final Instruction
   Produce the **full SEO script** in **${language}**, using **pure Markdown** (no horizontal rules).
+
+  THIS IS A PRODUCTION SYSTEM, DO NOT ADD ANY COMMENTS, EXPLANATIONS, OR NOTES.
+  DO NOT ADD MOCK TEXTS, DON'T MENTION FICTITIOUS BRANDS OR PRODUCTS.
+  IF YOU DETECT ANY OF THIS, YOU CAN MODIFY THE SCRIPT TO FIT THE REQUIREMENTS.
+  DON'T CREATE LINKS THAT DOES NOT EXIST
   
   ${faqNote}
   `;

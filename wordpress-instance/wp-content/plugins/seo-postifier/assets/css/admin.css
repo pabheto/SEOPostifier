@@ -1076,8 +1076,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .seo-postifier-fancy-loader h3 {
@@ -1113,7 +1117,7 @@
 }
 
 .seo-postifier-suggestion-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -1186,7 +1190,7 @@
 }
 
 .progress-step::before {
-  content: '';
+  content: "";
   position: absolute;
   left: 0;
   top: 0;
@@ -1251,7 +1255,8 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     box-shadow: 0 0 0 0 rgba(0, 124, 186, 0.4);
   }
@@ -1320,4 +1325,24 @@
   opacity: 0;
   transform: translateY(-20px);
   transition: all 0.3s ease;
+}
+
+/* Reload Suggestions Button */
+#reload-suggestions-button {
+  position: relative;
+  overflow: hidden;
+}
+
+#reload-suggestions-button .dashicons {
+  display: inline-block;
+  vertical-align: middle;
+  transition: transform 0.3s ease;
+}
+
+#reload-suggestions-button:hover .dashicons {
+  transform: rotate(180deg);
+}
+
+#reload-suggestions-button:active .dashicons {
+  transform: rotate(360deg);
 }

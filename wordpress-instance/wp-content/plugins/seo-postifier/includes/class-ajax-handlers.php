@@ -649,10 +649,18 @@ class SEO_Postifier_AJAX_Handlers {
             update_post_meta($wp_post_id, '_aioseo_title', $meta_title);
         }
 
-        // Set RankMath focus keyword from mainKeyword
+        // Set focus keyword from mainKeyword for SEO plugins
         if (!empty($post_data['mainKeyword'])) {
             $focus_keyword = sanitize_text_field($post_data['mainKeyword']);
+            
+            // RankMath focus keyword
             $set_rank_math_meta($wp_post_id, 'focus_keyword', $focus_keyword);
+            
+            // Yoast SEO focus keyword
+            update_post_meta($wp_post_id, '_yoast_wpseo_focuskw', $focus_keyword);
+            
+            // All in One SEO focus keyword
+            update_post_meta($wp_post_id, '_aioseo_focuskeyphrase', $focus_keyword);
         }
 
         // Set meta description for SEO plugins

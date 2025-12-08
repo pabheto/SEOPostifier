@@ -1,14 +1,14 @@
 === SEO Postifier ===
 Contributors: pabloherrero
-Tags: seo, content generation, ai, automation, posts, wordpress
+Tags: seo, content generation, ai, automation, posts, wordpress, yoast, rankmath
 Requires at least: 5.0
 Tested up to: 6.4
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 Requires PHP: 7.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Automatically generates WordPress posts with SEO optimizations using AI-powered backend.
+Automatically generates WordPress posts with SEO optimizations using AI-powered backend. Integrates with Yoast SEO, RankMath, and All in One SEO.
 
 == Description ==
 
@@ -20,6 +20,8 @@ SEO Postifier is a powerful WordPress plugin that automates the creation of SEO-
 * **License-Based Authentication**: Secure access with license key authentication
 * **Easy Script Management**: Create, view, and manage content generation scripts from the WordPress admin
 * **SEO Optimization**: Automatically generates content optimized for search engines
+* **SEO Plugin Integration**: Automatically fills meta keywords for Yoast SEO, RankMath, and All in One SEO
+* **Post Architecture Suggestions**: AI-generated post structure suggestions with reload capability
 * **Backend Integration**: Seamlessly connects to your SEO Postifier backend API
 * **User-Friendly Interface**: Clean, intuitive admin interface for managing all features
 * **Settings Management**: Easy configuration of license keys and backend URLs
@@ -83,7 +85,19 @@ SEO Postifier requires WordPress 5.0 or higher and PHP 7.4 or higher.
 
 = Is the plugin compatible with other SEO plugins? =
 
-Yes, SEO Postifier works alongside other SEO plugins. The generated content is optimized for search engines and can be further enhanced with your preferred SEO plugin.
+Yes, SEO Postifier works alongside other SEO plugins and automatically integrates with them. When you create a draft, the plugin automatically fills in:
+* **Main keyword/Focus keyword** for Yoast SEO, RankMath, and All in One SEO
+* **Meta title** from your post title
+* **Meta description** from your post excerpt
+
+Supported SEO plugins:
+* Yoast SEO
+* RankMath
+* All in One SEO
+
+= Can I reload the post architecture suggestions? =
+
+Yes! After viewing the AI-generated suggestions for your post structure, you can click the "Reload Suggestions" button to generate new suggestions if you're not satisfied with the initial options.
 
 == Screenshots ==
 
@@ -94,6 +108,12 @@ Yes, SEO Postifier works alongside other SEO plugins. The generated content is o
 
 == Changelog ==
 
+= 2.0.1 =
+* **New**: Added reload button for post architecture suggestions
+* **New**: Automatic SEO meta keyword integration for Yoast SEO, RankMath, and All in One SEO
+* **Enhancement**: Main keyword is now automatically set as focus keyword in supported SEO plugins
+* **Enhancement**: Improved suggestion UI with rotating icon animation on reload
+
 = 2.0.0 =
 * Initial release
 * License key authentication system
@@ -103,6 +123,9 @@ Yes, SEO Postifier works alongside other SEO plugins. The generated content is o
 * AJAX handlers for seamless user experience
 
 == Upgrade Notice ==
+
+= 2.0.1 =
+New features: Reload suggestions button and automatic SEO plugin integration for Yoast SEO, RankMath, and All in One SEO. Your main keyword will now automatically populate in supported SEO plugins!
 
 = 2.0.0 =
 Initial release of SEO Postifier. Install and configure your license key to get started.

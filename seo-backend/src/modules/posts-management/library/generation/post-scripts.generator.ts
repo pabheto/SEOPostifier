@@ -18,6 +18,7 @@ export class PostScriptsGenerator {
     mentionsBrand: boolean,
     brandName: string,
     brandDescription: string,
+    language: string,
   ) {
     const generateArchitectureSuggestionsPrompt =
       ScriptsPrompting.GENERATE_SCRIPT_ARCHITECTURE_SUGGESTION(
@@ -27,13 +28,14 @@ export class PostScriptsGenerator {
         mentionsBrand,
         brandName,
         brandDescription,
+        language,
       );
 
     const generateArchitectureSuggestionsResult = await groqService.generate(
       '',
       {
         model: GROQ_COMPOUND,
-        maxTokens: 20000,
+        maxTokens: 8192,
         systemPrompt: generateArchitectureSuggestionsPrompt.systemPrompts,
         userPrompt: generateArchitectureSuggestionsPrompt.userPrompts,
       },
@@ -44,7 +46,39 @@ export class PostScriptsGenerator {
       generateArchitectureSuggestionsResult,
     );
 
-    return generateArchitectureSuggestionsResult;
+    // Parse and validate JSON, with auto-fix if needed
+    let suggestionsObject: { suggestions: any[] };
+    try {
+      suggestionsObject = JSON.parse(
+        generateArchitectureSuggestionsResult.content,
+      ) as { suggestions: any[] };
+    } catch (parseError) {
+      // If JSON parsing fails, request a fix from the LLM
+      const { systemPrompts: fixSystemPrompts, userPrompts: fixUserPrompts } =
+        ScriptsPrompting.FIX_JSON_PROMPT(
+          generateArchitectureSuggestionsResult.content,
+          parseError instanceof Error ? parseError.message : String(parseError),
+        );
+
+      const fixedJsonResult = await groqService.generate('', {
+        model: GROQ_COMPOUND,
+        maxTokens: 8192,
+        systemPrompt: fixSystemPrompts,
+        userPrompt: fixUserPrompts,
+      });
+
+      try {
+        suggestionsObject = JSON.parse(fixedJsonResult.content) as {
+          suggestions: any[];
+        };
+      } catch (retryParseError) {
+        throw new BadRequestException(
+          `Failed to parse suggestions JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
+        );
+      }
+    }
+
+    return suggestionsObject;
   }
 
   static async createScriptTextFromInterview(

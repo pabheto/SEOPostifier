@@ -169,6 +169,7 @@ export class PostInterviewsService {
         postInterview.mentionsBrand,
         postInterview.brandName || '',
         postInterview.brandDescription || '',
+        postInterview.language || 'es',
       );
 
     return suggestions;
