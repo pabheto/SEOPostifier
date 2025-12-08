@@ -216,4 +216,48 @@ export class PostsInterviewsController {
     );
     return { interview };
   }
+
+  @Post('generate-suggestions')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Generate architecture suggestions for an interview' })
+  @ApiResponse({
+    status: 200,
+    description: 'Suggestions generated successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error - invalid interview ID',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing license key',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Interview not found',
+  })
+  async generateSuggestions(@Body() dto: GetInterviewByIdDto) {
+    const postInterview = await this.postInterviewsService.getPostInterviewById(
+      dto.interviewId,
+    );
+
+    const suggestionsResponse =
+      await this.postInterviewsService.generateSuggestionsFromInterview(
+        postInterview,
+      );
+
+    // Parse the Groq response which has a 'content' property containing JSON string
+    let suggestions = [];
+    try {
+      if (suggestionsResponse && suggestionsResponse.content) {
+        const parsed = JSON.parse(suggestionsResponse.content);
+        suggestions = parsed.suggestions || [];
+      }
+    } catch (error) {
+      console.error('Failed to parse suggestions:', error);
+      suggestions = [];
+    }
+
+    return { suggestions };
+  }
 }

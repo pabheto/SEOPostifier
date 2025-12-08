@@ -26,6 +26,7 @@ class SEO_Postifier_AJAX_Handlers {
         add_action('wp_ajax_seo_postifier_update_interview', array(__CLASS__, 'update_interview'));
         add_action('wp_ajax_seo_postifier_generate_script_text', array(__CLASS__, 'generate_script_text'));
         add_action('wp_ajax_seo_postifier_generate_script_definition', array(__CLASS__, 'generate_script_definition'));
+        add_action('wp_ajax_seo_postifier_generate_suggestions', array(__CLASS__, 'generate_suggestions'));
         add_action('wp_ajax_seo_postifier_generate_post', array(__CLASS__, 'generate_post'));
         add_action('wp_ajax_seo_postifier_get_post', array(__CLASS__, 'get_post'));
         add_action('wp_ajax_seo_postifier_create_wp_draft', array(__CLASS__, 'create_wp_draft'));
@@ -399,6 +400,46 @@ class SEO_Postifier_AJAX_Handlers {
         } else {
             wp_send_json_error(array(
                 'message' => 'Failed to generate script definition: ' . $result['message']
+            ));
+        }
+    }
+
+    /**
+     * Generate Suggestions (AJAX handler)
+     */
+    public static function generate_suggestions() {
+        check_ajax_referer('seo_postifier_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        if (!SEO_Postifier_Settings::has_license_key()) {
+            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+            return;
+        }
+
+        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field($_POST['interview_id']) : '';
+
+        if (empty($interview_id)) {
+            wp_send_json_error(array('message' => 'Interview ID is required'));
+            return;
+        }
+
+        set_time_limit(120);
+
+        $response = SEO_Postifier_API_Client::generate_suggestions($interview_id);
+        $result = SEO_Postifier_API_Client::parse_response($response);
+
+        if ($result['success']) {
+            wp_send_json_success(array(
+                'message' => 'Suggestions generated successfully',
+                'suggestions' => $result['data']
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => 'Failed to generate suggestions: ' . $result['message']
             ));
         }
     }

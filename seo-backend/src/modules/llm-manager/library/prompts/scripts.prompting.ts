@@ -4,10 +4,73 @@ import {
 } from 'src/modules/posts-management/library/interfaces/post-interview.interface';
 import { PostInterview } from '../../../posts-management/schemas/post-interview.schema';
 
+interface LLMPrompt {
+  systemPrompts: string[];
+  userPrompts: string[];
+}
+
 export class ScriptsPrompting {
+  static readonly GENERATE_SCRIPT_ARCHITECTURE_SUGGESTION = (
+    mainKeyword: string,
+    secondaryKeywords: string[],
+    userDescription: string,
+    mentionsBrand: boolean,
+    brandName: string,
+    brandDescription: string,
+  ): LLMPrompt => {
+    const systemPrompt = `
+You are an expert SEO strategist and senior copywriter.
+Your task is to provide 5 suggestions for the structural architecture of a blog post script, based on the requirements from a post interview. 
+Each suggestion should include a title that is optimized for SEO.
+
+Each title should:
+- Be 50–60 characters long
+- Include the primary keyword at the beginning if possible
+- Be clear, relevant, and appealing (increase CTR)
+- Use copywriting techniques such as:
+  - Numbers: e.g., "7 Tips for…"
+  - Adjectives: e.g., "easy", "quick", "better", "effective"
+  - Clear promises: e.g., "Complete Guide", "Step by Step"
+  - But do not use clickbait tactics
+- Clearly reflect the search intent
+- Include the brand (if specified); for example: "How to Improve Your SEO in 2025 | MyBrand"
+- Avoid keyword stuffing
+
+The format of the output should be:
+{
+    "suggestions": [
+        {
+            "title": "Title 1",
+            "description": "Description 1"  
+        },
+        {
+            "title": "Title 2",
+            "description": "Description 2"
+        }
+    ]
+}
+
+Answer ONLY WITH THE JSON TEXT, with no formating or other texts
+You must answer with updated information, find in the internet information if needed.
+`;
+
+    const userPrompt = `
+    Search intent keyword: ${mainKeyword}
+    ${secondaryKeywords.length > 0 ? `Secondary keywords: ${secondaryKeywords.join(', ')}` : ''}
+    Description of the user: ${userDescription}
+    Mentions brand: ${mentionsBrand}
+    Brand name: ${brandName}
+    Brand description: ${brandDescription}
+    `;
+
+    return {
+      systemPrompts: [systemPrompt],
+      userPrompts: [userPrompt],
+    };
+  };
   static readonly GENERATE_SEO_SCRIPT_PROMPT = (
     postInterview: PostInterview,
-  ) => {
+  ): LLMPrompt => {
     // Extract properties from PostInterview
     const {
       language,
@@ -161,7 +224,7 @@ export class ScriptsPrompting {
   `.trim()
       : '';
 
-    return `
+    const systemPrompt = `
   You are an elite-level SEO strategist and senior copy chief.  
   Your task is NOT to write the full article, but to create a **complete SEO script (outline/blueprint)** for a long-form blog post.
   
@@ -175,11 +238,7 @@ export class ScriptsPrompting {
   ## 1. Input Data (Context)
   
   - **Main keyword**: \`${mainKeyword}\`
-  - **Secondary keywords**: ${
-    secondaryKeywords.length
-      ? secondaryKeywords.map((k) => `\`${k}\``).join(', ')
-      : '_none provided_'
-  }
+  ${secondaryKeywords.length > 0 ? `- **Secondary keywords**: ${secondaryKeywords.map((k) => `\`${k}\``).join(', ')}` : ''}
   - **Keyword density target**: ${(keywordDensityTarget * 100).toFixed(2)}%
   - **Search intent**: \`${searchIntent}\`
   - **Target audience**: ${targetAudience}
@@ -320,6 +379,49 @@ export class ScriptsPrompting {
   
   ${faqNote}
   `;
+
+    const userPrompt = `Generate the complete SEO script following all the requirements and specifications provided in the system instructions.`;
+
+    return {
+      systemPrompts: [systemPrompt],
+      userPrompts: [userPrompt],
+    };
+  };
+
+  static readonly IMPROVE_SEO_SCRIPT_KEYWORD_USAGE_SUGGESTIONS = (
+    scriptText: string,
+    postInterview: PostInterview,
+  ) => {
+    const systemPrompt = `
+    You are an expert SEO strategist and senior copywriter.
+    Your task is to advice the user to improve the copywritting script that he has written to match the requirements.
+
+    The post should be optimized for SEO with the following requirements:
+    - The post should be written in ${postInterview.language}
+    - The post should have a main keyword intesity of ${postInterview.keywordDensityTarget}. 
+    In each section, you should explicitly mention how many times the main keyword has to be used.
+    - You have the permission to rewrite some sections description if you find redundancy issues, the post has to be clear and concise.
+    - Make sure that the total number of words is within the range of ${postInterview.minWordCount} - ${postInterview.maxWordCount} words. You
+    can modify the sections length if you find that the word count is not within the range.
+
+    You have to return the script text, with no additional text or comments.
+    Respect the original structure.
+
+    THIS IS A PRODUCTION SYSTEM, DO NOT ADD ANY COMMENTS, EXPLANATIONS, OR NOTES.
+    DO NOT ADD MOCK TEXTS, DON'T MENTION FICTITIOUS BRANDS OR PRODUCTS.
+    If you detect any of this you can modify the script to fit the requirements.
+    `;
+
+    const userPrompt = `
+    Hello. I have this script:
+    ${scriptText}    
+    Please advice me on how to improve it.
+    `;
+
+    return {
+      systemPrompts: [systemPrompt],
+      userPrompts: [userPrompt],
+    };
   };
 
   static readonly FORMAT_SEO_SCRIPT_TO_JSON_PROMPT = (
@@ -327,7 +429,7 @@ export class ScriptsPrompting {
     minWordCount?: number,
     maxWordCount?: number,
     needsFaqSection?: boolean,
-  ) => {
+  ): LLMPrompt => {
     const hasWordCountTarget = minWordCount && maxWordCount;
     const wordCountValidation = hasWordCountTarget
       ? `
@@ -337,7 +439,7 @@ The target article length is ${minWordCount} - ${maxWordCount} words. Use this a
 `
       : '';
 
-    return `
+    const systemPrompt = `
 Act as a strict converter from unstructured text to structured JSON.
 
 Task:
@@ -452,12 +554,23 @@ ${wordCountValidation}
    - Required fields: head.h1, head.introductionDescription, head.slug, head.tags, body.sections
    - Each section: id, level, title, lengthRange, description, links (internal + external)
 
+  THIS IS A PRODUCTION SYSTEM, DO NOT ADD ANY COMMENTS, EXPLANATIONS, OR NOTES.
+  DO NOT ADD MOCK TEXTS, DON'T MENTION FICTITIOUS BRANDS OR PRODUCTS.
+
+`;
+
+    const userPrompt = `
 Convert the outline below to JSON format. Return ONLY the JSON (no code blocks, no comments, no formatting characters).
 
 === OUTLINE ===
 ${script}
 === END OUTLINE ===
 `;
+
+    return {
+      systemPrompts: [systemPrompt],
+      userPrompts: [userPrompt],
+    };
   };
 
   static readonly COPYWRITER_INTRODUCTION_PROMPT = (
@@ -468,7 +581,7 @@ ${script}
     targetTone: string,
     lang: string,
     lengthRange?: [number, number],
-  ) => {
+  ): LLMPrompt => {
     const wordCountInstruction = lengthRange
       ? `
 ## CRITICAL WORD COUNT REQUIREMENT
@@ -505,7 +618,7 @@ Aim for approximately 200-400 words for the introduction. Be comprehensive but c
 - Typically 3-8 paragraphs to reach the target word count
 `;
 
-    return `You are an expert SEO copywriter. Write a compelling, SEO-optimized introduction.
+    const systemPrompt = `You are an expert SEO copywriter. Write a compelling, SEO-optimized introduction.
 
 **Context:**
 - Title: ${h1}
@@ -546,6 +659,13 @@ ${lengthRange ? `- Total words across all blocks: ${lengthRange[0]} - ${lengthRa
 
 DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
 `;
+
+    const userPrompt = `Write the introduction following all the specifications provided in the system instructions.`;
+
+    return {
+      systemPrompts: [systemPrompt],
+      userPrompts: [userPrompt],
+    };
   };
 
   static readonly COPYWRITER_PARAGRAPH_PROMPT = (
@@ -553,7 +673,7 @@ DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
     targetAudience: string,
     targetTone: string,
     section: ScriptSection,
-  ) => {
+  ): LLMPrompt => {
     const isCoreSection = section.lengthRange[1] >= 400;
     const sectionGuidance = isCoreSection
       ? `This is a CORE section (400-500 words). You may need to create multiple subsections or expand content significantly.`
@@ -580,7 +700,7 @@ DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
   `
         : '';
 
-    return `You are an expert SEO copywriter. Write compelling, SEO-optimized content for this section.
+    const systemPrompt = `You are an expert SEO copywriter. Write compelling, SEO-optimized content for this section.
 
 **Section Context:**
 - Title: ${section.title} (${section.level} heading - do not include in output)
@@ -637,8 +757,14 @@ ${hasInternalLinks || hasExternalLinks ? `- ALL suggested links must be included
 - JSON must be valid (double quotes, no trailing commas)
 
 DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
-
 `;
+
+    const userPrompt = `Write the section content following all the specifications provided in the system instructions.`;
+
+    return {
+      systemPrompts: [systemPrompt],
+      userPrompts: [userPrompt],
+    };
   };
 
   static readonly COPYWRITER_FAQ_PROMPT = (
@@ -646,7 +772,7 @@ DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
     targetAudience: string,
     targetTone: string,
     faq: ScriptFAQ,
-  ) => {
+  ): LLMPrompt => {
     const wordCountInstruction = faq.lengthRange
       ? `
 ## CRITICAL WORD COUNT REQUIREMENT
@@ -670,7 +796,7 @@ The word count is STRICTLY ENFORCED. Your response will be rejected if it doesn'
 Aim for approximately 300-600 words total across all questions and answers. Be comprehensive but concise.
 `;
 
-    return `You are an expert SEO copywriter. Write a compelling, SEO-optimized FAQ section.
+    const systemPrompt = `You are an expert SEO copywriter. Write a compelling, SEO-optimized FAQ section.
 
 **Context:**
 - Description: ${faq.description}
@@ -699,13 +825,20 @@ Return ONLY a JSON object (no additional text, no formatting characters):
 
 DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
 `;
+
+    const userPrompt = `Generate the FAQ section following all the specifications provided in the system instructions.`;
+
+    return {
+      systemPrompts: [systemPrompt],
+      userPrompts: [userPrompt],
+    };
   };
 
   static readonly FIX_JSON_PROMPT = (
     invalidJson: string,
     parseError: string,
-  ) => {
-    return `You are a JSON repair specialist. Your task is to fix a malformed JSON string so it can be parsed correctly.
+  ): LLMPrompt => {
+    const systemPrompt = `You are a JSON repair specialist. Your task is to fix a malformed JSON string so it can be parsed correctly.
 
 **CRITICAL REQUIREMENTS:**
 1. Output ONLY valid JSON - no code blocks, no backticks, no markdown formatting
@@ -731,5 +864,20 @@ Fix the JSON string above to make it valid and parseable. Return ONLY the correc
 - Do not change the content or meaning of the data
 - Ensure the output is a single, valid JSON object that can be parsed by JSON.parse()
 `;
+
+    const userPrompt = `
+**Original JSON (with errors):**
+${invalidJson}
+
+**Parse Error:**
+${parseError}
+
+Fix the JSON string above to make it valid and parseable. Return ONLY the corrected JSON object with no additional text, comments, or formatting characters.
+`;
+
+    return {
+      systemPrompts: [systemPrompt],
+      userPrompts: [userPrompt],
+    };
   };
 }

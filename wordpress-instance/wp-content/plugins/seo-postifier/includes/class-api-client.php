@@ -84,6 +84,15 @@ class SEO_Postifier_API_Client {
     }
 
     /**
+     * Generate suggestions for interview
+     */
+    public static function generate_suggestions($interview_id) {
+        return self::request('/posts-interviews/generate-suggestions', 'POST', array(
+            'interviewId' => $interview_id
+        ), 120);
+    }
+
+    /**
      * Generate post from interview
      */
     public static function generate_post($interview_id) {

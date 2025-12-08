@@ -70,7 +70,7 @@ export class PostsManagementService {
       postInterview.generatedScriptDefinition.body.sections ?? [];
 
     // Introduction prompt (single)
-    const introductionPromise = this.groqService.generate(
+    const { systemPrompts: introSystemPrompts, userPrompts: introUserPrompts } =
       ScriptsPrompting.COPYWRITER_INTRODUCTION_PROMPT(
         postInterview.generatedScriptDefinition.indexSummary,
         postInterview.generatedScriptDefinition.head.h1,
@@ -79,12 +79,14 @@ export class PostsManagementService {
         postInterview.toneOfVoice,
         postInterview.language,
         postInterview.generatedScriptDefinition.head.introductionLengthRange,
-      ),
-      {
-        model: MEDIUM_GENERATION_MODEL,
-        maxTokens: 8096,
-      },
-    );
+      );
+
+    const introductionPromise = this.groqService.generate('', {
+      model: MEDIUM_GENERATION_MODEL,
+      maxTokens: 8096,
+      systemPrompt: introSystemPrompts,
+      userPrompt: introUserPrompts,
+    });
 
     // Each section: parallelize content and image generation
     const sectionBlockPromises = sectionInputs.map(async (section) => {
@@ -152,20 +154,24 @@ export class PostsManagementService {
       );
 
       // Section content generation (LLM)
-      const sectionContentPromise = this.groqService.generate(
-        ScriptsPrompting.COPYWRITER_PARAGRAPH_PROMPT(
-          postInterview.generatedScriptDefinition?.indexSummary ?? '',
-          postInterview.targetAudience,
-          postInterview.toneOfVoice,
-          section,
-        ),
-        {
-          model: section.requiresDeepResearch
-            ? GROQ_COMPOUND
-            : MEDIUM_GENERATION_MODEL,
-          maxTokens: section.requiresDeepResearch ? 8096 : 8096,
-        },
+      const {
+        systemPrompts: sectionSystemPrompts,
+        userPrompts: sectionUserPrompts,
+      } = ScriptsPrompting.COPYWRITER_PARAGRAPH_PROMPT(
+        postInterview.generatedScriptDefinition?.indexSummary ?? '',
+        postInterview.targetAudience,
+        postInterview.toneOfVoice,
+        section,
       );
+
+      const sectionContentPromise = this.groqService.generate('', {
+        model: section.requiresDeepResearch
+          ? GROQ_COMPOUND
+          : MEDIUM_GENERATION_MODEL,
+        maxTokens: section.requiresDeepResearch ? 8096 : 8096,
+        systemPrompt: sectionSystemPrompts,
+        userPrompt: sectionUserPrompts,
+      });
 
       // Await both (content and images)
       const [imageBlockResults, sectionContentResult] = await Promise.all([
@@ -183,15 +189,20 @@ export class PostsManagementService {
           blocks: PostBlock[];
         };
       } catch (parseError) {
-        const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
-          sectionContentResult.content,
-          parseError instanceof Error ? parseError.message : String(parseError),
-        );
-        const fixedJsonResult = await this.groqService.generate(fixPrompt, {
+        const { systemPrompts: fixSystemPrompts, userPrompts: fixUserPrompts } =
+          ScriptsPrompting.FIX_JSON_PROMPT(
+            sectionContentResult.content,
+            parseError instanceof Error
+              ? parseError.message
+              : String(parseError),
+          );
+        const fixedJsonResult = await this.groqService.generate('', {
           model: section.requiresDeepResearch
             ? GROQ_COMPOUND
             : MEDIUM_GENERATION_MODEL,
           maxTokens: 8096,
+          systemPrompt: fixSystemPrompts,
+          userPrompt: fixUserPrompts,
         });
         try {
           sectionContentBlocks = JSON.parse(fixedJsonResult.content) as {
@@ -238,7 +249,7 @@ export class PostsManagementService {
       Promise.resolve(null);
     if (postInterview.generatedScriptDefinition.faq) {
       faqPromise = (async () => {
-        const faqResult = await this.groqService.generate(
+        const { systemPrompts: faqSystemPrompts, userPrompts: faqUserPrompts } =
           ScriptsPrompting.COPYWRITER_FAQ_PROMPT(
             postInterview.generatedScriptDefinition?.indexSummary ?? '',
             postInterview.targetAudience,
@@ -247,12 +258,15 @@ export class PostsManagementService {
               description: '',
               lengthRange: [0, 0],
             },
-          ),
-          {
-            model: MEDIUM_GENERATION_MODEL,
-            maxTokens: 8096,
-          },
-        );
+          );
+
+        const faqResult = await this.groqService.generate('', {
+          model: MEDIUM_GENERATION_MODEL,
+          maxTokens: 8096,
+          systemPrompt: faqSystemPrompts,
+          userPrompt: faqUserPrompts,
+        });
+
         let faqObject: { questions: string[]; answers: string[] };
         try {
           faqObject = JSON.parse(faqResult.content) as {
@@ -261,16 +275,21 @@ export class PostsManagementService {
           };
         } catch (parseError) {
           // If JSON parsing fails, request a fix from the LLM
-          const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
+          const {
+            systemPrompts: fixSystemPrompts,
+            userPrompts: fixUserPrompts,
+          } = ScriptsPrompting.FIX_JSON_PROMPT(
             faqResult.content,
             parseError instanceof Error
               ? parseError.message
               : String(parseError),
           );
 
-          const fixedJsonResult = await this.groqService.generate(fixPrompt, {
+          const fixedJsonResult = await this.groqService.generate('', {
             model: MEDIUM_GENERATION_MODEL,
             maxTokens: 8096,
+            systemPrompt: fixSystemPrompts,
+            userPrompt: fixUserPrompts,
           });
 
           try {
@@ -300,14 +319,17 @@ export class PostsManagementService {
         blocks: PostBlock[];
       };
     } catch (parseError) {
-      const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
-        introductionResult.content,
-        parseError instanceof Error ? parseError.message : String(parseError),
-      );
+      const { systemPrompts: fixSystemPrompts, userPrompts: fixUserPrompts } =
+        ScriptsPrompting.FIX_JSON_PROMPT(
+          introductionResult.content,
+          parseError instanceof Error ? parseError.message : String(parseError),
+        );
 
-      const fixedJsonResult = await this.groqService.generate(fixPrompt, {
+      const fixedJsonResult = await this.groqService.generate('', {
         model: MEDIUM_GENERATION_MODEL,
         maxTokens: 8096,
+        systemPrompt: fixSystemPrompts,
+        userPrompt: fixUserPrompts,
       });
 
       try {

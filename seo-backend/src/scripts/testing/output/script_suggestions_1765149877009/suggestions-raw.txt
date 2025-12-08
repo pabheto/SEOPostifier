@@ -1,0 +1,57 @@
+**Razonamiento y proceso**
+
+1. **Análisis de la entrevista**  
+   - **Keyword principal:** *online marketing* (debe aparecer al inicio del título).  
+   - **Keyword secundaria:** *digital marketing*.  
+   - **Intención de búsqueda:** informacional.  
+   - **Audiencia:** expertos en SEO.  
+   - **Tono:** profesional.  
+   - **Marca:** *Vértigo marketing* (debe aparecer en el título).  
+   - **Longitud del título:** 50 – 60 caracteres (incluyendo espacios y el separador “|”).  
+   - **Elementos de copywriting:** números, adjetivos, promesas claras, sin click‑bait.  
+
+2. **Construcción de los títulos**  
+   - Se colocó *online marketing* al principio.  
+   - Se usaron números (“7”, “5”) y adjetivos (“urgente”, “rápido”).  
+   - Se incluyó una promesa de valor (“guía completa”, “paso a paso”).  
+   - Se añadió la marca al final con el separador “|”.  
+   - Cada título fue contado manualmente para asegurar que su longitud esté entre 50 y 60 caracteres.  
+
+3. **Estructura sugerida del artículo** (para cada título)  
+   - **Introducción** (200‑250 palabras) – plantea la urgencia de digitalizar.  
+   - **Sección 1 – Contexto del online marketing** – definición y relevancia actual.  
+   - **Sección 2 – Beneficios concretos** – datos, casos y métricas.  
+   - **Sección 3 – Paso a paso / lista numérica** – guía práctica (según el título).  
+   - **Sección 4 – Herramientas y mejores prácticas** – incluye la keyword secundaria.  
+   - **FAQ** – al menos 5 preguntas que respondan dudas típicas de SEO experts.  
+   - **Conclusión y llamado a la acción** – invita a contactar a Vértigo marketing.  
+   - **Imágenes IA** – 5 imágenes descriptivas alineadas con cada sección.  
+
+---
+
+```json
+{
+    "suggestions": [
+        {
+            "title": "Online marketing: 7 pasos digitalizar tu empresa | Vértigo",
+            "description": "Estructura: Introducción → Por qué digitalizar ahora → 7 pasos accionables (planificación, SEO, contenidos, redes, analítica, automatización, medición) → Herramientas clave → FAQ (5‑7 preguntas) → Conclusión con CTA a Vértigo marketing. Incluye 5 imágenes IA y una sección de casos de éxito."
+        },
+        {
+            "title": "Online marketing: guía efectiva para empresas | Vértigo",
+            "description": "Estructura: Introducción → Definición de online marketing y su impacto → Guía paso a paso (estrategia, ejecución, optimización) → Integración de digital marketing → FAQ orientada a SEO experts → Conclusión con propuesta de consultoría Vértigo. 5 imágenes IA que ilustren cada fase."
+        },
+        {
+            "title": "Online marketing: 5 razones digitalizar tu empresa | Vértigo",
+            "description": "Estructura: Introducción → 5 razones fundamentadas con datos (alcance, ROI, competitividad, datos, automatización) → Cómo implementar cada razón → Herramientas recomendadas → FAQ (preguntas sobre métricas y medición) → Conclusión + CTA a Vértigo. 5 imágenes IA que visualicen cada razón."
+        },
+        {
+            "title": "Online marketing SEO: tácticas y casos reales | Vértigo",
+            "description": "Estructura: Introducción → Rol del online marketing en SEO avanzado → Tácticas específicas (keyword clustering, contenido pillar, link building, schema) → Estudios de caso reales de clientes Vértigo → FAQ (optimización, penalizaciones, reporting) → Conclusión con invitación a auditoría SEO. 5 imágenes IA que muestren diagramas y resultados."
+        },
+        {
+            "title": "Online marketing: guía de marketing digital | Vértigo",
+            "description": "Estructura: Introducción → Qué es el marketing digital dentro del online marketing → Guía completa (planificación, canales, contenido, paid, orgánico, medición) → Checklist descargable → FAQ (presupuesto, herramientas, KPIs) → Conclusión y llamado a acción a Vértigo marketing. 5 imágenes IA que representen cada canal."
+        }
+    ]
+}
+```

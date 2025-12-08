@@ -6,18 +6,11 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
-import {
-  GPT_OSS_120B_MODEL,
-  GROQ_COMPOUND,
-  GroqService,
-} from '../../llm-manager';
-import { ScriptsPrompting } from '../../llm-manager/library/prompts/scripts.prompting';
+import { GroqService } from '../../llm-manager';
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';
 import { UpdatePostInterviewDto } from '../dto/update-post-interview.dto';
-import {
-  InterviewStatus,
-  ScriptFormatDefinition,
-} from '../library/interfaces/post-interview.interface';
+import { PostScriptsGenerator } from '../library/generation/post-scripts.generator';
+import { InterviewStatus } from '../library/interfaces/post-interview.interface';
 import {
   PostInterview,
   PostInterviewDocument,
@@ -65,14 +58,12 @@ export class PostInterviewsService {
   async generateAndUpdateScriptText(
     postInterview: PostInterviewDocument,
   ): Promise<PostInterviewDocument> {
-    const prompt = ScriptsPrompting.GENERATE_SEO_SCRIPT_PROMPT(postInterview);
+    const scriptText = await PostScriptsGenerator.createScriptTextFromInterview(
+      postInterview,
+      this.groqService,
+    );
 
-    const script = await this.groqService.generate(prompt, {
-      model: GROQ_COMPOUND,
-      maxTokens: 8096,
-    });
-
-    postInterview.generatedScriptText = script.content;
+    postInterview.generatedScriptText = scriptText;
     postInterview.status = InterviewStatus.SCRIPT_TEXT_GENERATED;
     await postInterview.save();
 
@@ -89,45 +80,15 @@ export class PostInterviewsService {
     ) {
       throw new BadRequestException('Script text not generated');
     }
-    const prompt = ScriptsPrompting.FORMAT_SEO_SCRIPT_TO_JSON_PROMPT(
-      postInterview.generatedScriptText,
-      postInterview.minWordCount,
-      postInterview.maxWordCount,
-      postInterview.needsFaqSection,
-    );
 
-    const scriptDefinitionResult = await this.groqService.generate(prompt, {
-      model: GPT_OSS_120B_MODEL,
-      maxTokens: 20000,
-    });
-
-    let scriptDefinitionObject: ScriptFormatDefinition;
-    try {
-      scriptDefinitionObject = JSON.parse(
-        scriptDefinitionResult.content,
-      ) as ScriptFormatDefinition;
-    } catch (parseError) {
-      // If JSON parsing fails, request a fix from the LLM
-      const fixPrompt = ScriptsPrompting.FIX_JSON_PROMPT(
-        scriptDefinitionResult.content,
-        parseError instanceof Error ? parseError.message : String(parseError),
+    const scriptDefinitionObject =
+      await PostScriptsGenerator.createScriptDefinitionFromText(
+        postInterview.generatedScriptText,
+        postInterview.minWordCount || 500,
+        postInterview.maxWordCount || 2000,
+        postInterview.needsFaqSection || false,
+        this.groqService,
       );
-
-      const fixedJsonResult = await this.groqService.generate(fixPrompt, {
-        model: GPT_OSS_120B_MODEL,
-        maxTokens: 20000,
-      });
-
-      try {
-        scriptDefinitionObject = JSON.parse(
-          fixedJsonResult.content,
-        ) as ScriptFormatDefinition;
-      } catch (retryParseError) {
-        throw new BadRequestException(
-          `Failed to parse JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
-        );
-      }
-    }
 
     postInterview.generatedScriptDefinition = scriptDefinitionObject;
     postInterview.status = InterviewStatus.SCRIPT_DEFINITION_GENERATED;
@@ -196,5 +157,20 @@ export class PostInterviewsService {
 
     Object.assign(postInterview, updateData);
     return postInterview.save();
+  }
+
+  async generateSuggestionsFromInterview(postInterview: PostInterviewDocument) {
+    const suggestions =
+      await PostScriptsGenerator.createSugerencesFromInterview(
+        this.groqService,
+        postInterview.mainKeyword,
+        postInterview.secondaryKeywords ?? [],
+        postInterview.userDescription || '',
+        postInterview.mentionsBrand,
+        postInterview.brandName || '',
+        postInterview.brandDescription || '',
+      );
+
+    return suggestions;
   }
 }

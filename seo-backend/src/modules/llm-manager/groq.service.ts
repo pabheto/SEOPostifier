@@ -12,7 +12,8 @@ export interface LLMRequestOptions {
   temperature?: number;
   maxTokens?: number;
   topP?: number;
-  systemPrompt?: string;
+  systemPrompt?: string | string[];
+  userPrompt?: string | string[];
 }
 
 /**
@@ -55,7 +56,7 @@ export class GroqService {
   /**
    * Generate text completion using Groq API
    *
-   * @param prompt - The user prompt/message
+   * @param prompt - The user prompt/message (or combined prompt if options.userPrompt not specified)
    * @param options - Optional configuration for the request
    * @returns LLMResponse with generated content and metadata
    */
@@ -69,6 +70,7 @@ export class GroqService {
       maxTokens = 1024,
       topP = 1,
       systemPrompt,
+      userPrompt,
     } = options;
 
     this.logger.debug(`Generating completion with model: ${model}`);
@@ -76,18 +78,36 @@ export class GroqService {
     try {
       const messages: ChatCompletionMessageParam[] = [];
 
-      // Add system prompt if provided
+      // Add system prompt(s) if provided
       if (systemPrompt) {
-        messages.push({
-          role: 'system',
-          content: systemPrompt,
+        const systemPrompts = Array.isArray(systemPrompt)
+          ? systemPrompt
+          : [systemPrompt];
+        systemPrompts.forEach((sysPrompt) => {
+          if (sysPrompt.trim()) {
+            messages.push({
+              role: 'system',
+              content: sysPrompt,
+            });
+          }
         });
       }
 
-      // Add user prompt
-      messages.push({
-        role: 'user',
-        content: prompt,
+      // Add user prompt(s)
+      // If userPrompt is provided in options, use it; otherwise use the prompt parameter
+      const userPrompts = userPrompt
+        ? Array.isArray(userPrompt)
+          ? userPrompt
+          : [userPrompt]
+        : [prompt];
+
+      userPrompts.forEach((usrPrompt) => {
+        if (usrPrompt.trim()) {
+          messages.push({
+            role: 'user',
+            content: usrPrompt,
+          });
+        }
       });
 
       const completion = await this.groq.chat.completions.create({

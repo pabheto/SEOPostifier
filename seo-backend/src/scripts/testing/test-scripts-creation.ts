@@ -66,30 +66,34 @@ async function bootstrap() {
   }
 
   // ----- 1. Write the SEO Script Generation Prompt -----
-  const generationPrompt =
+  const { systemPrompts: genSystemPrompts, userPrompts: genUserPrompts } =
     ScriptsPrompting.GENERATE_SEO_SCRIPT_PROMPT(testPostInterview);
 
   // Don't write the prompt file, just generate
 
   // ----- 2. Generate the script (Markdown) -----
-  const script = await groqService.generate(generationPrompt, {
+  const script = await groqService.generate('', {
     model: GROQ_COMPOUND,
     maxTokens: 8096,
+    systemPrompt: genSystemPrompts,
+    userPrompt: genUserPrompts,
   });
 
   // ----- 3. Save script as JSON -----
-  const formattedScript = await groqService.generate(
+  const { systemPrompts: formatSystemPrompts, userPrompts: formatUserPrompts } =
     ScriptsPrompting.FORMAT_SEO_SCRIPT_TO_JSON_PROMPT(
       script.content,
       testPostInterview.minWordCount,
       testPostInterview.maxWordCount,
       testPostInterview.needsFaqSection,
-    ),
-    {
-      model: GROQ_COMPOUND,
-      maxTokens: 8096,
-    },
-  );
+    );
+
+  const formattedScript = await groqService.generate('', {
+    model: GROQ_COMPOUND,
+    maxTokens: 8096,
+    systemPrompt: formatSystemPrompts,
+    userPrompt: formatUserPrompts,
+  });
 
   const formattedScriptObject = JSON.parse(
     formattedScript.content,
@@ -104,7 +108,7 @@ async function bootstrap() {
   }
 
   // b. Write introduction
-  const introduction = await groqService.generate(
+  const { systemPrompts: introSystemPrompts, userPrompts: introUserPrompts } =
     ScriptsPrompting.COPYWRITER_INTRODUCTION_PROMPT(
       formattedScriptObject.indexSummary,
       formattedScriptObject.head.h1,
@@ -113,34 +117,38 @@ async function bootstrap() {
       testPostInterview.toneOfVoice,
       testPostInterview.language,
       formattedScriptObject.head.introductionLengthRange,
-    ),
-    {
-      model: MEDIUM_GENERATION_MODEL,
-      maxTokens: 8096,
-    },
-  );
+    );
+
+  const introduction = await groqService.generate('', {
+    model: MEDIUM_GENERATION_MODEL,
+    maxTokens: 8096,
+    systemPrompt: introSystemPrompts,
+    userPrompt: introUserPrompts,
+  });
   fullArticleContent += introduction.content.trim() + '\n\n';
 
   // c. Write sections
   for (const section of formattedScriptObject.body.sections) {
     const sectionTitle = section.title;
-    const sectionDescription = section.description;
 
     // Add section title based on its level
     const headingPrefix =
       section.level === 'h2' ? '##' : section.level === 'h3' ? '###' : '####';
     fullArticleContent += `${headingPrefix} ${sectionTitle}\n\n`;
 
-    const prompt = ScriptsPrompting.COPYWRITER_PARAGRAPH_PROMPT(
-      formattedScriptObject.indexSummary,
-      testPostInterview.targetAudience,
-      testPostInterview.toneOfVoice,
-      section,
-    );
+    const { systemPrompts: paraSystemPrompts, userPrompts: paraUserPrompts } =
+      ScriptsPrompting.COPYWRITER_PARAGRAPH_PROMPT(
+        formattedScriptObject.indexSummary,
+        testPostInterview.targetAudience,
+        testPostInterview.toneOfVoice,
+        section,
+      );
 
-    const paragraph = await groqService.generate(prompt, {
+    const paragraph = await groqService.generate('', {
       model: MEDIUM_GENERATION_MODEL,
       maxTokens: 8096,
+      systemPrompt: paraSystemPrompts,
+      userPrompt: paraUserPrompts,
     });
 
     fullArticleContent += paragraph.content.trim() + '\n\n';
@@ -153,18 +161,21 @@ async function bootstrap() {
     // Add FAQ section title
     fullArticleContent += `## ${sectionTitle}\n\n`;
 
-    const faq = await groqService.generate(
+    const { systemPrompts: faqSystemPrompts, userPrompts: faqUserPrompts } =
       ScriptsPrompting.COPYWRITER_FAQ_PROMPT(
         formattedScriptObject.indexSummary,
         testPostInterview.targetAudience,
         testPostInterview.toneOfVoice,
         formattedScriptObject.faq,
-      ),
-      {
-        model: MEDIUM_GENERATION_MODEL,
-        maxTokens: 8096,
-      },
-    );
+      );
+
+    const faq = await groqService.generate('', {
+      model: MEDIUM_GENERATION_MODEL,
+      maxTokens: 8096,
+      systemPrompt: faqSystemPrompts,
+      userPrompt: faqUserPrompts,
+    });
+
     fullArticleContent += faq.content.trim() + '\n\n';
   }
 

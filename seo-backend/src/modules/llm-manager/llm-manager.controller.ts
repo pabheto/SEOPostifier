@@ -12,7 +12,8 @@ class GenerateTextDto {
   model?: string;
   temperature?: number;
   maxTokens?: number;
-  systemPrompt?: string;
+  systemPrompt?: string | string[];
+  userPrompt?: string | string[];
 }
 
 @ApiTags('llm')
@@ -56,9 +57,21 @@ export class LlmManagerController {
           example: 1024,
         },
         systemPrompt: {
-          type: 'string',
-          description: 'Optional system prompt to set context',
+          oneOf: [
+            { type: 'string' },
+            { type: 'array', items: { type: 'string' } },
+          ],
+          description: 'Optional system prompt(s) to set context',
           example: 'You are an SEO expert and content writer.',
+        },
+        userPrompt: {
+          oneOf: [
+            { type: 'string' },
+            { type: 'array', items: { type: 'string' } },
+          ],
+          description:
+            'Optional user prompt(s). If not specified, the prompt field is used as user prompt.',
+          example: 'Write an article about SEO',
         },
       },
       required: ['prompt'],
@@ -107,6 +120,7 @@ export class LlmManagerController {
       temperature: dto.temperature,
       maxTokens: dto.maxTokens,
       systemPrompt: dto.systemPrompt,
+      userPrompt: dto.userPrompt,
     });
   }
 }

@@ -84,7 +84,7 @@ export class PostInterview {
 
   /** Lista de palabras clave secundarias o variaciones */
   @Prop({ type: [String], default: [] })
-  secondaryKeywords: string[];
+  secondaryKeywords?: string[];
 
   /** Descripción del usuario de lo que quiere tratar en este post */
   @Prop({ maxlength: 300 })
