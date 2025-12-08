@@ -27,8 +27,18 @@ $mode = $is_edit_mode ? 'edit' : 'create';
 
         <form id="create-script-form" data-mode="<?php echo esc_attr($mode); ?>" data-interview-id="<?php echo esc_attr($interview_id); ?>" style="margin-top: 20px;" onsubmit="return false;">
             
-            <div id="tab-draft">
-                <h3><?php _e('Draft Information', 'seo-postifier'); ?></h3>
+            <!-- Tab Navigation -->
+            <div class="seo-postifier-form-tabs">
+                <button type="button" class="form-tab active" data-tab="draft">
+                    <?php _e('Draft Information', 'seo-postifier'); ?>
+                </button>
+                <button type="button" class="form-tab" data-tab="settings">
+                    <?php _e('Settings', 'seo-postifier'); ?>
+                </button>
+            </div>
+
+            <!-- Tab 1: Draft Information -->
+            <div id="tab-draft" class="form-tab-content active">
                 <table class="form-table">
                     <tr>
                         <th scope="row">
@@ -50,25 +60,312 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                         </td>
                     </tr>
                 </table>
-                
-                <!-- Hidden fields for default values -->
-                <input type="hidden" id="secondary-keywords" name="secondaryKeywords" value="" />
-                <input type="hidden" id="keyword-density" name="keywordDensityTarget" value="0.015" />
-                <input type="hidden" id="language" name="language" value="es" />
-                <input type="hidden" id="search-intent" name="searchIntent" value="informational" />
-                <input type="hidden" id="target-audience" name="targetAudience" value="General audience" />
-                <input type="hidden" id="tone-of-voice" name="toneOfVoice" value="friendly" />
-                <input type="hidden" id="min-word-count" name="minWordCount" value="2000" />
-                <input type="hidden" id="max-word-count" name="maxWordCount" value="2500" />
-                <input type="hidden" id="needs-faq" name="needsFaqSection" value="1" />
-                <input type="hidden" id="mentions-brand" name="mentionsBrand" value="0" />
-                <input type="hidden" id="brand-name" name="brandName" value="" />
-                <input type="hidden" id="brand-description" name="brandDescription" value="" />
-                <input type="hidden" id="internal-links-mode" name="internalLinksMode" value="auto" />
-                <input type="hidden" id="external-links-research-mode" name="externalLinksResearchMode" value="auto" />
-                <input type="hidden" id="use-custom-external-links" name="useCustomExternalLinks" value="0" />
-                <input type="hidden" id="notes-for-writer" name="notesForWriter" value="" />
-                <input type="hidden" id="ai-images-mode" name="aiImagesMode" value="auto" />
+            </div>
+
+            <!-- Tab 2: Settings -->
+            <div id="tab-settings" class="form-tab-content">
+                <h3><?php _e('Advanced Settings', 'seo-postifier'); ?></h3>
+                <p class="description"><?php _e('Configure additional settings for your draft. Click on each section to expand.', 'seo-postifier'); ?></p>
+
+                <!-- Accordion: Images -->
+                <div class="settings-accordion">
+                    <div class="accordion-header">
+                        <h4><?php _e('Images', 'seo-postifier'); ?></h4>
+                        <span class="accordion-toggle">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <table class="form-table">
+                            <tr>
+                                <th scope="row">
+                                    <label for="ai-images-mode"><?php _e('AI Images', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <select id="ai-images-mode" name="aiImagesMode">
+                                        <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
+                                        <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
+                                        <option value="custom"><?php _e('Custom', 'seo-postifier'); ?></option>
+                                    </select>
+                                    <p class="description"><?php _e('Select how AI images should be generated', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                            <tr id="ai-images-custom-count-row" style="display: none;">
+                                <th scope="row">
+                                    <label for="ai-images-count"><?php _e('Number of Images', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="number" id="ai-images-count" name="aiImagesCount"
+                                           value="5" min="1" class="small-text" />
+                                    <p class="description"><?php _e('Number of AI-generated images to create', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                            <tr id="ai-images-custom-descriptions-row" style="display: none;">
+                                <th scope="row">
+                                    <label for="use-custom-ai-descriptions"><?php _e('Custom AI Descriptions', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="checkbox" id="use-custom-ai-descriptions" name="useCustomAiDescriptions" value="1" />
+                                    <label for="use-custom-ai-descriptions"><?php _e('Provide custom descriptions for each AI image', 'seo-postifier'); ?></label>
+                                </td>
+                            </tr>
+                            <tr id="ai-images-descriptions-container" style="display: none;">
+                                <td colspan="2">
+                                    <div id="ai-images-descriptions-list"></div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label><?php _e('User Images', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <button type="button" id="add-user-image" class="button button-secondary">
+                                        <?php _e('+ Add User Image', 'seo-postifier'); ?>
+                                    </button>
+                                    <p class="description"><?php _e('Add your own images to be used in the post', 'seo-postifier'); ?></p>
+                                    <div id="user-images-list" style="margin-top: 15px;"></div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Accordion: Style and Audience -->
+                <div class="settings-accordion">
+                    <div class="accordion-header">
+                        <h4><?php _e('Style and Audience', 'seo-postifier'); ?></h4>
+                        <span class="accordion-toggle">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <table class="form-table">
+                            <tr>
+                                <th scope="row">
+                                    <label for="language"><?php _e('Language', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <select id="language" name="language">
+                                        <option value="en">English</option>
+                                        <option value="es" selected>Español</option>
+                                        <option value="fr">Français</option>
+                                        <option value="de">Deutsch</option>
+                                        <option value="it">Italiano</option>
+                                        <option value="pt">Português</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="search-intent"><?php _e('Search Intent Type', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <select id="search-intent" name="searchIntent">
+                                        <option value="informational" selected>Informational</option>
+                                        <option value="transactional">Transactional</option>
+                                        <option value="commercial">Commercial</option>
+                                        <option value="navigational">Navigational</option>
+                                    </select>
+                                    <p class="description"><?php _e('User\'s search intent type', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="target-audience"><?php _e('Target Audience', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="text" id="target-audience" name="targetAudience"
+                                           class="regular-text" value="General audience" />
+                                    <p class="description"><?php _e('Describe your target audience', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="tone-of-voice"><?php _e('Tone of Voice', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <select id="tone-of-voice" name="toneOfVoice">
+                                        <option value="professional">Professional</option>
+                                        <option value="friendly" selected>Friendly</option>
+                                        <option value="technical">Technical</option>
+                                        <option value="educational">Educational</option>
+                                        <option value="casual">Casual</option>
+                                        <option value="formal">Formal</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="min-word-count"><?php _e('Minimum Word Count', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="number" id="min-word-count" name="minWordCount"
+                                           value="2000" min="100" class="small-text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="max-word-count"><?php _e('Maximum Word Count', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="number" id="max-word-count" name="maxWordCount"
+                                           value="2500" min="100" class="small-text" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="needs-faq"><?php _e('Include FAQ Section', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="checkbox" id="needs-faq" name="needsFaqSection" value="1" checked />
+                                    <label for="needs-faq"><?php _e('Add FAQ section at the end', 'seo-postifier'); ?></label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="notes-for-writer"><?php _e('Additional Instructions', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <textarea id="notes-for-writer" name="notesForWriter" rows="3"
+                                              class="large-text"></textarea>
+                                    <p class="description"><?php _e('Any additional instructions or requirements', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Accordion: Keywords -->
+                <div class="settings-accordion">
+                    <div class="accordion-header">
+                        <h4><?php _e('Keywords', 'seo-postifier'); ?></h4>
+                        <span class="accordion-toggle">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <table class="form-table">
+                            <tr>
+                                <th scope="row">
+                                    <label for="secondary-keywords"><?php _e('Secondary Keywords', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="text" id="secondary-keywords" name="secondaryKeywords" class="large-text" />
+                                    <p class="description"><?php _e('Comma-separated list of secondary keywords', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="keyword-density"><?php _e('Keyword Density Target', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="number" id="keyword-density" name="keywordDensityTarget"
+                                           value="0.015" min="0" max="1" step="0.001" class="small-text" />
+                                    <p class="description"><?php _e('Target keyword density (0-1, default: 0.015)', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Accordion: Link Mentions -->
+                <div class="settings-accordion">
+                    <div class="accordion-header">
+                        <h4><?php _e('Link Mentions', 'seo-postifier'); ?></h4>
+                        <span class="accordion-toggle">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <table class="form-table">
+                            <tr>
+                                <th scope="row">
+                                    <label for="internal-links-mode"><?php _e('Internal Links', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <select id="internal-links-mode" name="internalLinksMode">
+                                        <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
+                                        <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
+                                        <option value="custom"><?php _e('Custom', 'seo-postifier'); ?></option>
+                                    </select>
+                                    <p class="description"><?php _e('Select how internal links should be handled', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                            <tr class="internal-links-custom-fields" style="display: none;">
+                                <th scope="row">
+                                    <label for="internal-links-to-use"><?php _e('Internal Links URLs', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <textarea id="internal-links-to-use" name="internalLinksToUse" rows="3"
+                                              class="large-text" placeholder="One URL per line"></textarea>
+                                    <p class="description"><?php _e('Specific internal links to include (one per line)', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="external-links-research-mode"><?php _e('External Link Research', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <select id="external-links-research-mode" name="externalLinksResearchMode">
+                                        <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
+                                        <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
+                                    </select>
+                                    <p class="description"><?php _e('Automatically research and include external links', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">
+                                    <label for="use-custom-external-links"><?php _e('Use Custom External Links', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="checkbox" id="use-custom-external-links"
+                                           name="useCustomExternalLinks" value="1" />
+                                    <label for="use-custom-external-links"><?php _e('Provide specific external links to include', 'seo-postifier'); ?></label>
+                                </td>
+                            </tr>
+                            <tr class="external-links-custom-fields" style="display: none;">
+                                <th scope="row">
+                                    <label for="external-links-to-use"><?php _e('External Links URLs', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <textarea id="external-links-to-use" name="externalLinksToUse" rows="3"
+                                              class="large-text" placeholder="One URL per line"></textarea>
+                                    <p class="description"><?php _e('Specific external links to include (one per line)', 'seo-postifier'); ?></p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Accordion: Brand Mentions -->
+                <div class="settings-accordion">
+                    <div class="accordion-header">
+                        <h4><?php _e('Brand Mentions', 'seo-postifier'); ?></h4>
+                        <span class="accordion-toggle">▼</span>
+                    </div>
+                    <div class="accordion-content">
+                        <table class="form-table">
+                            <tr>
+                                <th scope="row">
+                                    <label for="mentions-brand"><?php _e('Mention Brand', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="checkbox" id="mentions-brand" name="mentionsBrand" value="1" />
+                                    <label for="mentions-brand"><?php _e('Include brand mentions', 'seo-postifier'); ?></label>
+                                </td>
+                            </tr>
+                            <tr class="brand-fields" style="display: none;">
+                                <th scope="row">
+                                    <label for="brand-name"><?php _e('Brand Name', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <input type="text" id="brand-name" name="brandName" class="regular-text" />
+                                </td>
+                            </tr>
+                            <tr class="brand-fields" style="display: none;">
+                                <th scope="row">
+                                    <label for="brand-description"><?php _e('Brand Description', 'seo-postifier'); ?></label>
+                                </th>
+                                <td>
+                                    <textarea id="brand-description" name="brandDescription" rows="2"
+                                              class="large-text"></textarea>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
             </div>
 
             <p class="submit">
@@ -189,6 +486,181 @@ jQuery(document).ready(function($) {
         console.log('seoPostifierData:', seoPostifierData);
     }
 
+    // Tab switching functionality
+    $('.form-tab').on('click', function() {
+        const tab = $(this).data('tab');
+        $('.form-tab').removeClass('active');
+        $(this).addClass('active');
+        $('.form-tab-content').removeClass('active');
+        $('#tab-' + tab).addClass('active');
+    });
+
+    // Accordion functionality
+    $('.accordion-header').on('click', function() {
+        const $accordion = $(this).closest('.settings-accordion');
+        const $content = $accordion.find('.accordion-content');
+        const $toggle = $(this).find('.accordion-toggle');
+        
+        $accordion.toggleClass('active');
+        $content.slideToggle(200);
+        $toggle.toggleClass('expanded');
+    });
+
+    // Initialize accordions - all closed by default
+    $('.accordion-content').hide();
+    $('.accordion-toggle').addClass('expanded');
+
+    // Toggle conditional fields - Brand
+    $('#mentions-brand').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('.brand-fields').show();
+        } else {
+            $('.brand-fields').hide();
+        }
+    });
+
+    // Handle AI images mode change
+    $('#ai-images-mode').on('change', function() {
+        const mode = $(this).val();
+        if (mode === 'custom') {
+            $('#ai-images-custom-count-row').show();
+            $('#ai-images-count').trigger('change');
+        } else {
+            $('#ai-images-custom-count-row').hide();
+            $('#ai-images-custom-descriptions-row').hide();
+            $('#use-custom-ai-descriptions').prop('checked', false);
+            $('#ai-images-descriptions-container').hide();
+        }
+    });
+
+    // Handle AI images count change
+    let aiImagesCount = 5;
+    $('#ai-images-count').on('change', function() {
+        if ($('#ai-images-mode').val() !== 'custom') {
+            return;
+        }
+        aiImagesCount = parseInt($(this).val()) || 5;
+        if (aiImagesCount > 1) {
+            $('#ai-images-custom-descriptions-row').show();
+        } else {
+            $('#ai-images-custom-descriptions-row').hide();
+            $('#use-custom-ai-descriptions').prop('checked', false);
+            $('#ai-images-descriptions-container').hide();
+        }
+        updateAiDescriptionsList();
+    });
+
+    // Handle custom AI descriptions checkbox
+    $('#use-custom-ai-descriptions').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('#ai-images-descriptions-container').show();
+            updateAiDescriptionsList();
+        } else {
+            $('#ai-images-descriptions-container').hide();
+        }
+    });
+
+    // Update AI descriptions list
+    function updateAiDescriptionsList() {
+        const container = $('#ai-images-descriptions-list');
+        container.empty();
+        
+        if (!$('#use-custom-ai-descriptions').is(':checked')) {
+            return;
+        }
+
+        const count = parseInt($('#ai-images-count').val()) || 5;
+        for (let i = 0; i < count; i++) {
+            const item = $('<div class="ai-image-description-item" style="margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
+            item.append('<label style="display: block; font-weight: 600; margin-bottom: 5px;">' + 
+                '<?php _e('Image', 'seo-postifier'); ?> ' + (i + 1) + ':</label>');
+            item.append('<textarea class="large-text ai-image-description" data-index="' + i + '" ' +
+                'placeholder="<?php _e('Describe what this image should show...', 'seo-postifier'); ?>" ' +
+                'rows="2" style="width: 100%;"></textarea>');
+            container.append(item);
+        }
+    }
+
+    // Add user image
+    let userImageCounter = 0;
+    $('#add-user-image').on('click', function() {
+        const imageId = 'user-image-' + userImageCounter++;
+        const item = $('<div class="user-image-item" data-id="' + imageId + '" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
+        
+        item.append('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">' +
+            '<strong><?php _e('User Image', 'seo-postifier'); ?> #' + (userImageCounter) + '</strong>' +
+            '<button type="button" class="button button-link-delete remove-user-image" style="color: #b32d2e;">' +
+            '<?php _e('Remove', 'seo-postifier'); ?></button></div>');
+        
+        item.append('<table class="form-table" style="margin: 0;"><tbody>');
+        
+        // Source Type
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Source Type', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><input type="text" class="regular-text user-image-source-type" ' +
+            'placeholder="<?php _e('e.g., url, wordpress_id', 'seo-postifier'); ?>" /></td>' +
+            '</tr>');
+        
+        // Source Value (Link)
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Link/URL', 'seo-postifier'); ?> *</label></th>' +
+            '<td style="padding: 10px 0;"><input type="text" class="regular-text user-image-source-value" ' +
+            'placeholder="<?php _e('Image URL or WordPress ID', 'seo-postifier'); ?>" required /></td>' +
+            '</tr>');
+        
+        // Suggested Alt
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Alt Text', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><input type="text" class="regular-text user-image-alt" ' +
+            'placeholder="<?php _e('Suggested alt text for the image', 'seo-postifier'); ?>" /></td>' +
+            '</tr>');
+        
+        // Image Description
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Image Description', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><textarea class="large-text user-image-description" rows="2" ' +
+            'placeholder="<?php _e('Describe the image and what it shows', 'seo-postifier'); ?>"></textarea></td>' +
+            '</tr>');
+        
+        // Usage Notes
+        item.find('tbody').append('<tr>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Usage Notes', 'seo-postifier'); ?></label></th>' +
+            '<td style="padding: 10px 0;"><textarea class="large-text user-image-notes" rows="2" ' +
+            'placeholder="<?php _e('How should this image be used in the post?', 'seo-postifier'); ?>"></textarea></td>' +
+            '</tr>');
+        
+        item.find('tbody').append('</tbody></table>');
+        
+        $('#user-images-list').append(item);
+        
+        // Remove button handler
+        item.find('.remove-user-image').on('click', function() {
+            item.remove();
+        });
+    });
+
+    // Handle internal links mode change
+    $('#internal-links-mode').on('change', function() {
+        const mode = $(this).val();
+        if (mode === 'custom') {
+            $('.internal-links-custom-fields').show();
+        } else {
+            $('.internal-links-custom-fields').hide();
+        }
+    });
+
+    // Toggle custom external links fields
+    $('#use-custom-external-links').on('change', function() {
+        if ($(this).is(':checked')) {
+            $('.external-links-custom-fields').show();
+        } else {
+            $('.external-links-custom-fields').hide();
+        }
+    });
+
+    // Initialize AI images mode handler
+    $('#ai-images-mode').trigger('change');
+
     // Form submission handler
     function handleFormSubmit(e) {
         console.log('=== handleFormSubmit called ===');
@@ -217,35 +689,109 @@ jQuery(document).ready(function($) {
         // Don't disable button yet - we need to show suggestions first
         $status.html('');
 
-        // Collect form data - simple version with defaults
-        const formData = {
-            mainKeyword: $('#main-keyword').val(),
-            secondaryKeywords: [],
-            keywordDensityTarget: 0.015,
-            userDescription: $('#user-description').val(),
-            language: 'es',
-            searchIntent: 'informational',
-            targetAudience: 'General audience',
-            toneOfVoice: 'friendly',
-            minWordCount: 2000,
-            maxWordCount: 2500,
-            needsFaqSection: true,
-            mentionsBrand: false,
-            brandName: '',
-            brandDescription: '',
-            internalLinksMode: 'auto',
-            includeInternalLinks: true,
-            includeInternalLinksAutomatically: true,
-            externalLinksResearchMode: 'auto',
-            externalLinksToIncludeAutomatically: -1,
-            useCustomExternalLinks: false,
-            notesForWriter: '',
-            imagesConfig: {
-                aiImagesCount: -1  // Auto mode
+        // Collect images configuration
+        const aiImagesMode = $('#ai-images-mode').val();
+        let aiImagesCountValue;
+        
+        if (aiImagesMode === 'auto') {
+            aiImagesCountValue = -1;
+        } else if (aiImagesMode === 'custom') {
+            const aiImagesCountInput = $('#ai-images-count').val();
+            aiImagesCountValue = (aiImagesCountInput !== '' && !isNaN(parseInt(aiImagesCountInput))) 
+                ? parseInt(aiImagesCountInput) 
+                : 5;
+        } else {
+            // disabled
+            aiImagesCountValue = 0;
+        }
+        
+        const useCustomAiDescriptions = $('#use-custom-ai-descriptions').is(':checked');
+        const aiImagesUserDescriptions = [];
+        
+        if (useCustomAiDescriptions && aiImagesMode === 'custom' && aiImagesCountValue > 0) {
+            $('.ai-image-description').each(function() {
+                const desc = $(this).val().trim();
+                if (desc) {
+                    aiImagesUserDescriptions.push(desc);
+                }
+            });
+        }
+        
+        const userImages = [];
+        $('.user-image-item').each(function() {
+            const $item = $(this);
+            const sourceValue = $item.find('.user-image-source-value').val().trim();
+            
+            if (sourceValue) {
+                const imageDescription = $item.find('.user-image-description').val().trim();
+                const usageNotes = $item.find('.user-image-notes').val().trim();
+                
+                let notes = '';
+                if (imageDescription) {
+                    notes = imageDescription;
+                }
+                if (usageNotes) {
+                    notes += (notes ? '\n\n' : '') + 'Usage: ' + usageNotes;
+                }
+                
+                userImages.push({
+                    sourceType: $item.find('.user-image-source-type').val().trim() || 'url',
+                    sourceValue: sourceValue,
+                    suggestedAlt: $item.find('.user-image-alt').val().trim() || undefined,
+                    notes: notes || undefined
+                });
             }
+        });
+        
+        // Build images config object
+        const imagesConfig = {
+            aiImagesCount: aiImagesCountValue
         };
         
-        const internalLinksMode = 'auto';
+        if (aiImagesUserDescriptions.length > 0) {
+            imagesConfig.aiImagesUserDescriptions = aiImagesUserDescriptions;
+        }
+        if (userImages.length > 0) {
+            imagesConfig.useUserImages = true;
+            imagesConfig.userImages = userImages;
+        }
+
+        // Helper function to split string into array
+        const splitAndFilter = (str, delimiter) => {
+            if (!str || typeof str !== 'string') return [];
+            return str.split(delimiter)
+                .map(item => item.trim())
+                .filter(item => item.length > 0);
+        };
+
+        // Collect all form data
+        const internalLinksMode = $('#internal-links-mode').val();
+        const formData = {
+            mainKeyword: $('#main-keyword').val(),
+            secondaryKeywords: splitAndFilter($('#secondary-keywords').val(), ','),
+            keywordDensityTarget: parseFloat($('#keyword-density').val()) || 0.015,
+            userDescription: $('#user-description').val(),
+            language: $('#language').val(),
+            searchIntent: $('#search-intent').val(),
+            targetAudience: $('#target-audience').val(),
+            toneOfVoice: $('#tone-of-voice').val(),
+            minWordCount: parseInt($('#min-word-count').val()) || 2000,
+            maxWordCount: parseInt($('#max-word-count').val()) || 2500,
+            needsFaqSection: $('#needs-faq').is(':checked'),
+            mentionsBrand: $('#mentions-brand').is(':checked'),
+            brandName: $('#brand-name').val() || '',
+            brandDescription: $('#brand-description').val() || '',
+            internalLinksMode: internalLinksMode,
+            includeInternalLinks: internalLinksMode !== 'disabled',
+            includeInternalLinksAutomatically: internalLinksMode === 'auto',
+            internalLinksToUse: internalLinksMode === 'custom' ? splitAndFilter($('#internal-links-to-use').val(), '\n') : undefined,
+            externalLinksResearchMode: $('#external-links-research-mode').val(),
+            externalLinksToIncludeAutomatically: $('#external-links-research-mode').val() === 'auto' ? -1 : 0,
+            useCustomExternalLinks: $('#use-custom-external-links').is(':checked'),
+            externalLinksToUse: $('#use-custom-external-links').is(':checked') ? splitAndFilter($('#external-links-to-use').val(), '\n') : undefined,
+            notesForWriter: $('#notes-for-writer').val() || '',
+            imagesConfig: imagesConfig
+        };
 
         // If in create mode, show suggestions first before creating interview
         if (mode === 'create') {

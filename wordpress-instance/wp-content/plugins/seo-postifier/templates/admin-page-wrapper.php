@@ -23,9 +23,10 @@ if (!defined('ABSPATH')) {
     <?php endif; ?>
 
     <!-- Tabs Navigation -->
+    <?php if ($current_tab !== 'create-script' && $current_tab !== 'edit-script' && $current_tab !== 'view-script'): ?>
     <nav class="nav-tab-wrapper wp-clearfix" style="margin-bottom: 20px;">
         <a href="?page=seo-postifier&tab=scripts" 
-           class="nav-tab <?php echo ($current_tab === 'scripts' || $current_tab === 'create-script' || $current_tab === 'view-script') ? 'nav-tab-active' : ''; ?>">
+           class="nav-tab <?php echo $current_tab === 'scripts' ? 'nav-tab-active' : ''; ?>">
             <?php _e('My Drafts', 'seo-postifier'); ?>
         </a>
         <a href="?page=seo-postifier&tab=settings" 
@@ -37,6 +38,7 @@ if (!defined('ABSPATH')) {
             <?php _e('Dev', 'seo-postifier'); ?>
         </a>
     </nav>
+    <?php endif; ?>
 
     <!-- Tab Content -->
     <div class="seo-postifier-tab-content">
