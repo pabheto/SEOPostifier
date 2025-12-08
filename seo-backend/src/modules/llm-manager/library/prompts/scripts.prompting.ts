@@ -410,6 +410,16 @@ You must answer with updated information, find in the internet information if ne
     THIS IS A PRODUCTION SYSTEM, DO NOT ADD ANY COMMENTS, EXPLANATIONS, OR NOTES.
     DO NOT ADD MOCK TEXTS, DON'T MENTION FICTITIOUS BRANDS OR PRODUCTS.
     If you detect any of this you can modify the script to fit the requirements.
+
+    ${
+      postInterview.blogInternalLinksMeta
+        ? `
+    This is the meta of the blog internal links:
+    ${postInterview.blogInternalLinksMeta}
+    MAKE SURE THAT IF YOU MENTION THIS INTERNAL LINKS, IT HAS RELEVANCE AND SENSE, IF THERE ARE NO GOOD POSTS TO LINK TO, DON'T LINK THEM
+    `
+        : ''
+    }
     `;
 
     const userPrompt = `

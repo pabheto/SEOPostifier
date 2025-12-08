@@ -219,7 +219,9 @@ export class PostsInterviewsController {
 
   @Post('generate-suggestions')
   @HttpCode(200)
-  @ApiOperation({ summary: 'Generate architecture suggestions for an interview' })
+  @ApiOperation({
+    summary: 'Generate architecture suggestions for an interview',
+  })
   @ApiResponse({
     status: 200,
     description: 'Suggestions generated successfully',
