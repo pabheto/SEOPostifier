@@ -11,6 +11,7 @@ import {
   NanoBananaImageGenerationService,
 } from 'src/modules/image-generation/services/nano-banana-image-generation.service';
 import {
+  GPT_OSS_120B_MODEL,
   GROQ_COMPOUND,
   MEDIUM_GENERATION_MODEL,
 } from 'src/modules/llm-manager';
@@ -20,6 +21,7 @@ import { InterviewStatus } from '../library/interfaces/post-interview.interface'
 import {
   PostBlock,
   PostBlockType,
+  PostParagraph,
   PostStatus,
 } from '../library/interfaces/posts.interface';
 import { PostInterviewDocument } from '../schemas/post-interview.schema';
@@ -358,7 +360,15 @@ export class PostsManagementService {
       });
     }
 
-    post.blocks = blocks;
+    // NEW STEP: Optimize each section content for SEO and reduce redundancies
+    const optimizedBlocks = await this.optimizeBlocksForSEO(
+      blocks,
+      postInterview.generatedScriptDefinition.head.h1,
+      postInterview.targetAudience,
+      postInterview.language,
+    );
+
+    post.blocks = optimizedBlocks;
     post.status = PostStatus.GENERATED;
     await post.save();
 
@@ -366,6 +376,132 @@ export class PostsManagementService {
     await postInterview.save();
 
     return post;
+  }
+
+  /**
+   * Optimize all paragraph blocks for SEO by reducing redundancies and improving content quality
+   * Processes all content together to identify real redundancies across sections
+   * @param blocks - Array of post blocks to optimize
+   * @param postTitle - Title of the post for context
+   * @param targetAudience - Target audience for context
+   * @param language - Language of the content
+   * @returns Array of optimized blocks
+   */
+  private async optimizeBlocksForSEO(
+    blocks: PostBlock[],
+    postTitle: string,
+    targetAudience: string,
+    language: string,
+  ): Promise<PostBlock[]> {
+    // Extract all paragraph blocks with their indices
+    const paragraphIndices: number[] = [];
+    const paragraphContents: string[] = [];
+
+    blocks.forEach((block, index) => {
+      if (block.type === PostBlockType.PARAGRAPH) {
+        paragraphIndices.push(index);
+        paragraphContents.push((block as PostParagraph).content);
+      }
+    });
+
+    // If no paragraphs to optimize, return original blocks
+    if (paragraphContents.length === 0) {
+      return blocks;
+    }
+
+    try {
+      // Build the full content context with numbered sections
+      const fullContent = paragraphContents
+        .map((content, idx) => `[SECTION ${idx + 1}]\n${content}`)
+        .join('\n\n');
+
+      const systemPrompt = `You are an expert SEO content optimizer and editor. Your task is to review ALL sections together and:
+1. Identify and eliminate redundancies across ALL sections (repeated ideas, phrases, or information)
+2. Optimize for SEO without keyword stuffing
+3. Improve readability and clarity
+4. Maintain the original message and tone of each section
+5. Keep the content concise and impactful
+6. Ensure each section adds unique value without repeating what other sections already covered
+
+CRITICAL: You must return a valid JSON object with this exact structure:
+{
+  "sections": [
+    "optimized text for section 1",
+    "optimized text for section 2",
+    ...
+  ]
+}
+
+The "sections" array must contain exactly ${paragraphContents.length} optimized paragraphs in the same order.`;
+
+      const userPrompt = `Post Title: "${postTitle}"
+Target Audience: ${targetAudience}
+Language: ${language}
+
+Here are ALL the sections of the post. Review them together to identify redundancies across sections:
+
+${fullContent}
+
+Optimize all ${paragraphContents.length} sections together, reducing redundancies while maintaining the unique value of each section. Return a JSON object with the "sections" array containing all optimized paragraphs in order.`;
+
+      const optimizedResult = await this.groqService.generate('', {
+        model: GPT_OSS_120B_MODEL,
+        maxTokens: 8096,
+        temperature: 0.7,
+        systemPrompt,
+        userPrompt,
+      });
+
+      // Parse the response
+      let optimizedSections: { sections: string[] };
+      try {
+        optimizedSections = JSON.parse(optimizedResult.content) as {
+          sections: string[];
+        };
+      } catch (parseError) {
+        // If JSON parsing fails, request a fix from the LLM
+        const { systemPrompts: fixSystemPrompts, userPrompts: fixUserPrompts } =
+          ScriptsPrompting.FIX_JSON_PROMPT(
+            optimizedResult.content,
+            parseError instanceof Error
+              ? parseError.message
+              : String(parseError),
+          );
+
+        const fixedJsonResult = await this.groqService.generate('', {
+          model: GPT_OSS_120B_MODEL,
+          maxTokens: 8096,
+          systemPrompt: fixSystemPrompts,
+          userPrompt: fixUserPrompts,
+        });
+
+        optimizedSections = JSON.parse(fixedJsonResult.content) as {
+          sections: string[];
+        };
+      }
+
+      // Validate we got the right number of sections
+      if (optimizedSections.sections.length !== paragraphContents.length) {
+        throw new Error(
+          `Expected ${paragraphContents.length} optimized sections but got ${optimizedSections.sections.length}`,
+        );
+      }
+
+      // Create a new blocks array with optimized paragraphs
+      const optimizedBlocks = [...blocks];
+      paragraphIndices.forEach((originalIndex, idx) => {
+        optimizedBlocks[originalIndex] = {
+          ...optimizedBlocks[originalIndex],
+          content: optimizedSections.sections[idx].trim(),
+        } as PostBlock;
+      });
+
+      return optimizedBlocks;
+    } catch (error) {
+      // If optimization fails, log error and return original blocks
+      console.error('Failed to optimize content for SEO:', error);
+      return blocks;
+    }
   }
 
   async listPostsForUser(userId: string) {
