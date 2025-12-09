@@ -87,7 +87,7 @@ export class PostInterview {
   secondaryKeywords?: string[];
 
   /** Descripción del usuario de lo que quiere tratar en este post */
-  @Prop({ maxlength: 300 })
+  @Prop({ maxlength: 2000 })
   userDescription?: string;
 
   /** Densidad objetivo de palabra clave (ej: 0.017 para 1.7%) */
