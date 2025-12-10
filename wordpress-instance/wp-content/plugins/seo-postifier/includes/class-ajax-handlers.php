@@ -18,6 +18,7 @@ class SEO_Postifier_AJAX_Handlers {
         // Settings
         add_action('wp_ajax_seo_postifier_save_settings', array(__CLASS__, 'save_settings'));
         add_action('wp_ajax_seo_postifier_test_license', array(__CLASS__, 'test_license'));
+        add_action('wp_ajax_seo_postifier_get_subscription', array(__CLASS__, 'get_subscription'));
         
         // Interview management
         add_action('wp_ajax_seo_postifier_get_interviews_list', array(__CLASS__, 'get_interviews_list'));
@@ -113,6 +114,37 @@ class SEO_Postifier_AJAX_Handlers {
 
             wp_send_json_error(array(
                 'message' => 'License validation failed: ' . $error_message
+            ));
+        }
+    }
+
+    /**
+     * Get subscription and usage (AJAX handler)
+     */
+    public static function get_subscription() {
+        check_ajax_referer('seo_postifier_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        if (!SEO_Postifier_Settings::has_license_key()) {
+            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+            return;
+        }
+
+        $response = SEO_Postifier_API_Client::get_subscription();
+        $result = SEO_Postifier_API_Client::parse_response($response);
+
+        if ($result['success']) {
+            wp_send_json_success(array(
+                'message' => 'Subscription data retrieved successfully',
+                'data' => $result['data']
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => 'Failed to load subscription data: ' . $result['message']
             ));
         }
     }

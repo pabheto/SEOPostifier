@@ -1346,3 +1346,46 @@
 #reload-suggestions-button:active .dashicons {
   transform: rotate(360deg);
 }
+
+/* Subscription Usage Display */
+#subscription-usage-card {
+  position: relative;
+}
+
+#subscription-usage-card h2 {
+  margin-top: 0;
+}
+
+#refresh-usage-btn {
+  margin-left: 10px;
+}
+
+.subscription-info {
+  padding: 0;
+}
+
+.usage-section {
+  padding: 15px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.usage-section:last-child {
+  border-bottom: none;
+}
+
+.usage-section h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #1d2327;
+}
+
+.usage-section p {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+
+.usage-section strong {
+  color: #1d2327;
+  font-weight: 600;
+}

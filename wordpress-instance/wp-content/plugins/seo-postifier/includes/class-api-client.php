@@ -132,6 +132,13 @@ class SEO_Postifier_API_Client {
     }
 
     /**
+     * Get current subscription and usage
+     */
+    public static function get_subscription() {
+        return self::request('/subscriptions/current-by-license', 'GET', null, 30);
+    }
+
+    /**
      * Parse response and extract data
      */
     public static function parse_response($response) {

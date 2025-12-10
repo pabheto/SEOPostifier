@@ -87,6 +87,23 @@ $settings = SEO_Postifier_Settings::get_all();
             <?php endif; ?>
         </p>
     </div>
+
+    <?php if (SEO_Postifier_Settings::has_license_key()): ?>
+    <div class="card" style="margin-top: 20px;" id="subscription-usage-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 style="margin: 0;"><?php _e('Subscription & Usage', 'seo-postifier'); ?></h2>
+            <button type="button" id="refresh-usage-btn" class="button button-secondary">
+                <?php _e('Refresh', 'seo-postifier'); ?>
+            </button>
+        </div>
+        <div id="subscription-usage-content">
+            <p style="text-align: center; padding: 20px;">
+                <span class="spinner is-active" style="float: none; margin: 0 auto;"></span>
+                <?php _e('Loading subscription information...', 'seo-postifier'); ?>
+            </p>
+        </div>
+    </div>
+    <?php endif; ?>
 </div>
 
 <script type="text/javascript">
@@ -175,6 +192,113 @@ jQuery(document).ready(function($) {
             }
         });
     });
+
+    <?php if (SEO_Postifier_Settings::has_license_key()): ?>
+    // Load subscription usage on page load
+    function loadSubscriptionUsage() {
+        const $content = $('#subscription-usage-content');
+        $content.html('<p style="text-align: center; padding: 20px;"><span class="spinner is-active" style="float: none; margin: 0 auto;"></span> <?php _e('Loading subscription information...', 'seo-postifier'); ?></p>');
+
+        $.ajax({
+            url: seoPostifierData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'seo_postifier_get_subscription',
+                nonce: seoPostifierData.nonce
+            },
+            success: function(response) {
+                if (response.success && response.data && response.data.data) {
+                    const data = response.data.data;
+                    let html = '<div class="subscription-info">';
+                    
+                    // Subscription Plan
+                    html += '<div class="usage-section" style="margin-bottom: 20px;">';
+                    html += '<h3 style="margin-top: 0;"><?php _e('Current Plan', 'seo-postifier'); ?></h3>';
+                    html += '<p style="font-size: 16px; margin: 5px 0;"><strong><?php _e('Plan:', 'seo-postifier'); ?></strong> <span style="text-transform: uppercase; color: #2271b1;">' + escapeHtml(data.subscription.plan || 'N/A') + '</span></p>';
+                    html += '<p style="font-size: 16px; margin: 5px 0;"><strong><?php _e('Status:', 'seo-postifier'); ?></strong> <span style="text-transform: capitalize; color: ' + (data.subscription.status === 'active' ? '#46b450' : '#dc3232') + ';">' + escapeHtml(data.subscription.status || 'N/A') + '</span></p>';
+                    html += '</div>';
+                    
+                    // Billing Period
+                    if (data.billingPeriod) {
+                        html += '<div class="usage-section" style="margin-bottom: 20px;">';
+                        html += '<h3><?php _e('Billing Period', 'seo-postifier'); ?></h3>';
+                        const startDate = new Date(data.billingPeriod.start);
+                        const endDate = new Date(data.billingPeriod.end);
+                        html += '<p style="margin: 5px 0;"><strong><?php _e('Start:', 'seo-postifier'); ?></strong> ' + formatDate(startDate) + '</p>';
+                        html += '<p style="margin: 5px 0;"><strong><?php _e('End:', 'seo-postifier'); ?></strong> ' + formatDate(endDate) + '</p>';
+                        html += '</div>';
+                    }
+                    
+                    // Usage Statistics
+                    if (data.usage) {
+                        html += '<div class="usage-section">';
+                        html += '<h3><?php _e('Usage This Period', 'seo-postifier'); ?></h3>';
+                        html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">';
+                        html += '<div style="background: #f0f0f1; padding: 15px; border-radius: 4px;">';
+                        html += '<div style="font-size: 24px; font-weight: bold; color: #2271b1; margin-bottom: 5px;">' + (data.usage.aiGeneratedImages || 0) + '</div>';
+                        html += '<div style="color: #646970;"><?php _e('AI Generated Images', 'seo-postifier'); ?></div>';
+                        html += '</div>';
+                        html += '<div style="background: #f0f0f1; padding: 15px; border-radius: 4px;">';
+                        html += '<div style="font-size: 24px; font-weight: bold; color: #2271b1; margin-bottom: 5px;">' + formatNumber(data.usage.generatedWords || 0) + '</div>';
+                        html += '<div style="color: #646970;"><?php _e('Generated Words', 'seo-postifier'); ?></div>';
+                        html += '</div>';
+                        html += '</div>';
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                    $content.html(html);
+                } else {
+                    $content.html('<div class="notice notice-error inline"><p><?php _e('Failed to load subscription information', 'seo-postifier'); ?></p></div>');
+                }
+            },
+            error: function(xhr) {
+                let errorMsg = '<?php _e('Failed to load subscription information', 'seo-postifier'); ?>';
+                if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
+                    errorMsg = xhr.responseJSON.data.message;
+                }
+                $content.html('<div class="notice notice-error inline"><p>' + errorMsg + '</p></div>');
+            }
+        });
+    }
+
+    // Helper function to escape HTML
+    function escapeHtml(text) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;'
+        };
+        return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+    }
+
+    // Helper function to format date
+    function formatDate(date) {
+        if (!date || isNaN(date.getTime())) {
+            return 'N/A';
+        }
+        return date.toLocaleDateString('en-US', { 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+        });
+    }
+
+    // Helper function to format numbers with commas
+    function formatNumber(num) {
+        return String(num).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    }
+
+    // Load usage on page load
+    loadSubscriptionUsage();
+
+    // Refresh button
+    $('#refresh-usage-btn').on('click', function() {
+        loadSubscriptionUsage();
+    });
+    <?php endif; ?>
 });
 </script>
 
