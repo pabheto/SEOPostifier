@@ -142,6 +142,7 @@ async function bootstrap() {
         testPostInterview.targetAudience,
         testPostInterview.toneOfVoice,
         section,
+        testPostInterview.language,
       );
 
     const paragraph = await groqService.generate('', {

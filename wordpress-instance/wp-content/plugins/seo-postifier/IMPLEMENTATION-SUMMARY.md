@@ -302,3 +302,5 @@ The plugin is ready to use. To test:
 5. Check that focus keyword is populated in your SEO plugin
 
 Enjoy your enhanced SEO Postifier plugin! 🚀
+
+

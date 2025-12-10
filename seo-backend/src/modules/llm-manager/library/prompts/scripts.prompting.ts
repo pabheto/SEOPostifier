@@ -68,6 +68,7 @@ DONT REFERENCE BRANDS THAT DOESNT EXIST
     Brand name: ${brandName}
     Brand description: ${brandDescription}
     The language should be: ${language}
+    MAKE SURE TO MATCH THE LANGUAGE ${language}
     `;
 
     return {
@@ -692,6 +693,7 @@ DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
     targetAudience: string,
     targetTone: string,
     section: ScriptSection,
+    language: string,
   ): LLMPrompt => {
     const isCoreSection = section.lengthRange[1] >= 400;
     const sectionGuidance = isCoreSection
@@ -727,6 +729,7 @@ DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
 - Tone: ${targetTone}
 - Audience: ${targetAudience}
 - Article topics: ${indexSummary}
+- Language: ${language} MAKE SURE TO MATCH THE LANGUAGE ${language}
 ${linksSection}
 
 ## CRITICAL WORD COUNT REQUIREMENTS
@@ -763,7 +766,7 @@ Return ONLY a JSON object with this structure (no additional text):
 }
 
 **Link Format in Content:**
-- Internal links: Use markdown format [link text](internal-link-slug) where the slug matches the internal link suggestion
+- Internal links: Use markdown format [link text](internal link url) where the slug matches the internal link suggestion
 - External links: Use markdown format [link text](https://full-url.com) with the actual URL from external link suggestions
 - Links should be naturally integrated into the paragraph content, not added as separate sentences
 
@@ -772,7 +775,7 @@ NEVER ADD BACKTICKS, CODEBLOCK FENCES, OR FORMATTING CHARACTERS
 **VALIDATION:**
 - Total words across all blocks: ${section.lengthRange[0]} - ${section.lengthRange[1]} words
 - Each paragraph: 40-80 words (up to 120 if critical)
-${hasInternalLinks || hasExternalLinks ? `- ALL suggested links must be included in the content` : ''}
+${hasInternalLinks || hasExternalLinks ? `- Suggested links must be included in the content as long as they make sense` : ''}
 - JSON must be valid (double quotes, no trailing commas)
 
 DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS

@@ -38,7 +38,7 @@ if (empty($interview_id)) {
             <!-- Tab Navigation -->
             <div class="seo-postifier-form-tabs">
                 <button type="button" class="form-tab active" data-tab="draft">
-                    <?php _e('New Draft', 'seo-postifier'); ?>
+                    <?php _e('Draft Information', 'seo-postifier'); ?>
                 </button>
                 <button type="button" class="form-tab" data-tab="settings">
                     <?php _e('Settings', 'seo-postifier'); ?>
@@ -48,36 +48,26 @@ if (empty($interview_id)) {
             <!-- Edit Form -->
             <form id="edit-interview-form" style="margin-top: 20px;">
                 
-                <!-- Tab 1: New Draft -->
+                <!-- Tab 1: Draft Information -->
                 <div id="tab-draft" class="form-tab-content active">
-                    <h3><?php _e('Draft Information', 'seo-postifier'); ?></h3>
                     <table class="form-table">
                         <tr>
                             <th scope="row">
-                                <label for="edit-main-keyword"><?php _e('Main Keyword', 'seo-postifier'); ?> *</label>
+                                <label for="edit-main-keyword"><?php _e('Search Intent', 'seo-postifier'); ?> *</label>
                             </th>
                             <td>
                                 <input type="text" id="edit-main-keyword" name="mainKeyword" class="regular-text" required />
-                                <p class="description"><?php _e('Primary keyword to optimize for', 'seo-postifier'); ?></p>
+                                <p class="description"><?php _e('Primary keyword or search intent to optimize for', 'seo-postifier'); ?></p>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">
-                                <label for="edit-secondary-keywords"><?php _e('Secondary Keywords', 'seo-postifier'); ?></label>
-                            </th>
-                            <td>
-                                <input type="text" id="edit-secondary-keywords" name="secondaryKeywords" class="large-text" />
-                                <p class="description"><?php _e('Comma-separated list of secondary keywords', 'seo-postifier'); ?></p>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th scope="row">
-                                <label for="edit-user-description"><?php _e('Post Description', 'seo-postifier'); ?> *</label>
+                                <label for="edit-user-description"><?php _e('Post Description', 'seo-postifier'); ?></label>
                             </th>
                             <td>
                                 <textarea id="edit-user-description" name="userDescription" rows="6"
-                                          class="large-text" required></textarea>
-                                <p class="description"><?php _e('Describe what the post should be about', 'seo-postifier'); ?></p>
+                                          class="large-text"></textarea>
+                                <p class="description"><?php _e('Optional: Describe what the post should be about', 'seo-postifier'); ?></p>
                             </td>
                         </tr>
                     </table>
@@ -149,28 +139,6 @@ if (empty($interview_id)) {
                         </div>
                     </div>
 
-                    <!-- Accordion: Keyword Usage -->
-                    <div class="settings-accordion">
-                        <div class="accordion-header">
-                            <h4><?php _e('Keyword Usage', 'seo-postifier'); ?></h4>
-                            <span class="accordion-toggle">▼</span>
-                        </div>
-                        <div class="accordion-content">
-                            <table class="form-table">
-                                <tr>
-                                    <th scope="row">
-                                        <label for="edit-keyword-density"><?php _e('Keyword Density Target', 'seo-postifier'); ?></label>
-                                    </th>
-                                    <td>
-                                        <input type="number" id="edit-keyword-density" name="keywordDensityTarget"
-                                               value="0.015" min="0" max="1" step="0.001" class="small-text" />
-                                        <p class="description"><?php _e('Target keyword density (0-1, default: 0.015)', 'seo-postifier'); ?></p>
-                                    </td>
-                                </tr>
-                            </table>
-                        </div>
-                    </div>
-
                     <!-- Accordion: Style and Audience -->
                     <div class="settings-accordion">
                         <div class="accordion-header">
@@ -181,10 +149,10 @@ if (empty($interview_id)) {
                             <table class="form-table">
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-language"><?php _e('Language', 'seo-postifier'); ?> *</label>
+                                        <label for="edit-language"><?php _e('Language', 'seo-postifier'); ?></label>
                                     </th>
                                     <td>
-                                        <select id="edit-language" name="language" required>
+                                        <select id="edit-language" name="language">
                                             <option value="en">English</option>
                                             <option value="es" selected>Español</option>
                                             <option value="fr">Français</option>
@@ -196,10 +164,10 @@ if (empty($interview_id)) {
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-search-intent"><?php _e('Search Intent', 'seo-postifier'); ?> *</label>
+                                        <label for="edit-search-intent"><?php _e('Search Intent Type', 'seo-postifier'); ?></label>
                                     </th>
                                     <td>
-                                        <select id="edit-search-intent" name="searchIntent" required>
+                                        <select id="edit-search-intent" name="searchIntent">
                                             <option value="informational" selected>Informational</option>
                                             <option value="transactional">Transactional</option>
                                             <option value="commercial">Commercial</option>
@@ -210,20 +178,20 @@ if (empty($interview_id)) {
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-target-audience"><?php _e('Target Audience', 'seo-postifier'); ?> *</label>
+                                        <label for="edit-target-audience"><?php _e('Target Audience', 'seo-postifier'); ?></label>
                                     </th>
                                     <td>
                                         <input type="text" id="edit-target-audience" name="targetAudience"
-                                               class="regular-text" value="General audience" required />
+                                               class="regular-text" value="General audience" />
                                         <p class="description"><?php _e('Describe your target audience', 'seo-postifier'); ?></p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-tone-of-voice"><?php _e('Tone of Voice', 'seo-postifier'); ?> *</label>
+                                        <label for="edit-tone-of-voice"><?php _e('Tone of Voice', 'seo-postifier'); ?></label>
                                     </th>
                                     <td>
-                                        <select id="edit-tone-of-voice" name="toneOfVoice" required>
+                                        <select id="edit-tone-of-voice" name="toneOfVoice">
                                             <option value="professional">Professional</option>
                                             <option value="friendly" selected>Friendly</option>
                                             <option value="technical">Technical</option>
@@ -268,6 +236,37 @@ if (empty($interview_id)) {
                                         <textarea id="edit-notes-for-writer" name="notesForWriter" rows="3"
                                                   class="large-text"></textarea>
                                         <p class="description"><?php _e('Any additional instructions or requirements', 'seo-postifier'); ?></p>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Accordion: Keywords -->
+                    <div class="settings-accordion">
+                        <div class="accordion-header">
+                            <h4><?php _e('Keywords', 'seo-postifier'); ?></h4>
+                            <span class="accordion-toggle">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <table class="form-table">
+                                <tr>
+                                    <th scope="row">
+                                        <label for="edit-secondary-keywords"><?php _e('Secondary Keywords', 'seo-postifier'); ?></label>
+                                    </th>
+                                    <td>
+                                        <input type="text" id="edit-secondary-keywords" name="secondaryKeywords" class="large-text" />
+                                        <p class="description"><?php _e('Comma-separated list of secondary keywords', 'seo-postifier'); ?></p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">
+                                        <label for="edit-keyword-density"><?php _e('Keyword Density Target', 'seo-postifier'); ?></label>
+                                    </th>
+                                    <td>
+                                        <input type="number" id="edit-keyword-density" name="keywordDensityTarget"
+                                               value="0.015" min="0" max="1" step="0.001" class="small-text" />
+                                        <p class="description"><?php _e('Target keyword density (0-1, default: 0.015)', 'seo-postifier'); ?></p>
                                     </td>
                                 </tr>
                             </table>

@@ -162,6 +162,7 @@ export class PostsManagementService {
         postInterview.targetAudience,
         postInterview.toneOfVoice,
         section,
+        postInterview.language,
       );
 
       const sectionContentPromise = this.groqService.generate('', {

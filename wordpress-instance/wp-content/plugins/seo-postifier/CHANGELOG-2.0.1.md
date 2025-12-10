@@ -223,3 +223,5 @@ Potential improvements for future versions:
 - Developed by: Pablo Herrero
 - Date: December 8, 2025
 - Version: 2.0.1
+
+
