@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { UsersController } from './users.controller';
-import { UsersService } from './users.service';
 import { AuthHelper } from './auth.helper';
-import { User, UserSchema } from './schemas/user.schema';
+import { LicenseGuard } from './guards/license.guard';
+import { SessionGuard } from './guards/session.guard';
 import { License, LicenseSchema } from './schemas/license.schema';
 import { Session, SessionSchema } from './schemas/session.schema';
-import { LicenseGuard } from './guards/license.guard';
+import { User, UserSchema } from './schemas/user.schema';
+import { UsersController } from './users.controller';
+import { UsersService } from './users.service';
 
 @Module({
   imports: [
@@ -17,8 +18,7 @@ import { LicenseGuard } from './guards/license.guard';
     ]),
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthHelper, LicenseGuard],
-  exports: [UsersService, AuthHelper, LicenseGuard],
+  providers: [UsersService, AuthHelper, LicenseGuard, SessionGuard],
+  exports: [UsersService, AuthHelper, LicenseGuard, SessionGuard],
 })
 export class UsersModule {}
-

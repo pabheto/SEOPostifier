@@ -48,9 +48,8 @@ export class LicenseGuard implements CanActivate {
 
     try {
       // Validate license and get user
-      const { user, license } = await this.authHelper.getUserByLicense(
-        licenseKey,
-      );
+      const { user, license } =
+        await this.authHelper.getUserByLicense(licenseKey);
 
       // Check if specific roles are required
       const requiredRoles = this.reflector.getAllAndOverride<LicenseRole[]>(
@@ -79,4 +78,3 @@ export class LicenseGuard implements CanActivate {
     }
   }
 }
-
