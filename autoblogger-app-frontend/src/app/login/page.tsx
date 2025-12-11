@@ -81,7 +81,7 @@ export default function Login() {
           </Form.Item>
           <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
             <Typography.Text type="secondary">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href="/register" style={{ color: "#1890ff" }}>
                 Sign up
               </Link>
