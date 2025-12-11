@@ -1,0 +1,54 @@
+{
+  "name": "autoblogger-app-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "cross-env NODE_OPTIONS=--max_old_space_size=4096 refine dev",
+    "build": "refine build",
+    "start": "refine start",
+    "lint": "next lint",
+    "refine": "refine",
+    "codegen": "graphql-codegen"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.5.1",
+    "@ant-design/nextjs-registry": "^1.0.0",
+    "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@refinedev/antd": "^6.0.1",
+    "@refinedev/cli": "^2.16.48",
+    "@refinedev/core": "^5.0.0",
+    "@refinedev/devtools": "^2.0.1",
+    "@refinedev/kbar": "^2.0.0",
+    "@refinedev/nestjs-query": "^2.0.0",
+    "@refinedev/nextjs-router": "^7.0.0",
+    "antd": "^5.23.0",
+    "graphql-tag": "^2.12.6",
+    "graphql-ws": "^5.9.1",
+    "js-cookie": "^3.0.5",
+    "next": "^15.2.4",
+    "next-auth": "^4.24.5",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^5.0.0",
+    "@graphql-codegen/import-types-preset": "^3.0.0",
+    "@graphql-codegen/typescript": "^4.0.1",
+    "@graphql-codegen/typescript-operations": "^4.0.1",
+    "@types/js-cookie": "^3.0.6",
+    "@types/node": "^20",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8",
+    "eslint-config-next": "^15.0.3",
+    "typescript": "^5.8.3"
+  },
+  "refine": {
+    "projectId": "p8kcRF-rIezxL-3LuGcH"
+  },
+  "packageManager": "pnpm@10.20.0+sha512.cf9998222162dd85864d0a8102e7892e7ba4ceadebbf5a31f9c2fce48dfce317a9c53b9f6464d1ef9042cba2e02ae02a9f7c143a2b438cd93c91840f0192b9dd"
+}

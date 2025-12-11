@@ -8,7 +8,5 @@ export type {
   RequestWithUser,
 } from '../decorators/current-user.decorator';
 export { RequireLicense } from '../decorators/require-license.decorator';
-export { RequireSession } from '../decorators/require-session.decorator';
 export { LicenseGuard } from '../guards/license.guard';
-export { SessionGuard } from '../guards/session.guard';
 export { LicenseRole } from '../schemas/license.schema';
