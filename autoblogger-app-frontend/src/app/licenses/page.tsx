@@ -17,7 +17,6 @@ import {
   message,
   Modal,
   Row,
-  Select,
   Skeleton,
   Space,
   Table,
@@ -35,28 +34,36 @@ export default function LicensesPage() {
   const { data: subscriptionData } = useSubscription();
   const createLicense = useCreateLicense();
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedRole, setSelectedRole] = useState<string>("BASIC");
+  const [licenseName, setLicenseName] = useState<string>("");
 
   const subscription = subscriptionData?.subscription;
   const currentPlan = subscription?.plan || "free";
 
-  const planToLicenseRoles: Record<string, string[]> = {
-    free: ["BASIC"],
-    basic: ["BASIC"],
-    premium: ["BASIC", "PREMIUM"],
-    agency: ["BASIC", "PREMIUM", "ENTERPRISE"],
+  // Plan limits for maximum active licenses
+  const planLimits: Record<string, number> = {
+    free: 1,
+    basic: 1,
+    premium: 1,
+    agency: 1,
   };
 
-  const availableRoles = planToLicenseRoles[currentPlan] || ["BASIC"];
+  const maxLicenses = planLimits[currentPlan] || 1;
+  const activeLicenses = licenses?.filter((l) => l.active) || [];
+  const activeCount = activeLicenses.length;
+  const remainingLicenses = Math.max(0, maxLicenses - activeCount);
 
   const handleCreateLicense = async () => {
+    if (!licenseName.trim()) {
+      message.error("Please enter a license name");
+      return;
+    }
     try {
-      await createLicense.mutateAsync({ role: selectedRole });
+      await createLicense.mutateAsync({ name: licenseName.trim() });
       message.success("License created successfully!");
       setIsModalVisible(false);
-      setSelectedRole("BASIC");
-    } catch (error) {
-      message.error("Failed to create license");
+      setLicenseName("");
+    } catch (error: any) {
+      message.error(error?.message || "Failed to create license");
     }
   };
 
@@ -91,21 +98,10 @@ export default function LicensesPage() {
       ),
     },
     {
-      title: "Role",
-      dataIndex: "role",
-      key: "role",
-      render: (role: string) => {
-        const colorMap: Record<string, string> = {
-          ENTERPRISE: "red",
-          PREMIUM: "purple",
-          BASIC: "blue",
-        };
-        return (
-          <Tag color={colorMap[role] || "default"} style={{ fontSize: 12 }}>
-            {role}
-          </Tag>
-        );
-      },
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+      render: (name: string) => <Text strong>{name || "Unnamed License"}</Text>,
     },
     {
       title: "Status",
@@ -164,6 +160,16 @@ export default function LicensesPage() {
           <Text type="secondary" style={{ fontSize: 16 }}>
             Manage your license keys
           </Text>
+          <div style={{ marginTop: 8 }}>
+            <Text type="secondary" style={{ fontSize: 14 }}>
+              Active licenses: <Text strong>{activeCount}</Text> / {maxLicenses}
+              {remainingLicenses > 0 && (
+                <Text type="success" style={{ marginLeft: 8 }}>
+                  ({remainingLicenses} remaining)
+                </Text>
+              )}
+            </Text>
+          </div>
         </Col>
         <Col>
           <Button
@@ -171,6 +177,7 @@ export default function LicensesPage() {
             size="large"
             icon={<PlusOutlined />}
             onClick={() => setIsModalVisible(true)}
+            disabled={remainingLicenses === 0}
             style={{
               borderRadius: 8,
               height: 40,
@@ -217,7 +224,7 @@ export default function LicensesPage() {
         onOk={handleCreateLicense}
         onCancel={() => {
           setIsModalVisible(false);
-          setSelectedRole("BASIC");
+          setLicenseName("");
         }}
         confirmLoading={createLicense.isPending}
         okText="Create License"
@@ -231,17 +238,15 @@ export default function LicensesPage() {
       >
         <div style={{ marginBottom: 16 }}>
           <Text strong style={{ display: "block", marginBottom: 8 }}>
-            Select License Role:
+            License Name:
           </Text>
-          <Select
-            style={{ width: "100%" }}
+          <Input
+            placeholder="Enter a name for this license"
             size="large"
-            value={selectedRole}
-            onChange={setSelectedRole}
-            options={availableRoles.map((role) => ({
-              label: role,
-              value: role,
-            }))}
+            value={licenseName}
+            onChange={(e) => setLicenseName(e.target.value)}
+            onPressEnter={handleCreateLicense}
+            maxLength={100}
           />
         </div>
         <div
@@ -253,12 +258,12 @@ export default function LicensesPage() {
             color: token.colorTextSecondary,
           }}
         >
-          Based on your current plan (
-          <Text strong>{currentPlan.toUpperCase()}</Text>), you can create
-          licenses with the following roles:{" "}
-          <Text strong>{availableRoles.join(", ")}</Text>
+          You can create <Text strong>{remainingLicenses}</Text> more{" "}
+          {remainingLicenses === 1 ? "license" : "licenses"} with your current
+          plan (<Text strong>{currentPlan.toUpperCase()}</Text>).
         </div>
       </Modal>
     </div>
   );
 }
+

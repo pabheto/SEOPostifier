@@ -26,3 +26,4 @@ export class CreateCheckoutDto {
   @IsNotEmpty()
   billingPeriod: BillingPeriod;
 }
+

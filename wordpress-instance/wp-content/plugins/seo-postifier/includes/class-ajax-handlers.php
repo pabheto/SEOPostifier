@@ -94,8 +94,8 @@ class SEO_Postifier_AJAX_Handlers {
                 $message .= ' User: ' . $user_data['user']['email'];
             }
             
-            if (isset($user_data['license']['role'])) {
-                $message .= ' | Role: ' . $user_data['license']['role'];
+            if (isset($user_data['license']['name'])) {
+                $message .= ' | Name: ' . $user_data['license']['name'];
             }
 
             wp_send_json_success(array(

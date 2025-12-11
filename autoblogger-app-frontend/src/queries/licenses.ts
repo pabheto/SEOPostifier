@@ -6,7 +6,7 @@ import { apiClient } from "../lib/api-client";
 export interface License {
   id: string;
   key: string;
-  role: string;
+  name: string;
   active: boolean;
   createdAt: string;
   updatedAt: string;
@@ -22,10 +22,11 @@ export const useLicenses = () => {
 export const useCreateLicense = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<License, Error, { role: string }>({
+  return useMutation<License, Error, { name: string }>({
     mutationFn: (data) => apiClient.post<License>("/users/licenses", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["licenses"] });
     },
   });
 };
+
