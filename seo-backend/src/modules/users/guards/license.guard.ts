@@ -6,10 +6,8 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthHelper } from '../auth.helper';
-import { LicenseRole } from '../schemas/license.schema';
 
 export const REQUIRE_LICENSE_KEY = 'requireLicense';
-export const LICENSE_ROLES_KEY = 'licenseRoles';
 
 @Injectable()
 export class LicenseGuard implements CanActivate {
@@ -50,20 +48,6 @@ export class LicenseGuard implements CanActivate {
       // Validate license and get user
       const { user, license } =
         await this.authHelper.getUserByLicense(licenseKey);
-
-      // Check if specific roles are required
-      const requiredRoles = this.reflector.getAllAndOverride<LicenseRole[]>(
-        LICENSE_ROLES_KEY,
-        [context.getHandler(), context.getClass()],
-      );
-
-      if (requiredRoles && requiredRoles.length > 0) {
-        if (!requiredRoles.includes(license.role)) {
-          throw new UnauthorizedException(
-            `Insufficient permissions. Required roles: ${requiredRoles.join(', ')}`,
-          );
-        }
-      }
 
       // Attach user and license info to request
       request.user = user;

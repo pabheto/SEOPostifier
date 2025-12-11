@@ -9,17 +9,13 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import {
-  AVAILABLE_PLANS,
-  PlanIdentifier,
-} from '../subscriptions/plans/plans.definition';
+import { AVAILABLE_PLANS } from '../subscriptions/plans/plans.definition';
 import { SubscriptionService } from '../subscriptions/subscription.service';
 import type { AuthenticatedUser } from './auth';
 import { CurrentUser, RequireAuth } from './auth';
 import { AuthHelper } from './auth.helper';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { LicenseRole } from './schemas/license.schema';
 import { UsersService } from './users.service';
 
 @ApiTags('users')
@@ -76,8 +72,12 @@ export class UsersController {
   @ApiOperation({ summary: 'Create a new license for the current user' })
   async createLicense(
     @CurrentUser() user: AuthenticatedUser,
-    @Body('role') role: LicenseRole,
+    @Body('name') name: string,
   ) {
+    if (!name || name.trim().length === 0) {
+      throw new BadRequestException('License name is required');
+    }
+
     // Get user's subscription to check plan limits
     const subscription =
       await this.subscriptionService.getOrCreateSubscriptionForUser(user.id);
@@ -99,28 +99,6 @@ export class UsersController {
       );
     }
 
-    // Map plan to allowed license roles
-    const planToLicenseRoles: Record<PlanIdentifier, LicenseRole[]> = {
-      [PlanIdentifier.FREE]: [LicenseRole.BASIC],
-      [PlanIdentifier.BASIC]: [LicenseRole.BASIC],
-      [PlanIdentifier.PREMIUM]: [LicenseRole.BASIC, LicenseRole.PREMIUM],
-      [PlanIdentifier.AGENCY]: [
-        LicenseRole.BASIC,
-        LicenseRole.PREMIUM,
-        LicenseRole.ENTERPRISE,
-      ],
-    };
-
-    const allowedRoles = planToLicenseRoles[subscription.plan] || [
-      LicenseRole.BASIC,
-    ];
-
-    if (!allowedRoles.includes(role)) {
-      throw new BadRequestException(
-        `Your ${plan.name} plan does not allow creating ${role} licenses. Allowed roles: ${allowedRoles.join(', ')}`,
-      );
-    }
-
-    return this.usersService.createLicenseForUser(user.id, role);
+    return this.usersService.createLicenseForUser(user.id, name.trim());
   }
 }

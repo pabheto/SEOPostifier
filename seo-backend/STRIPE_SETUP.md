@@ -28,6 +28,32 @@ FRONTEND_URL=http://localhost:3000 # Your frontend URL
 
 ### 1. Create Products and Prices
 
+#### Option A: Automated Setup (Recommended)
+
+Use the automated script to create all products and prices from your plan definitions:
+
+```bash
+pnpm stripe:create-plans
+```
+
+This script will:
+
+- Read plan definitions from `src/modules/subscriptions/plans/plans.definition.ts`
+- Create Stripe products for each plan (except FREE)
+- Create monthly and annual prices for each plan
+- Use metadata to identify existing products/prices and avoid duplicates
+- Output the price IDs in `.env` format for easy copy-paste
+
+**Requirements:**
+
+- `STRIPE_SECRET_KEY` must be set in your `.env` file
+- The script uses the plan identifier as metadata to prevent duplicates
+
+**Output:**
+The script will display all created/existing price IDs in a format ready to add to your `.env` file.
+
+#### Option B: Manual Setup
+
 1. Go to [Stripe Dashboard > Products](https://dashboard.stripe.com/products)
 2. Create products for each plan:
    - **Basic Plan** (Monthly and Annual)

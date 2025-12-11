@@ -32,6 +32,7 @@ export class StripeService {
     plan: PlanIdentifier,
     billingPeriod: BillingPeriod,
   ): string {
+    console.log('Fetching for plan ', plan, billingPeriod);
     const priceIdMap: Record<string, string> = {
       [`${PlanIdentifier.BASIC}-monthly`]:
         this.configService.get<string>('STRIPE_PRICE_ID_BASIC_MONTHLY') || '',

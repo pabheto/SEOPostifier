@@ -24,7 +24,7 @@ export class AuthHelper {
 
     return {
       user: { id: user._id, email: user.email },
-      license: { key: license.key, role: license.role },
+      license: { key: license.key, name: license.name },
     };
   }
 }

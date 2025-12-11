@@ -9,7 +9,7 @@ export interface RequestWithUser {
   user?: AuthenticatedUser;
   license?: {
     key: string;
-    role: string;
+    name: string;
   };
 }
 
@@ -40,7 +40,7 @@ export const CurrentUser = createParamDecorator(
  * ```typescript
  * @RequireLicense()
  * async myEndpoint(@CurrentLicense() license) {
- *   console.log(license.key, license.role);
+ *   console.log(license.key, license.name);
  * }
  * ```
  */

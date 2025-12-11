@@ -9,7 +9,7 @@ import * as jwt from 'jsonwebtoken';
 import { Model } from 'mongoose';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { License, LicenseRole } from './schemas/license.schema';
+import { License } from './schemas/license.schema';
 import { Session } from './schemas/session.schema';
 import { User } from './schemas/user.schema';
 
@@ -36,11 +36,11 @@ export class UsersService {
       password: hashedPassword,
     });
 
-    // Create a default BASIC license
+    // Create a default license
     const licenseKey = this.generateLicenseKey();
     const license = await this.licenseModel.create({
       userId: user._id,
-      role: LicenseRole.BASIC,
+      name: 'Default License',
       key: licenseKey,
     });
 
@@ -61,7 +61,7 @@ export class UsersService {
     return {
       token,
       user: { id: user._id, email: user.email },
-      license: { key: license.key, role: license.role },
+      license: { key: license.key, name: license.name },
     };
   }
 
@@ -90,7 +90,7 @@ export class UsersService {
     return {
       token,
       user: { id: user._id, email: user.email },
-      license: license ? { key: license.key, role: license.role } : null,
+      license: license ? { key: license.key, name: license.name } : null,
     };
   }
 
@@ -131,23 +131,23 @@ export class UsersService {
     return licenses.map((license) => ({
       id: license._id,
       key: license.key,
-      role: license.role,
+      name: license.name,
       active: license.active,
     }));
   }
 
-  async createLicenseForUser(userId: string, role: LicenseRole) {
-    const licenseKey = this.generateLicenseKeyForRole(role);
+  async createLicenseForUser(userId: string, name: string) {
+    const licenseKey = this.generateLicenseKey();
     const license = await this.licenseModel.create({
       userId,
-      role,
+      name,
       key: licenseKey,
       active: true,
     });
     return {
       id: license._id,
       key: license.key,
-      role: license.role,
+      name: license.name,
       active: license.active,
     };
   }
@@ -157,10 +157,6 @@ export class UsersService {
   }
 
   private generateLicenseKey(): string {
-    return `BASIC-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-  }
-
-  private generateLicenseKeyForRole(role: LicenseRole): string {
-    return `${role}-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    return `LIC-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
   }
 }
