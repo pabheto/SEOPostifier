@@ -47,7 +47,6 @@ export class SubscriptionsController {
     return {
       subscription: {
         plan: subscription.plan,
-        status: subscription.status,
         billingPeriodStart: subscription.billingPeriodStart,
         billingPeriodEnd: subscription.billingPeriodEnd,
       },

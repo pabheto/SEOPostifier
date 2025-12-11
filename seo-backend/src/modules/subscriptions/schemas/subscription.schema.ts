@@ -3,7 +3,7 @@ import { Document, Types } from 'mongoose';
 import { PlanIdentifier } from '../plans/plans.definition';
 
 @Schema({ timestamps: true })
-export class Subscription extends Document {
+export class UserSubscription extends Document {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true, unique: true })
   userId: Types.ObjectId;
 
@@ -17,4 +17,5 @@ export class Subscription extends Document {
   billingPeriodEnd: Date;
 }
 
-export const SubscriptionSchema = SchemaFactory.createForClass(Subscription);
+export const SubscriptionSchema =
+  SchemaFactory.createForClass(UserSubscription);

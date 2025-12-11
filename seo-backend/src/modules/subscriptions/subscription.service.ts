@@ -2,11 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import {
-  SubscriptionStatus,
-  UserSubscription,
-} from '../users/schemas/subscription.schema';
 import { PlanIdentifier } from './plans/plans.definition';
+import { UserSubscription } from './schemas/subscription.schema';
 
 @Injectable()
 export class SubscriptionService {
@@ -31,7 +28,6 @@ export class SubscriptionService {
     const subscription = await this.subscriptionModel.create({
       userId,
       plan: PlanIdentifier.FREE,
-      status: SubscriptionStatus.ACTIVE,
       billingPeriodStart: new Date(Date.now()),
       billingPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     });
