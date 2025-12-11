@@ -5,13 +5,14 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { ThemedTitle } from "@refinedev/antd";
-import { Button, Form, Input, Layout, Space, Typography, message } from "antd";
+import { App, Button, Form, Input, Layout, Space, Typography } from "antd";
 import Link from "next/link";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
 export default function Register() {
+  const { message } = App.useApp();
   const { mutate: login } = useLogin();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -166,4 +167,3 @@ export default function Register() {
     </Layout>
   );
 }
-

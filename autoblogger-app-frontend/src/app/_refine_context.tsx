@@ -13,6 +13,7 @@ import { AntdRegistry } from "@ant-design/nextjs-registry";
 import { ColorModeContextProvider } from "@contexts/color-mode";
 import { dataProvider, liveProvider } from "@providers/data-provider";
 import "@refinedev/antd/dist/reset.css";
+import { App } from "antd";
 
 type RefineContextProps = {
   defaultMode?: string;
@@ -107,43 +108,45 @@ const App = (props: React.PropsWithChildren<AppProps>) => {
   return (
     <AntdRegistry>
       <ColorModeContextProvider defaultMode={defaultMode}>
-        <Refine
-          routerProvider={routerProvider}
-          dataProvider={dataProvider}
-          liveProvider={liveProvider}
-          notificationProvider={useNotificationProvider}
-          authProvider={authProvider}
-          resources={[
-            {
-              name: "dashboard",
-              list: "/dashboard",
-              meta: {
-                label: "Dashboard",
+        <App>
+          <Refine
+            routerProvider={routerProvider}
+            dataProvider={dataProvider}
+            liveProvider={liveProvider}
+            notificationProvider={useNotificationProvider}
+            authProvider={authProvider}
+            resources={[
+              {
+                name: "dashboard",
+                list: "/dashboard",
+                meta: {
+                  label: "Dashboard",
+                },
               },
-            },
-            {
-              name: "billing",
-              list: "/billing",
-              meta: {
-                label: "Billing",
+              {
+                name: "billing",
+                list: "/billing",
+                meta: {
+                  label: "Billing",
+                },
               },
-            },
-            {
-              name: "licenses",
-              list: "/licenses",
-              meta: {
-                label: "Licenses",
+              {
+                name: "licenses",
+                list: "/licenses",
+                meta: {
+                  label: "Licenses",
+                },
               },
-            },
-          ]}
-          options={{
-            syncWithLocation: true,
-            warnWhenUnsavedChanges: true,
-            liveMode: "auto",
-          }}
-        >
-          {props.children}
-        </Refine>
+            ]}
+            options={{
+              syncWithLocation: true,
+              warnWhenUnsavedChanges: true,
+              liveMode: "auto",
+            }}
+          >
+            {props.children}
+          </Refine>
+        </App>
       </ColorModeContextProvider>
     </AntdRegistry>
   );

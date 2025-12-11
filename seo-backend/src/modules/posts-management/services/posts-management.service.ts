@@ -16,6 +16,7 @@ import {
 } from 'src/modules/llm-manager';
 import { GroqService } from 'src/modules/llm-manager/groq.service';
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
+import { UsageService } from 'src/modules/subscriptions/usage.service';
 import { InterviewStatus } from '../library/interfaces/post-interview.interface';
 import {
   PostBlock,
@@ -25,6 +26,7 @@ import {
 import { PostInterviewDocument } from '../schemas/post-interview.schema';
 import { Post, PostDocument } from '../schemas/posts.schema';
 import { PostInterviewsService } from './posts-interviews.service';
+import { SubscriptionService } from 'src/modules/subscriptions/subscription.service';
 
 @Injectable()
 export class PostsManagementService {
@@ -35,9 +37,21 @@ export class PostsManagementService {
     @Inject(forwardRef(() => GroqService))
     private readonly groqService: GroqService,
     private readonly imageGenerationService: NanoBananaImageGenerationService,
+    private readonly usageService: UsageService,
+    private readonly subscriptionService: SubscriptionService,
   ) {}
 
   async createPostDraftFromInterview(postInterview: PostInterviewDocument) {
+    // Usage checks
+    const currentCycleUserUsage =
+      await this.usageService.getUsageForCurrentBillingPeriod(
+        postInterview.userId as string,
+      );
+    const userActiveSubscription =
+      await this.subscriptionService.getOrCreateSubscriptionForUser(
+        postInterview.userId as string,
+      );
+
     if (
       postInterview.status !== InterviewStatus.SCRIPT_DEFINITION_GENERATED ||
       !postInterview.generatedScriptDefinition

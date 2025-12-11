@@ -10,11 +10,11 @@ import {
 import { useCreateLicense, useLicenses } from "@queries/licenses";
 import { useSubscription } from "@queries/subscriptions";
 import {
+  App,
   Button,
   Card,
   Col,
   Input,
-  message,
   Modal,
   Row,
   Skeleton,
@@ -30,6 +30,7 @@ const { Title, Text } = Typography;
 
 export default function LicensesPage() {
   const { token } = theme.useToken();
+  const { message } = App.useApp();
   const { data: licenses, isLoading, error } = useLicenses();
   const { data: subscriptionData } = useSubscription();
   const createLicense = useCreateLicense();
@@ -266,4 +267,3 @@ export default function LicensesPage() {
     </div>
   );
 }
-
