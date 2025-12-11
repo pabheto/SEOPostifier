@@ -1,5 +1,6 @@
 "use client";
 
+import { MoonOutlined, SunOutlined, UserOutlined } from "@ant-design/icons";
 import { ColorModeContext } from "@contexts/color-mode";
 import type { RefineThemedLayoutHeaderProps } from "@refinedev/antd";
 import { useGetIdentity } from "@refinedev/core";
@@ -30,33 +31,51 @@ export const Header: React.FC<RefineThemedLayoutHeaderProps> = ({
   const { mode, setMode } = useContext(ColorModeContext);
 
   const headerStyles: React.CSSProperties = {
-    backgroundColor: token.colorBgElevated,
+    backgroundColor: token.colorBgContainer,
     display: "flex",
     justifyContent: "flex-end",
     alignItems: "center",
-    padding: "0px 24px",
-    height: "64px",
+    padding: "0px 32px",
+    height: "72px",
+    borderBottom: `1px solid ${token.colorBorderSecondary}`,
+    boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
   };
 
   if (sticky) {
     headerStyles.position = "sticky";
     headerStyles.top = 0;
-    headerStyles.zIndex = 1;
+    headerStyles.zIndex = 100;
   }
 
   return (
     <AntdLayout.Header style={headerStyles}>
-      <Space>
+      <Space size="large">
         <Switch
-          checkedChildren="🌛"
-          unCheckedChildren="🔆"
+          checked={mode === "dark"}
           onChange={() => setMode(mode === "light" ? "dark" : "light")}
-          defaultChecked={mode === "dark"}
+          checkedChildren={<MoonOutlined />}
+          unCheckedChildren={<SunOutlined />}
+          style={{
+            backgroundColor: mode === "dark" ? token.colorPrimary : undefined,
+          }}
         />
         {(user?.name || user?.avatar) && (
-          <Space style={{ marginLeft: "8px" }} size="middle">
-            {user?.name && <Text strong>{user.name}</Text>}
-            {user?.avatar && <Avatar src={user?.avatar} alt={user?.name} />}
+          <Space size="middle" style={{ cursor: "pointer" }}>
+            <Space size="small">
+              {user?.name && (
+                <Text strong style={{ fontSize: 14 }}>
+                  {user.name}
+                </Text>
+              )}
+              <Avatar
+                src={user?.avatar}
+                icon={!user?.avatar && <UserOutlined />}
+                alt={user?.name}
+                style={{
+                  backgroundColor: token.colorPrimary,
+                }}
+              />
+            </Space>
           </Space>
         )}
       </Space>

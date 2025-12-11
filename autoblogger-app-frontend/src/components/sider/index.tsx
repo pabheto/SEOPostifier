@@ -1,56 +1,92 @@
 "use client";
 
-import { LogoutOutlined } from "@ant-design/icons";
-import { useLogout, useMenu } from "@refinedev/core";
-import { Button, Layout, Menu, theme } from "antd";
+import {
+  CreditCardOutlined,
+  DashboardOutlined,
+  KeyOutlined,
+  LogoutOutlined,
+} from "@ant-design/icons";
+import { useLogout } from "@refinedev/core";
+import { Button, Layout, Menu, theme, Typography } from "antd";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 
 const { Sider: AntdSider } = Layout;
+const { Text } = Typography;
 
 export const CustomSider: React.FC = () => {
-  const { menuItems, selectedKey, defaultOpenKeys } = useMenu();
   const { mutate: logout } = useLogout();
   const { token } = theme.useToken();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  // Transform menuItems to Ant Design Menu items format
-  const transformMenuItems = (items: typeof menuItems): any[] => {
-    return items.map((item) => {
-      const menuItem: any = {
-        key: item.key,
-        label: item.label,
-        icon: item.icon,
-      };
+  const menuItems = [
+    {
+      key: "/dashboard",
+      icon: <DashboardOutlined />,
+      label: "Dashboard",
+    },
+    {
+      key: "/billing",
+      icon: <CreditCardOutlined />,
+      label: "Billing",
+    },
+    {
+      key: "/licenses",
+      icon: <KeyOutlined />,
+      label: "Licenses",
+    },
+  ];
 
-      if (item.children && item.children.length > 0) {
-        menuItem.children = transformMenuItems(item.children);
-      }
-
-      return menuItem;
-    });
+  const handleMenuClick = ({ key }: { key: string }) => {
+    router.push(key);
   };
-
-  const items = transformMenuItems(menuItems);
 
   return (
     <AntdSider
+      width={260}
       style={{
         backgroundColor: token.colorBgContainer,
-        borderRight: `1px solid ${token.colorBorder}`,
+        borderRight: `1px solid ${token.colorBorderSecondary}`,
         display: "flex",
         flexDirection: "column",
+        boxShadow: "2px 0 8px rgba(0,0,0,0.04)",
       }}
     >
+      <div
+        style={{
+          padding: "24px 20px",
+          borderBottom: `1px solid ${token.colorBorderSecondary}`,
+        }}
+      >
+        <Text
+          strong
+          style={{
+            fontSize: 20,
+            color: token.colorPrimary,
+            fontWeight: 700,
+          }}
+        >
+          SEO CopyWriter
+        </Text>
+      </div>
       <Menu
         mode="inline"
-        selectedKeys={selectedKey ? [selectedKey] : []}
-        defaultOpenKeys={defaultOpenKeys}
-        items={items}
-        style={{ flex: 1, borderRight: 0 }}
+        selectedKeys={[pathname || "/dashboard"]}
+        items={menuItems}
+        onClick={handleMenuClick}
+        style={{
+          flex: 1,
+          borderRight: 0,
+          padding: "8px",
+          backgroundColor: "transparent",
+        }}
+        theme="light"
       />
       <div
         style={{
           padding: "16px",
-          borderTop: `1px solid ${token.colorBorder}`,
+          borderTop: `1px solid ${token.colorBorderSecondary}`,
         }}
       >
         <Button
@@ -59,6 +95,12 @@ export const CustomSider: React.FC = () => {
           icon={<LogoutOutlined />}
           onClick={() => logout()}
           block
+          size="large"
+          style={{
+            height: 40,
+            borderRadius: 8,
+            fontWeight: 500,
+          }}
         >
           Logout
         </Button>

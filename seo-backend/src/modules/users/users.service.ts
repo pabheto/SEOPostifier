@@ -121,8 +121,34 @@ export class UsersService {
     }
 
     return {
-      user: { id: user._id, email: user.email },
-      sessionId: session._id,
+      user: { id: String(user._id), email: user.email },
+      sessionId: String(session._id),
+    };
+  }
+
+  async getLicensesForUser(userId: string) {
+    const licenses = await this.licenseModel.find({ userId }).exec();
+    return licenses.map((license) => ({
+      id: license._id,
+      key: license.key,
+      role: license.role,
+      active: license.active,
+    }));
+  }
+
+  async createLicenseForUser(userId: string, role: LicenseRole) {
+    const licenseKey = this.generateLicenseKeyForRole(role);
+    const license = await this.licenseModel.create({
+      userId,
+      role,
+      key: licenseKey,
+      active: true,
+    });
+    return {
+      id: license._id,
+      key: license.key,
+      role: license.role,
+      active: license.active,
     };
   }
 
@@ -132,5 +158,9 @@ export class UsersService {
 
   private generateLicenseKey(): string {
     return `BASIC-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+  }
+
+  private generateLicenseKeyForRole(role: LicenseRole): string {
+    return `${role}-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
   }
 }

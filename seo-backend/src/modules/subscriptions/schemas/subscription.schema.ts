@@ -15,6 +15,18 @@ export class UserSubscription extends Document {
 
   @Prop({ required: true })
   billingPeriodEnd: Date;
+
+  @Prop({ type: String, required: false })
+  stripeCustomerId?: string;
+
+  @Prop({ type: String, required: false })
+  stripeSubscriptionId?: string;
+
+  @Prop({ type: String, required: false })
+  stripePriceId?: string;
+
+  @Prop({ type: String, required: false })
+  stripeStatus?: string; // active, canceled, past_due, etc.
 }
 
 export const SubscriptionSchema =
