@@ -21,7 +21,7 @@ export function UserInfo() {
   }
 
   const user = session.user;
-  const name = user.name || "";
+  const name = user.email || "";
   const email = user.email || "";
   const nameParts = name.split(" ");
   const firstName = nameParts[0] || "";

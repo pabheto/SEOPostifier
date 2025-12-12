@@ -13,8 +13,8 @@ export function UserAvatar() {
   }
 
   const user = session.user;
-  const fullName = user.name || user.email || "User";
-  const avatar = user.image;
+  const fullName = user.email || "User";
+  const avatar = undefined;
 
   return (
     <Avatar className={cn("h-10", "w-10")}>
