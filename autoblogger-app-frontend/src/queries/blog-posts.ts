@@ -83,3 +83,4 @@ export const CATEGORIES_SELECT_QUERY = gql`
     }
   }
 `;
+

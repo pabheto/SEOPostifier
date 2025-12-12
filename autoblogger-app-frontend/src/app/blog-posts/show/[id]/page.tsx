@@ -1,34 +1,91 @@
 "use client";
 
-import { POST_SHOW_QUERY } from "@queries/blog-posts";
-import { DateField, MarkdownField, Show, TextField } from "@refinedev/antd";
+import React from "react";
+import { POST_SHOW_QUERY } from "@/queries/blog-posts";
+import { ShowView, ShowViewHeader } from "@/components/refine-ui/views/show-view";
 import { useShow } from "@refinedev/core";
-import { Typography } from "antd";
-
-const { Title } = Typography;
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { format } from "date-fns";
 
 export default function BlogPostShow() {
-  const { result: record, query } = useShow({
+  const { queryResult } = useShow({
     meta: {
       gqlQuery: POST_SHOW_QUERY,
     },
   });
-  const { isLoading } = query;
+
+  const { data, isLoading } = queryResult;
+  const record = data?.data;
 
   return (
-    <Show isLoading={isLoading}>
-      <Title level={5}>{"ID"}</Title>
-      <TextField value={record?.id} />
-      <Title level={5}>{"Title"}</Title>
-      <TextField value={record?.title} />
-      <Title level={5}>{"Content"}</Title>
-      <MarkdownField value={record?.content} />
-      <Title level={5}>{"Category"}</Title>
-      <TextField value={record?.category?.title} />
-      <Title level={5}>{"Status"}</Title>
-      <TextField value={record?.status} />
-      <Title level={5}>{"CreatedAt"}</Title>
-      <DateField value={record?.createdAt} />
-    </Show>
+    <ShowView>
+      <ShowViewHeader />
+      {isLoading ? (
+        <div>Loading...</div>
+      ) : (
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>ID</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>{record?.id}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Title</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>{record?.title}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Content</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="prose max-w-none">
+                <pre className="whitespace-pre-wrap">{record?.content}</pre>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Category</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>{record?.category?.title || "-"}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>{record?.status}</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Created At</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p>
+                {record?.createdAt
+                  ? format(new Date(record.createdAt), "MMM dd, yyyy HH:mm")
+                  : "-"}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+    </ShowView>
   );
 }
+

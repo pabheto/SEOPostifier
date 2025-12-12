@@ -3,27 +3,37 @@
 import { useLogin } from "@refinedev/core";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
-import { ThemedTitle } from "@refinedev/antd";
-import { App, Button, Form, Input, Layout, Space, Typography } from "antd";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { toast } from "sonner";
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
 
 export default function Register() {
-  const { message } = App.useApp();
   const { mutate: login } = useLogin();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const onFinish = async (values: {
-    email: string;
-    password: string;
-    confirmPassword: string;
-  }) => {
-    if (values.password !== values.confirmPassword) {
-      message.error("Passwords do not match!");
+  const onFinish = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match!");
       return;
     }
 
@@ -36,8 +46,8 @@ export default function Register() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          email: values.email,
-          password: values.password,
+          email,
+          password,
         }),
       });
 
@@ -49,13 +59,13 @@ export default function Register() {
       const data = await response.json();
 
       // Automatically log in the user after successful registration
-      message.success("Registration successful! Logging you in...");
+      toast.success("Registration successful! Logging you in...");
 
       // Use the token from registration to sign in
       login(
         {
-          email: values.email,
-          password: values.password,
+          email,
+          password,
         },
         {
           onSuccess: () => {
@@ -64,7 +74,7 @@ export default function Register() {
           },
           onError: (error) => {
             setLoading(false);
-            message.error(
+            toast.error(
               "Registration successful, but login failed. Please try logging in manually."
             );
             console.error("Login error after registration:", error);
@@ -73,97 +83,73 @@ export default function Register() {
       );
     } catch (error: any) {
       setLoading(false);
-      message.error(error.message || "Registration failed. Please try again.");
+      toast.error(error.message || "Registration failed. Please try again.");
       console.error("Registration error:", error);
     }
   };
 
   return (
-    <Layout
-      style={{
-        height: "100vh",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Space direction="vertical" align="center" size="large">
-        <ThemedTitle
-          collapsed={false}
-          wrapperStyles={{
-            fontSize: "22px",
-            marginBottom: "36px",
-          }}
-        />
-        <Form
-          name="register"
-          onFinish={onFinish}
-          layout="vertical"
-          style={{ width: "300px" }}
-        >
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Please input your email!" },
-              { type: "email", message: "Please enter a valid email!" },
-            ]}
-          >
-            <Input placeholder="Email" />
-          </Form.Item>
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[
-              { required: true, message: "Please input your password!" },
-              {
-                min: 6,
-                message: "Password must be at least 6 characters!",
-              },
-            ]}
-          >
-            <Input.Password placeholder="Password" />
-          </Form.Item>
-          <Form.Item
-            label="Confirm Password"
-            name="confirmPassword"
-            dependencies={["password"]}
-            rules={[
-              { required: true, message: "Please confirm your password!" },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue("password") === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(
-                    new Error("The two passwords do not match!")
-                  );
-                },
-              }),
-            ]}
-          >
-            <Input.Password placeholder="Confirm Password" />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              block
-              style={{ width: "100%" }}
-            >
-              Sign up
+    <div className="flex items-center justify-center min-h-screen p-6">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Sign up</CardTitle>
+          <CardDescription>
+            Create an account to get started
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onFinish} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Input
+                id="confirmPassword"
+                type="password"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing up..." : "Sign up"}
             </Button>
-          </Form.Item>
-          <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
-            <Typography.Text type="secondary">
-              Already have an account?{" "}
-              <Link href="/login" style={{ color: "#1890ff" }}>
-                Sign in
-              </Link>
-            </Typography.Text>
-          </Form.Item>
-        </Form>
-      </Space>
-    </Layout>
+          </form>
+        </CardContent>
+        <Separator />
+        <CardFooter className="text-center text-sm">
+          <span className="text-muted-foreground">
+            Already have an account?{" "}
+          </span>
+          <Link href="/login" className="text-primary hover:underline">
+            Sign in
+          </Link>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }
+

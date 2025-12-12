@@ -1,38 +1,21 @@
 "use client";
 
 import {
-  CalendarOutlined,
-  CheckCircleOutlined,
-  CreditCardOutlined,
-  DollarOutlined,
-} from "@ant-design/icons";
-import {
   useCancelSubscription,
   useCreateCheckout,
   useCustomerPortal,
   useSubscription,
-} from "@queries/subscriptions";
-import {
-  App,
-  Badge,
-  Button,
-  Card,
-  Col,
-  Row,
-  Skeleton,
-  Space,
-  Tag,
-  theme,
-  Typography,
-} from "antd";
+} from "@/queries/subscriptions";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Calendar, CheckCircle2, CreditCard, DollarSign } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-
-const { Title, Text } = Typography;
+import { toast } from "sonner";
 
 export default function BillingPage() {
-  const { token } = theme.useToken();
-  const { message } = App.useApp();
   const searchParams = useSearchParams();
   const { data, isLoading, error, refetch } = useSubscription();
   const createCheckout = useCreateCheckout();
@@ -48,21 +31,21 @@ export default function BillingPage() {
     const canceled = searchParams?.get("canceled");
 
     if (success === "true") {
-      message.success("Subscription activated successfully!");
+      toast.success("Subscription activated successfully!");
       refetch();
       // Clean URL
       window.history.replaceState({}, "", "/billing");
     } else if (canceled === "true") {
-      message.info("Checkout was canceled");
+      toast.info("Checkout was canceled");
       // Clean URL
       window.history.replaceState({}, "", "/billing");
     }
-  }, [searchParams, refetch, message]);
+  }, [searchParams, refetch]);
 
   if (error) {
     return (
-      <div style={{ padding: "48px", textAlign: "center" }}>
-        <Text type="danger">Error loading billing data</Text>
+      <div className="flex items-center justify-center p-12">
+        <p className="text-destructive">Error loading billing data</p>
       </div>
     );
   }
@@ -85,7 +68,7 @@ export default function BillingPage() {
       monthly: 0,
       annual: 0,
       name: "Free",
-      color: "default",
+      color: "secondary",
       identifier: "free",
       features: ["16 AI images/month", "10,000 words/month", "1 license"],
     },
@@ -93,7 +76,7 @@ export default function BillingPage() {
       monthly: 10,
       annual: 99,
       name: "Basic",
-      color: "blue",
+      color: "default",
       identifier: "basic",
       features: ["64 AI images/month", "50,000 words/month", "1 license"],
     },
@@ -101,7 +84,7 @@ export default function BillingPage() {
       monthly: 20,
       annual: 199,
       name: "Premium",
-      color: "purple",
+      color: "default",
       identifier: "premium",
       features: ["128 AI images/month", "100,000 words/month", "1 license"],
     },
@@ -109,7 +92,7 @@ export default function BillingPage() {
       monthly: 50,
       annual: 499,
       name: "Agency",
-      color: "gold",
+      color: "default",
       identifier: "agency",
       features: ["256 AI images/month", "100,000 words/month", "1 license"],
     },
@@ -130,7 +113,7 @@ export default function BillingPage() {
       // Redirect to Stripe checkout
       window.location.href = response.url;
     } catch (error: any) {
-      message.error(
+      toast.error(
         error?.message || "Failed to create checkout session. Please try again."
       );
     }
@@ -142,7 +125,7 @@ export default function BillingPage() {
       // Redirect to Stripe customer portal
       window.location.href = response.url;
     } catch (error: any) {
-      message.error(
+      toast.error(
         error?.message || "Failed to access customer portal. Please try again."
       );
     }
@@ -153,127 +136,84 @@ export default function BillingPage() {
   );
 
   return (
-    <div
-      style={{
-        padding: "32px",
-        minHeight: "100vh",
-        background: `linear-gradient(135deg, ${token.colorBgContainer} 0%, ${token.colorFillQuaternary} 100%)`,
-      }}
-    >
-      <div style={{ marginBottom: 32 }}>
-        <Title level={2} style={{ margin: 0, fontWeight: 700 }}>
-          Billing
-        </Title>
-        <Text type="secondary" style={{ fontSize: 16 }}>
+    <div className="min-h-screen p-8 bg-gradient-to-br from-background to-muted/20">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold mb-2">Billing</h2>
+        <p className="text-muted-foreground text-base">
           Manage your subscription and billing information
-        </Text>
+        </p>
       </div>
 
       {isLoading ? (
-        <Row gutter={[24, 24]}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <Col xs={24} sm={12} md={8} key={i}>
-              <Card>
-                <Skeleton active paragraph={{ rows: 2 }} />
-              </Card>
-            </Col>
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-32 mb-2" />
+                <Skeleton className="h-4 w-20" />
+              </CardContent>
+            </Card>
           ))}
-        </Row>
+        </div>
       ) : (
         <>
-          <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
-            <Col xs={24} sm={12} md={8}>
-              <Card
-                hoverable
-                style={{
-                  borderRadius: 12,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  border: `1px solid ${token.colorBorderSecondary}`,
-                  background: `linear-gradient(135deg, ${token.colorPrimaryBg} 0%, ${token.colorBgContainer} 100%)`,
-                }}
-              >
-                <div style={{ marginBottom: 16 }}>
-                  <Text type="secondary" style={{ fontSize: 14 }}>
-                    <DollarOutlined style={{ marginRight: 8 }} />
-                    Current Plan
-                  </Text>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <Card className="hover:shadow-md transition-shadow bg-gradient-to-br from-primary/5 to-background">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">Current Plan</p>
                 </div>
-                <Title level={3} style={{ margin: 0, marginBottom: 8 }}>
-                  {currentPlan.name}
-                </Title>
-                <div
-                  style={{
-                    fontSize: 24,
-                    fontWeight: 700,
-                    color: token.colorPrimary,
-                  }}
-                >
+              </CardHeader>
+              <CardContent>
+                <h3 className="text-2xl font-bold mb-2">{currentPlan.name}</h3>
+                <div className="text-2xl font-bold text-primary mb-2">
                   {currentPlan.monthly > 0
                     ? `$${currentPlan.monthly}/month`
                     : "Free"}
                 </div>
-                <Tag
-                  color={currentPlan.color}
-                  style={{ marginTop: 12, fontSize: 12 }}
-                >
-                  <CheckCircleOutlined style={{ marginRight: 4 }} />
+                <Badge variant={currentPlan.color as any} className="mt-2">
+                  <CheckCircle2 className="h-3 w-3 mr-1" />
                   Active
-                </Tag>
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} md={8}>
-              <Card
-                hoverable
-                style={{
-                  borderRadius: 12,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  border: `1px solid ${token.colorBorderSecondary}`,
-                }}
-              >
-                <div style={{ marginBottom: 16 }}>
-                  <Text type="secondary" style={{ fontSize: 14 }}>
-                    <CalendarOutlined style={{ marginRight: 8 }} />
+                </Badge>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
                     Billing Period Start
-                  </Text>
+                  </p>
                 </div>
-                <div
-                  style={{
-                    fontSize: 20,
-                    fontWeight: 600,
-                    color: token.colorText,
-                  }}
-                >
+              </CardHeader>
+              <CardContent>
+                <p className="text-xl font-semibold">
                   {billingPeriod?.start
                     ? new Date(billingPeriod.start).toLocaleDateString(
                         "en-US",
                         { month: "short", day: "numeric", year: "numeric" }
                       )
                     : "-"}
-                </div>
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} md={8}>
-              <Card
-                hoverable
-                style={{
-                  borderRadius: 12,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  border: `1px solid ${token.colorBorderSecondary}`,
-                }}
-              >
-                <div style={{ marginBottom: 16 }}>
-                  <Text type="secondary" style={{ fontSize: 14 }}>
-                    <CalendarOutlined style={{ marginRight: 8 }} />
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
                     Billing Period End
-                  </Text>
+                  </p>
                 </div>
-                <div
-                  style={{
-                    fontSize: 20,
-                    fontWeight: 600,
-                    color: token.colorText,
-                  }}
-                >
+              </CardHeader>
+              <CardContent>
+                <p className="text-xl font-semibold">
                   {billingPeriod?.end
                     ? new Date(billingPeriod.end).toLocaleDateString("en-US", {
                         month: "short",
@@ -281,45 +221,41 @@ export default function BillingPage() {
                         year: "numeric",
                       })
                     : "-"}
-                </div>
-              </Card>
-            </Col>
-          </Row>
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Billing Period Toggle */}
-          <Card
-            style={{
-              marginBottom: 24,
-              borderRadius: 12,
-              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-            }}
-          >
-            <Space>
-              <Text strong>Billing Period:</Text>
-              <Button
-                type={
-                  selectedBillingPeriod === "monthly" ? "primary" : "default"
-                }
-                onClick={() => setSelectedBillingPeriod("monthly")}
-              >
-                Monthly
-              </Button>
-              <Button
-                type={
-                  selectedBillingPeriod === "annual" ? "primary" : "default"
-                }
-                onClick={() => setSelectedBillingPeriod("annual")}
-              >
-                Annual
-                <Tag color="green" style={{ marginLeft: 8 }}>
-                  Save up to 17%
-                </Tag>
-              </Button>
-            </Space>
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-4">
+                <span className="font-semibold">Billing Period:</span>
+                <Button
+                  variant={
+                    selectedBillingPeriod === "monthly" ? "default" : "outline"
+                  }
+                  onClick={() => setSelectedBillingPeriod("monthly")}
+                >
+                  Monthly
+                </Button>
+                <Button
+                  variant={
+                    selectedBillingPeriod === "annual" ? "default" : "outline"
+                  }
+                  onClick={() => setSelectedBillingPeriod("annual")}
+                >
+                  Annual
+                  <Badge variant="secondary" className="ml-2">
+                    Save up to 17%
+                  </Badge>
+                </Button>
+              </div>
+            </CardContent>
           </Card>
 
           {/* Plan Cards */}
-          <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
             {plansToShow.map((plan) => {
               const isCurrentPlan = plan.identifier === subscription?.plan;
               const price =
@@ -332,155 +268,95 @@ export default function BillingPage() {
                   : `$${price}/year`;
 
               return (
-                <Col xs={24} sm={12} lg={8} key={plan.identifier}>
-                  <Card
-                    hoverable
-                    style={{
-                      borderRadius: 12,
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                      border: isCurrentPlan
-                        ? `2px solid ${token.colorPrimary}`
-                        : `1px solid ${token.colorBorderSecondary}`,
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                    styles={{
-                      body: {
-                        flex: 1,
-                        display: "flex",
-                        flexDirection: "column",
-                      },
-                    }}
-                  >
-                    <div style={{ flex: 1 }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          marginBottom: 16,
-                        }}
-                      >
-                        <Tag
-                          color={plan.color}
-                          style={{ fontSize: 14, padding: "4px 12px" }}
-                        >
-                          {plan.name}
-                        </Tag>
-                        {isCurrentPlan && (
-                          <Badge status="processing" text="Current" />
-                        )}
-                      </div>
-
-                      <div
-                        style={{
-                          fontSize: 32,
-                          fontWeight: 700,
-                          color: token.colorPrimary,
-                          marginBottom: 8,
-                        }}
-                      >
-                        {priceLabel}
-                      </div>
-
-                      {selectedBillingPeriod === "annual" &&
-                        plan.monthly > 0 && (
-                          <Text type="secondary" style={{ fontSize: 12 }}>
-                            ${(plan.annual / 12).toFixed(2)}/month billed
-                            annually
-                          </Text>
-                        )}
-
-                      <div style={{ marginTop: 24, marginBottom: 24 }}>
-                        {plan.features.map((feature, index) => (
-                          <div
-                            key={index}
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              marginBottom: 8,
-                            }}
-                          >
-                            <CheckCircleOutlined
-                              style={{
-                                color: token.colorSuccess,
-                                marginRight: 8,
-                              }}
-                            />
-                            <Text>{feature}</Text>
-                          </div>
-                        ))}
-                      </div>
+                <Card
+                  key={plan.identifier}
+                  className={`hover:shadow-md transition-shadow h-full flex flex-col ${
+                    isCurrentPlan ? "ring-2 ring-primary" : ""
+                  }`}
+                >
+                  <CardHeader>
+                    <div className="flex justify-between items-center mb-4">
+                      <Badge variant={plan.color as any} className="text-sm px-3 py-1">
+                        {plan.name}
+                      </Badge>
+                      {isCurrentPlan && (
+                        <Badge variant="secondary">Current</Badge>
+                      )}
                     </div>
-
+                    <div className="text-3xl font-bold text-primary mb-2">
+                      {priceLabel}
+                    </div>
+                    {selectedBillingPeriod === "annual" && plan.monthly > 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        ${(plan.annual / 12).toFixed(2)}/month billed annually
+                      </p>
+                    )}
+                  </CardHeader>
+                  <CardContent className="flex-1 flex flex-col">
+                    <div className="mb-6 space-y-3">
+                      {plan.features.map((feature, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                          <span className="text-sm">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
                     <Button
-                      type={isCurrentPlan ? "default" : "primary"}
-                      block
-                      size="large"
+                      variant={isCurrentPlan ? "outline" : "default"}
+                      className="w-full mt-auto"
                       disabled={isCurrentPlan}
-                      loading={createCheckout.isPending}
                       onClick={() =>
                         handleSubscribe(plan.identifier, selectedBillingPeriod)
                       }
-                      style={{ marginTop: "auto" }}
                     >
                       {isCurrentPlan ? "Current Plan" : "Subscribe"}
                     </Button>
-                  </Card>
-                </Col>
+                  </CardContent>
+                </Card>
               );
             })}
-          </Row>
+          </div>
 
           {/* Customer Portal & Cancel Subscription */}
           {subscription?.plan !== "free" && (
-            <Card
-              title={
-                <span style={{ fontWeight: 600, fontSize: 18 }}>
-                  Manage Subscription
-                </span>
-              }
-              style={{
-                borderRadius: 12,
-                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                border: `1px solid ${token.colorBorderSecondary}`,
-              }}
-            >
-              <Space direction="vertical" style={{ width: "100%" }}>
-                <Text type="secondary">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Manage Subscription</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground mb-4">
                   Manage your subscription, payment methods, and billing history
                   through the Stripe customer portal.
-                </Text>
-                <Space>
+                </p>
+                <div className="flex gap-4">
                   <Button
-                    type="default"
-                    icon={<CreditCardOutlined />}
-                    loading={customerPortal.isPending}
+                    variant="outline"
                     onClick={handleCustomerPortal}
+                    disabled={customerPortal.isPending}
                   >
+                    <CreditCard className="h-4 w-4 mr-2" />
                     Manage Subscription
                   </Button>
                   <Button
-                    danger
-                    loading={cancelSubscription.isPending}
+                    variant="destructive"
                     onClick={async () => {
                       try {
                         await cancelSubscription.mutateAsync();
-                        message.success("Subscription canceled successfully");
+                        toast.success("Subscription canceled successfully");
                         refetch();
                       } catch (error: any) {
-                        message.error(
+                        toast.error(
                           error?.message ||
                             "Failed to cancel subscription. Please try again."
                         );
                       }
                     }}
+                    disabled={cancelSubscription.isPending}
                   >
                     Cancel Subscription
                   </Button>
-                </Space>
-              </Space>
+                </div>
+              </CardContent>
             </Card>
           )}
         </>
@@ -488,3 +364,4 @@ export default function BillingPage() {
     </div>
   );
 }
+

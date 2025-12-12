@@ -1,20 +1,48 @@
 "use client";
 
+import React from "react";
 import {
   CATEGORIES_SELECT_QUERY,
   POST_CREATE_MUTATION,
-} from "@queries/blog-posts";
-import { Create, useForm, useSelect } from "@refinedev/antd";
-import { Form, Input, Select } from "antd";
+} from "@/queries/blog-posts";
+import { CreateView, CreateViewHeader } from "@/components/refine-ui/views/create-view";
+import { useForm } from "@refinedev/react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { useSelect } from "@refinedev/core";
 
 export default function BlogPostCreate() {
-  const { formProps, saveButtonProps, form } = useForm({
-    meta: {
-      gqlMutation: POST_CREATE_MUTATION,
+  const {
+    refineCore: { formLoading, onFinish },
+    saveButtonProps,
+    register,
+    control,
+  } = useForm({
+    refineCoreProps: {
+      resource: "blog-posts",
+      meta: {
+        gqlMutation: POST_CREATE_MUTATION,
+      },
     },
   });
 
-  const { selectProps: categorySelectProps } = useSelect({
+  const { options: categoryOptions } = useSelect({
     resource: "categories",
     meta: {
       gqlQuery: CATEGORIES_SELECT_QUERY,
@@ -22,62 +50,114 @@ export default function BlogPostCreate() {
   });
 
   return (
-    <Create saveButtonProps={saveButtonProps}>
-      <Form {...formProps} form={form} layout="vertical">
-        <Form.Item
-          label={"Title"}
-          name={["title"]}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
+    <CreateView>
+      <CreateViewHeader />
+      <Form {...{ control, register }}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            onFinish({
+              title: formData.get("title"),
+              content: formData.get("content"),
+              categoryId: formData.get("categoryId"),
+              status: formData.get("status") || "DRAFT",
+            });
+          }}
+          className="space-y-6"
         >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label={"Content"}
-          name="content"
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Input.TextArea rows={5} />
-        </Form.Item>
-        <Form.Item
-          label={"Category"}
-          name={"categoryId"}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select {...categorySelectProps} />
-        </Form.Item>
-        <Form.Item
-          label={"Status"}
-          name={["status"]}
-          initialValue={"DRAFT"}
-          rules={[
-            {
-              required: true,
-            },
-          ]}
-        >
-          <Select
-            defaultValue={"DRAFT"}
-            options={[
-              { value: "DRAFT", label: "Draft" },
-              { value: "PUBLISHED", label: "Published" },
-              { value: "REJECTED", label: "Rejected" },
-            ]}
-            style={{ width: 120 }}
+          <FormField
+            control={control}
+            name="title"
+            rules={{ required: "Title is required" }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Title</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
           />
-        </Form.Item>
+
+          <FormField
+            control={control}
+            name="content"
+            rules={{ required: "Content is required" }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Content</FormLabel>
+                <FormControl>
+                  <Textarea {...field} rows={5} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="categoryId"
+            rules={{ required: "Category is required" }}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Category</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {categoryOptions?.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={control}
+            name="status"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value || "DRAFT"}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-[180px]">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="DRAFT">Draft</SelectItem>
+                    <SelectItem value="PUBLISHED">Published</SelectItem>
+                    <SelectItem value="REJECTED">Rejected</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="flex justify-end">
+            <Button type="submit" disabled={formLoading} {...saveButtonProps}>
+              {formLoading ? "Saving..." : "Save"}
+            </Button>
+          </div>
+        </form>
       </Form>
-    </Create>
+    </CreateView>
   );
 }

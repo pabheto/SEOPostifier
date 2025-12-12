@@ -3,20 +3,32 @@
 import { useLogin } from "@refinedev/core";
 import Link from "next/link";
 import { useState } from "react";
-
-import { ThemedTitle } from "@refinedev/antd";
-import { Button, Form, Input, Layout, Space, Typography } from "antd";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 export default function Login() {
   const { mutate: login } = useLogin();
   const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const onFinish = (values: { email: string; password: string }) => {
+  const onFinish = (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     login(
       {
-        email: values.email,
-        password: values.password,
+        email,
+        password,
       },
       {
         onSuccess: () => {
@@ -30,65 +42,53 @@ export default function Login() {
   };
 
   return (
-    <Layout
-      style={{
-        height: "100vh",
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Space direction="vertical" align="center" size="large">
-        <ThemedTitle
-          collapsed={false}
-          wrapperStyles={{
-            fontSize: "22px",
-            marginBottom: "36px",
-          }}
-        />
-        <Form
-          name="login"
-          onFinish={onFinish}
-          layout="vertical"
-          style={{ width: "300px" }}
-        >
-          <Form.Item
-            label="Email"
-            name="email"
-            rules={[
-              { required: true, message: "Please input your email!" },
-              { type: "email", message: "Please enter a valid email!" },
-            ]}
-          >
-            <Input placeholder="Email" />
-          </Form.Item>
-          <Form.Item
-            label="Password"
-            name="password"
-            rules={[{ required: true, message: "Please input your password!" }]}
-          >
-            <Input.Password placeholder="Password" />
-          </Form.Item>
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              block
-              style={{ width: "100%" }}
-            >
-              Sign in
+    <div className="flex items-center justify-center min-h-screen p-6">
+      <Card className="w-full max-w-md">
+        <CardHeader className="space-y-1">
+          <CardTitle className="text-2xl font-bold">Sign in</CardTitle>
+          <CardDescription>
+            Enter your email and password to access your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={onFinish} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Signing in..." : "Sign in"}
             </Button>
-          </Form.Item>
-          <Form.Item style={{ marginBottom: 0, textAlign: "center" }}>
-            <Typography.Text type="secondary">
-              Don&apos;t have an account?{" "}
-              <Link href="/register" style={{ color: "#1890ff" }}>
-                Sign up
-              </Link>
-            </Typography.Text>
-          </Form.Item>
-        </Form>
-      </Space>
-    </Layout>
+          </form>
+        </CardContent>
+        <Separator />
+        <CardFooter className="text-center text-sm">
+          <span className="text-muted-foreground">
+            Don&apos;t have an account?{" "}
+          </span>
+          <Link href="/register" className="text-primary hover:underline">
+            Sign up
+          </Link>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }

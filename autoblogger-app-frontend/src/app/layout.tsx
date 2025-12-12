@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import React, { Suspense } from "react";
 import { RefineContext } from "./_refine_context";
+import { ToasterWrapper } from "@/components/toaster-wrapper";
 
 export const metadata: Metadata = {
   title: "SEO CopyWriter",
@@ -26,6 +27,7 @@ export default async function RootLayout({
         <Suspense>
           <RefineContext defaultMode={defaultMode}>{children}</RefineContext>
         </Suspense>
+        <ToasterWrapper />
       </body>
     </html>
   );

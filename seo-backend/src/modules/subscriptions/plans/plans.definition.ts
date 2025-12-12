@@ -1,5 +1,5 @@
 export interface PlanDefinition {
-  identifier: string;
+  identifier: PlanIdentifier;
   name: string;
   description: string;
 
@@ -62,11 +62,13 @@ export const AGENCY_PLAN: PlanDefinition = {
   maximumActiveLicenses: 1,
 };
 
-export const AVAILABLE_PLANS: PlanDefinition[] = [
-  FREE_PLAN,
-  BASIC_PLAN,
-  PREMIUM_PLAN,
-  AGENCY_PLAN,
-];
+export const AVAILABLE_PLANS: {
+  [key in PlanIdentifier]: PlanDefinition;
+} = {
+  [PlanIdentifier.FREE]: FREE_PLAN,
+  [PlanIdentifier.BASIC]: BASIC_PLAN,
+  [PlanIdentifier.PREMIUM]: PREMIUM_PLAN,
+  [PlanIdentifier.AGENCY]: AGENCY_PLAN,
+};
 
 export const DEFAULT_PLAN: PlanDefinition = FREE_PLAN;

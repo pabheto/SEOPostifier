@@ -34,7 +34,7 @@ async function createStripePlans() {
   const skippedPrices: CreatedPrice[] = [];
 
   // Filter out FREE plan as it doesn't need Stripe integration
-  const plansToCreate = AVAILABLE_PLANS.filter(
+  const plansToCreate = Object.values(AVAILABLE_PLANS).filter(
     (plan) => plan.identifier !== PlanIdentifier.FREE,
   );
 
@@ -55,7 +55,7 @@ async function createStripePlans() {
         });
 
         existingProduct = productsResponse.data.find(
-          (p) => p.metadata?.plan_identifier === plan.identifier,
+          (p) => p.metadata?.plan_identifier === plan.identifier.toString(),
         );
 
         hasMore = productsResponse.has_more;
@@ -154,7 +154,10 @@ async function createStripePlans() {
         }
       }
     } catch (error) {
-      console.error(`   ❌ Error processing plan ${plan.name}:`, error.message);
+      console.error(
+        `   ❌ Error processing plan ${plan.name}:`,
+        error instanceof Error ? error.message : 'Unknown error',
+      );
     }
   }
 

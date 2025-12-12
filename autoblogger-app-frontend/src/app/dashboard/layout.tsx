@@ -1,29 +1,18 @@
-import authOptions from "@app/api/auth/[...nextauth]/options";
-import { Header } from "@components/header";
-import { CustomSider } from "@components/sider";
-import { ThemedLayout } from "@refinedev/antd";
+import authOptions from "@/app/api/auth/[...nextauth]/options";
+import { Layout } from "@/components/refine-ui/layout/layout";
 import { getServerSession } from "next-auth/next";
 import { redirect } from "next/navigation";
 import React from "react";
 
-export default async function Layout({ children }: React.PropsWithChildren) {
-  const data = await getData();
+export default async function DashboardLayout({
+  children,
+}: React.PropsWithChildren) {
+  const session = await getServerSession(authOptions);
 
-  if (!data.session?.user) {
+  if (!session?.user) {
     return redirect("/login");
   }
 
-  return (
-    <ThemedLayout Header={Header} Sider={CustomSider}>
-      {children}
-    </ThemedLayout>
-  );
-}
-
-async function getData() {
-  const session = await getServerSession(authOptions);
-  return {
-    session,
-  };
+  return <Layout>{children}</Layout>;
 }
 

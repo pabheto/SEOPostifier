@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { UsageExceededException } from 'src/library/exceptions/usage.exceptions';
 import {
   AspectRatio,
   NanoBananaImageGenerationService,
@@ -16,7 +17,10 @@ import {
 } from 'src/modules/llm-manager';
 import { GroqService } from 'src/modules/llm-manager/groq.service';
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
+import { AVAILABLE_PLANS } from 'src/modules/subscriptions/plans/plans.definition';
+import { SubscriptionService } from 'src/modules/subscriptions/subscription.service';
 import { UsageService } from 'src/modules/subscriptions/usage.service';
+import { countPostUsage } from '../library/accounting/post-accounting';
 import { InterviewStatus } from '../library/interfaces/post-interview.interface';
 import {
   PostBlock,
@@ -26,7 +30,6 @@ import {
 import { PostInterviewDocument } from '../schemas/post-interview.schema';
 import { Post, PostDocument } from '../schemas/posts.schema';
 import { PostInterviewsService } from './posts-interviews.service';
-import { SubscriptionService } from 'src/modules/subscriptions/subscription.service';
 
 @Injectable()
 export class PostsManagementService {
@@ -51,6 +54,16 @@ export class PostsManagementService {
       await this.subscriptionService.getOrCreateSubscriptionForUser(
         postInterview.userId as string,
       );
+
+    if (
+      currentCycleUserUsage.aiGeneratedImages +
+        (postInterview.imagesConfig.aiImagesCount ?? 0) >
+      AVAILABLE_PLANS[userActiveSubscription.plan].aiImageGenerationPerMonth
+    ) {
+      throw new UsageExceededException(
+        'You have reached the maximum number of AI generated images for the current billing period',
+      );
+    }
 
     if (
       postInterview.status !== InterviewStatus.SCRIPT_DEFINITION_GENERATED ||
@@ -379,6 +392,13 @@ export class PostsManagementService {
 
     postInterview.associatedPostId = post._id as unknown as Post;
     await postInterview.save();
+
+    // After everything has gone good, we update the usage
+    const postUsage = countPostUsage(post);
+    await this.usageService.increaseUsageForUserInCurrentBillingPeriod(
+      postInterview.userId as string,
+      postUsage,
+    );
 
     return post;
   }

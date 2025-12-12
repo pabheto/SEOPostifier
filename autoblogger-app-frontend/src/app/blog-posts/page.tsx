@@ -1,59 +1,107 @@
 "use client";
 
-import {
-  DateField,
-  DeleteButton,
-  EditButton,
-  List,
-  MarkdownField,
-  ShowButton,
-  useTable,
-} from "@refinedev/antd";
-import { type BaseRecord } from "@refinedev/core";
-import { Space, Table } from "antd";
+import React from "react";
+import { POSTS_LIST_QUERY } from "@/queries/blog-posts";
+import { DataTable } from "@/components/refine-ui/data-table/data-table";
+import { ListView, ListViewHeader } from "@/components/refine-ui/views/list-view";
+import { DeleteButton } from "@/components/refine-ui/buttons/delete";
+import { EditButton } from "@/components/refine-ui/buttons/edit";
+import { ShowButton } from "@/components/refine-ui/buttons/show";
+import { useTable } from "@refinedev/react-table";
+import { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
 
-import { POSTS_LIST_QUERY } from "@queries/blog-posts";
+type BlogPost = {
+  id: string;
+  title: string;
+  content: string;
+  category: {
+    id: string;
+    title: string;
+  } | null;
+  status: string;
+  createdAt: string;
+};
 
 export default function BlogPostList() {
-  const { result, tableProps } = useTable({
-    syncWithLocation: true,
-    meta: {
-      gqlQuery: POSTS_LIST_QUERY,
+  const columns = React.useMemo<ColumnDef<BlogPost>[]>(
+    () => [
+      {
+        id: "id",
+        accessorKey: "id",
+        header: "ID",
+      },
+      {
+        id: "title",
+        accessorKey: "title",
+        header: "Title",
+      },
+      {
+        id: "content",
+        accessorKey: "content",
+        header: "Content",
+        cell: function render({ getValue }) {
+          const value = getValue() as string;
+          if (!value) return "-";
+          return <span>{value.slice(0, 80)}...</span>;
+        },
+      },
+      {
+        id: "category",
+        accessorKey: "category.title",
+        header: "Category",
+        cell: function render({ row }) {
+          return row.original.category?.title || "-";
+        },
+      },
+      {
+        id: "status",
+        accessorKey: "status",
+        header: "Status",
+      },
+      {
+        id: "createdAt",
+        accessorKey: "createdAt",
+        header: "Created at",
+        cell: function render({ getValue }) {
+          const value = getValue() as string;
+          if (!value) return "-";
+          return format(new Date(value), "MMM dd, yyyy");
+        },
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        accessorKey: "id",
+        cell: function render({ getValue }) {
+          return (
+            <div className="flex items-center gap-2">
+              <EditButton hideText size="sm" recordItemId={getValue() as string} />
+              <ShowButton hideText size="sm" recordItemId={getValue() as string} />
+              <DeleteButton hideText size="sm" recordItemId={getValue() as string} />
+            </div>
+          );
+        },
+      },
+    ],
+    []
+  );
+
+  const table = useTable<BlogPost>({
+    columns,
+    refineCoreProps: {
+      resource: "blog-posts",
+      meta: {
+        gqlQuery: POSTS_LIST_QUERY,
+      },
     },
   });
 
   return (
-    <List>
-      <Table {...tableProps} rowKey="id">
-        <Table.Column dataIndex="id" title={"ID"} />
-        <Table.Column dataIndex="title" title={"Title"} />
-        <Table.Column
-          dataIndex="content"
-          title={"Content"}
-          render={(value: any) => {
-            if (!value) return "-";
-            return <MarkdownField value={value.slice(0, 80) + "..."} />;
-          }}
-        />
-        <Table.Column dataIndex={["category", "title"]} title={"Category"} />
-        <Table.Column dataIndex="status" title={"Status"} />
-        <Table.Column
-          dataIndex={["createdAt"]}
-          title={"Created at"}
-          render={(value: any) => <DateField value={value} />}
-        />
-        <Table.Column
-          title={"Actions"}
-          dataIndex="actions"
-          render={(_, record: BaseRecord) => (
-            <Space>
-              <EditButton hideText size="small" recordItemId={record.id} />
-              <ShowButton hideText size="small" recordItemId={record.id} />
-              <DeleteButton hideText size="small" recordItemId={record.id} />
-            </Space>
-          )}
-        />
-      </Table>
-    </List>
+    <ListView>
+      <ListViewHeader />
+      <DataTable table={table} />
+    </ListView>
   );
 }
+

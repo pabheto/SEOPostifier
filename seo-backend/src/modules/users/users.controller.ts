@@ -81,9 +81,7 @@ export class UsersController {
     // Get user's subscription to check plan limits
     const subscription =
       await this.subscriptionService.getOrCreateSubscriptionForUser(user.id);
-    const plan = AVAILABLE_PLANS.find(
-      (p) => p.identifier === subscription.plan,
-    );
+    const plan = AVAILABLE_PLANS[subscription.plan];
 
     if (!plan) {
       throw new BadRequestException('Invalid subscription plan');

@@ -1,41 +1,78 @@
 "use client";
 
-import { CATEGORIES_LIST_QUERY } from "@queries/categories";
-import {
-  DeleteButton,
-  EditButton,
-  List,
-  ShowButton,
-  useTable,
-} from "@refinedev/antd";
-import type { BaseRecord } from "@refinedev/core";
-import { Space, Table } from "antd";
+import React from "react";
+import { CATEGORIES_LIST_QUERY } from "@/queries/categories";
+import { DataTable } from "@/components/refine-ui/data-table/data-table";
+import { ListView, ListViewHeader } from "@/components/refine-ui/views/list-view";
+import { DeleteButton } from "@/components/refine-ui/buttons/delete";
+import { EditButton } from "@/components/refine-ui/buttons/edit";
+import { ShowButton } from "@/components/refine-ui/buttons/show";
+import { useTable } from "@refinedev/react-table";
+import { ColumnDef } from "@tanstack/react-table";
+import { format } from "date-fns";
+
+type Category = {
+  id: string;
+  title: string;
+  createdAt: string;
+};
 
 export default function CategoryList() {
-  const { tableProps } = useTable({
-    syncWithLocation: true,
-    meta: {
-      gqlQuery: CATEGORIES_LIST_QUERY,
+  const columns = React.useMemo<ColumnDef<Category>[]>(
+    () => [
+      {
+        id: "id",
+        accessorKey: "id",
+        header: "ID",
+      },
+      {
+        id: "title",
+        accessorKey: "title",
+        header: "Title",
+      },
+      {
+        id: "createdAt",
+        accessorKey: "createdAt",
+        header: "Created At",
+        cell: function render({ getValue }) {
+          const value = getValue() as string;
+          if (!value) return "-";
+          return format(new Date(value), "MMM dd, yyyy");
+        },
+      },
+      {
+        id: "actions",
+        header: "Actions",
+        accessorKey: "id",
+        cell: function render({ getValue }) {
+          return (
+            <div className="flex items-center gap-2">
+              <EditButton hideText size="sm" recordItemId={getValue() as string} />
+              <ShowButton hideText size="sm" recordItemId={getValue() as string} />
+              <DeleteButton hideText size="sm" recordItemId={getValue() as string} />
+            </div>
+          );
+        },
+      },
+    ],
+    []
+  );
+
+  const table = useTable<Category>({
+    columns,
+    refineCoreProps: {
+      resource: "categories",
+      meta: {
+        gqlQuery: CATEGORIES_LIST_QUERY,
+      },
     },
   });
 
   return (
-    <List>
-      <Table {...tableProps} rowKey="id">
-        <Table.Column dataIndex="id" title={"ID"} />
-        <Table.Column dataIndex="title" title={"title"} />
-        <Table.Column
-          title={"Actions"}
-          dataIndex="actions"
-          render={(_, record: BaseRecord) => (
-            <Space>
-              <EditButton hideText size="small" recordItemId={record.id} />
-              <ShowButton hideText size="small" recordItemId={record.id} />
-              <DeleteButton hideText size="small" recordItemId={record.id} />
-            </Space>
-          )}
-        />
-      </Table>
-    </List>
+    <ListView>
+      <ListViewHeader />
+      <DataTable table={table} />
+    </ListView>
   );
 }
+

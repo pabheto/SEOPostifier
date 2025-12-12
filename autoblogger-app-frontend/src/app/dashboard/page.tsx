@@ -1,33 +1,19 @@
 "use client";
 
-import {
-  CalendarOutlined,
-  FileTextOutlined,
-  PictureOutlined,
-} from "@ant-design/icons";
-import { useSubscription } from "@queries/subscriptions";
-import {
-  Card,
-  Col,
-  Progress,
-  Row,
-  Skeleton,
-  Statistic,
-  Tag,
-  Typography,
-  theme,
-} from "antd";
-
-const { Title, Text } = Typography;
+import { useSubscription } from "@/queries/subscriptions";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Calendar, FileText, Image } from "lucide-react";
 
 export default function DashboardPage() {
-  const { token } = theme.useToken();
   const { data, isLoading, error } = useSubscription();
 
   if (error) {
     return (
-      <div style={{ padding: "48px", textAlign: "center" }}>
-        <Text type="danger">Error loading dashboard data</Text>
+      <div className="flex items-center justify-center p-12">
+        <p className="text-destructive">Error loading dashboard data</p>
       </div>
     );
   }
@@ -55,238 +41,146 @@ export default function DashboardPage() {
 
   const getPlanColor = (plan: string) => {
     const colors: Record<string, string> = {
-      free: "default",
-      basic: "blue",
-      premium: "purple",
-      agency: "gold",
+      free: "secondary",
+      basic: "default",
+      premium: "default",
+      agency: "default",
     };
-    return colors[plan] || "default";
+    return colors[plan] || "secondary";
   };
 
   return (
-    <div
-      style={{
-        padding: "32px",
-        minHeight: "100vh",
-        background: `linear-gradient(135deg, ${token.colorBgContainer} 0%, ${token.colorFillQuaternary} 100%)`,
-      }}
-    >
-      <div style={{ marginBottom: 32 }}>
-        <Title level={2} style={{ margin: 0, fontWeight: 700 }}>
-          Dashboard
-        </Title>
-        <Text type="secondary" style={{ fontSize: 16 }}>
+    <div className="min-h-screen p-8 bg-gradient-to-br from-background to-muted/20">
+      <div className="mb-8">
+        <h2 className="text-3xl font-bold mb-2">Dashboard</h2>
+        <p className="text-muted-foreground text-base">
           Overview of your subscription and usage
-        </Text>
+        </p>
       </div>
 
       {isLoading ? (
-        <Row gutter={[24, 24]}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <Col xs={24} sm={12} md={8} key={i}>
-              <Card>
-                <Skeleton active paragraph={{ rows: 2 }} />
-              </Card>
-            </Col>
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-4 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-32 mb-2" />
+                <Skeleton className="h-4 w-20" />
+              </CardContent>
+            </Card>
           ))}
-        </Row>
+        </div>
       ) : (
         <>
-          <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
-            <Col xs={24} sm={12} md={8}>
-              <Card
-                hoverable
-                style={{
-                  borderRadius: 12,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  border: `1px solid ${token.colorBorderSecondary}`,
-                }}
-              >
-                <Statistic
-                  title={
-                    <Text type="secondary" style={{ fontSize: 14 }}>
-                      Current Plan
-                    </Text>
-                  }
-                  value={subscription?.plan?.toUpperCase() || "FREE"}
-                  valueStyle={{
-                    fontSize: 28,
-                    fontWeight: 700,
-                    color: token.colorPrimary,
-                  }}
-                  prefix={
-                    <Tag
-                      color={getPlanColor(subscription?.plan || "free")}
-                      style={{ marginRight: 8 }}
-                    >
-                      {subscription?.plan || "FREE"}
-                    </Tag>
-                  }
-                />
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} md={8}>
-              <Card
-                hoverable
-                style={{
-                  borderRadius: 12,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  border: `1px solid ${token.colorBorderSecondary}`,
-                }}
-              >
-                <Statistic
-                  title={
-                    <Text type="secondary" style={{ fontSize: 14 }}>
-                      <CalendarOutlined style={{ marginRight: 8 }} />
-                      Billing Period Start
-                    </Text>
-                  }
-                  value={
-                    billingPeriod?.start
-                      ? new Date(billingPeriod.start).toLocaleDateString(
-                          "en-US",
-                          { month: "short", day: "numeric", year: "numeric" }
-                        )
-                      : "-"
-                  }
-                  valueStyle={{
-                    fontSize: 20,
-                    fontWeight: 600,
-                  }}
-                />
-              </Card>
-            </Col>
-            <Col xs={24} sm={12} md={8}>
-              <Card
-                hoverable
-                style={{
-                  borderRadius: 12,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  border: `1px solid ${token.colorBorderSecondary}`,
-                }}
-              >
-                <Statistic
-                  title={
-                    <Text type="secondary" style={{ fontSize: 14 }}>
-                      <CalendarOutlined style={{ marginRight: 8 }} />
-                      Billing Period End
-                    </Text>
-                  }
-                  value={
-                    billingPeriod?.end
-                      ? new Date(billingPeriod.end).toLocaleDateString(
-                          "en-US",
-                          { month: "short", day: "numeric", year: "numeric" }
-                        )
-                      : "-"
-                  }
-                  valueStyle={{
-                    fontSize: 20,
-                    fontWeight: 600,
-                  }}
-                />
-              </Card>
-            </Col>
-          </Row>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <p className="text-sm text-muted-foreground">Current Plan</p>
+              </CardHeader>
+              <CardContent>
+                <div className="flex items-center gap-2 mb-2">
+                  <Badge variant={getPlanColor(subscription?.plan || "free") as any}>
+                    {subscription?.plan?.toUpperCase() || "FREE"}
+                  </Badge>
+                  <span className="text-2xl font-bold">
+                    {subscription?.plan?.toUpperCase() || "FREE"}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Row gutter={[24, 24]}>
-            <Col xs={24} lg={12}>
-              <Card
-                style={{
-                  borderRadius: 12,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  border: `1px solid ${token.colorBorderSecondary}`,
-                }}
-                title={
-                  <div>
-                    <PictureOutlined
-                      style={{ marginRight: 8, color: token.colorPrimary }}
-                    />
-                    <span style={{ fontWeight: 600 }}>AI Generated Images</span>
-                  </div>
-                }
-              >
-                <Statistic
-                  value={usage?.aiGeneratedImages || 0}
-                  suffix={`/ ${limits.images}`}
-                  valueStyle={{
-                    fontSize: 32,
-                    fontWeight: 700,
-                    color: token.colorPrimary,
-                  }}
-                />
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Billing Period Start
+                  </p>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xl font-semibold">
+                  {billingPeriod?.start
+                    ? new Date(billingPeriod.start).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : "-"}
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="hover:shadow-md transition-shadow">
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <p className="text-sm text-muted-foreground">
+                    Billing Period End
+                  </p>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p className="text-xl font-semibold">
+                  {billingPeriod?.end
+                    ? new Date(billingPeriod.end).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : "-"}
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Image className="h-5 w-5 text-primary" />
+                  <CardTitle>AI Generated Images</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold mb-4">
+                  {usage?.aiGeneratedImages || 0} / {limits.images}
+                </div>
                 <Progress
-                  percent={imagesUsagePercent}
-                  strokeColor={{
-                    "0%": token.colorPrimary,
-                    "100%": token.colorSuccess,
-                  }}
-                  status={
-                    imagesUsagePercent >= 90
-                      ? "exception"
-                      : imagesUsagePercent >= 75
-                      ? "active"
-                      : "success"
-                  }
-                  style={{ marginTop: 24 }}
-                  size={8}
+                  value={imagesUsagePercent}
+                  className="mb-2"
                 />
-                <Text type="secondary" style={{ fontSize: 12, marginTop: 8 }}>
+                <p className="text-sm text-muted-foreground">
                   {limits.images - (usage?.aiGeneratedImages || 0)} images
                   remaining
-                </Text>
-              </Card>
-            </Col>
-            <Col xs={24} lg={12}>
-              <Card
-                style={{
-                  borderRadius: 12,
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                  border: `1px solid ${token.colorBorderSecondary}`,
-                }}
-                title={
-                  <div>
-                    <FileTextOutlined
-                      style={{ marginRight: 8, color: token.colorPrimary }}
-                    />
-                    <span style={{ fontWeight: 600 }}>Generated Words</span>
-                  </div>
-                }
-              >
-                <Statistic
-                  value={usage?.generatedWords || 0}
-                  suffix={`/ ${limits.words.toLocaleString()}`}
-                  valueStyle={{
-                    fontSize: 32,
-                    fontWeight: 700,
-                    color: token.colorPrimary,
-                  }}
-                />
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  <CardTitle>Generated Words</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold mb-4">
+                  {usage?.generatedWords || 0} / {limits.words.toLocaleString()}
+                </div>
                 <Progress
-                  percent={wordsUsagePercent}
-                  strokeColor={{
-                    "0%": token.colorPrimary,
-                    "100%": token.colorSuccess,
-                  }}
-                  status={
-                    wordsUsagePercent >= 90
-                      ? "exception"
-                      : wordsUsagePercent >= 75
-                      ? "active"
-                      : "success"
-                  }
-                  style={{ marginTop: 24 }}
-                  size={8}
+                  value={wordsUsagePercent}
+                  className="mb-2"
                 />
-                <Text type="secondary" style={{ fontSize: 12, marginTop: 8 }}>
-                  {(
-                    limits.words - (usage?.generatedWords || 0)
-                  ).toLocaleString()}{" "}
+                <p className="text-sm text-muted-foreground">
+                  {(limits.words - (usage?.generatedWords || 0)).toLocaleString()}{" "}
                   words remaining
-                </Text>
-              </Card>
-            </Col>
-          </Row>
+                </p>
+              </CardContent>
+            </Card>
+          </div>
         </>
       )}
     </div>

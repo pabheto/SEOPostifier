@@ -1,36 +1,38 @@
 "use client";
 
+import { useCreateLicense, useLicenses } from "@/queries/licenses";
+import { useSubscription } from "@/queries/subscriptions";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  CopyOutlined,
-  KeyOutlined,
-  PlusOutlined,
-} from "@ant-design/icons";
-import { useCreateLicense, useLicenses } from "@queries/licenses";
-import { useSubscription } from "@queries/subscriptions";
-import {
-  App,
-  Button,
   Card,
-  Col,
-  Input,
-  Modal,
-  Row,
-  Skeleton,
-  Space,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
   Table,
-  Tag,
-  theme,
-  Typography,
-} from "antd";
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { CheckCircle2, Copy, Key, XCircle, Plus } from "lucide-react";
 import { useState } from "react";
-
-const { Title, Text } = Typography;
+import { toast } from "sonner";
 
 export default function LicensesPage() {
-  const { token } = theme.useToken();
-  const { message } = App.useApp();
   const { data: licenses, isLoading, error } = useLicenses();
   const { data: subscriptionData } = useSubscription();
   const createLicense = useCreateLicense();
@@ -55,215 +57,188 @@ export default function LicensesPage() {
 
   const handleCreateLicense = async () => {
     if (!licenseName.trim()) {
-      message.error("Please enter a license name");
+      toast.error("Please enter a license name");
       return;
     }
     try {
       await createLicense.mutateAsync({ name: licenseName.trim() });
-      message.success("License created successfully!");
+      toast.success("License created successfully!");
       setIsModalVisible(false);
       setLicenseName("");
     } catch (error: any) {
-      message.error(error?.message || "Failed to create license");
+      toast.error(error?.message || "Failed to create license");
     }
   };
 
   const handleCopyLicense = (licenseKey: string) => {
     navigator.clipboard.writeText(licenseKey);
-    message.success("License key copied to clipboard!");
+    toast.success("License key copied to clipboard!");
   };
-
-  const columns = [
-    {
-      title: "License Key",
-      dataIndex: "key",
-      key: "key",
-      render: (key: string) => (
-        <Space.Compact style={{ width: "100%" }}>
-          <Input
-            readOnly
-            value={key}
-            style={{
-              fontFamily: "monospace",
-              backgroundColor: token.colorFillTertiary,
-            }}
-          />
-          <Button
-            icon={<CopyOutlined />}
-            onClick={() => handleCopyLicense(key)}
-            type="primary"
-          >
-            Copy
-          </Button>
-        </Space.Compact>
-      ),
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-      render: (name: string) => <Text strong>{name || "Unnamed License"}</Text>,
-    },
-    {
-      title: "Status",
-      dataIndex: "active",
-      key: "active",
-      render: (active: boolean) => (
-        <Tag
-          color={active ? "success" : "error"}
-          icon={active ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
-        >
-          {active ? "Active" : "Inactive"}
-        </Tag>
-      ),
-    },
-    {
-      title: "Created At",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (date: string) =>
-        date
-          ? new Date(date).toLocaleDateString("en-US", {
-              month: "short",
-              day: "numeric",
-              year: "numeric",
-            })
-          : "-",
-    },
-  ];
 
   if (error) {
     return (
-      <div style={{ padding: "48px", textAlign: "center" }}>
-        <Text type="danger">Error loading licenses</Text>
+      <div className="flex items-center justify-center p-12">
+        <p className="text-destructive">Error loading licenses</p>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        padding: "32px",
-        minHeight: "100vh",
-        background: `linear-gradient(135deg, ${token.colorBgContainer} 0%, ${token.colorFillQuaternary} 100%)`,
-      }}
-    >
-      <Row
-        justify="space-between"
-        align="middle"
-        style={{ marginBottom: 32 }}
-        gutter={[16, 16]}
-      >
-        <Col>
-          <Title level={2} style={{ margin: 0, fontWeight: 700 }}>
-            Licenses
-          </Title>
-          <Text type="secondary" style={{ fontSize: 16 }}>
+    <div className="min-h-screen p-8 bg-gradient-to-br from-background to-muted/20">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div>
+          <h2 className="text-3xl font-bold mb-2">Licenses</h2>
+          <p className="text-muted-foreground text-base">
             Manage your license keys
-          </Text>
-          <div style={{ marginTop: 8 }}>
-            <Text type="secondary" style={{ fontSize: 14 }}>
-              Active licenses: <Text strong>{activeCount}</Text> / {maxLicenses}
+          </p>
+          <div className="mt-2">
+            <p className="text-sm text-muted-foreground">
+              Active licenses: <span className="font-semibold">{activeCount}</span> / {maxLicenses}
               {remainingLicenses > 0 && (
-                <Text type="success" style={{ marginLeft: 8 }}>
+                <span className="text-green-600 dark:text-green-400 ml-2">
                   ({remainingLicenses} remaining)
-                </Text>
+                </span>
               )}
-            </Text>
+            </p>
           </div>
-        </Col>
-        <Col>
-          <Button
-            type="primary"
-            size="large"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalVisible(true)}
-            disabled={remainingLicenses === 0}
-            style={{
-              borderRadius: 8,
-              height: 40,
-              fontWeight: 600,
-            }}
-          >
-            Create License
-          </Button>
-        </Col>
-      </Row>
+        </div>
+        <Button
+          onClick={() => setIsModalVisible(true)}
+          disabled={remainingLicenses === 0}
+          size="lg"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create License
+        </Button>
+      </div>
 
-      <Card
-        style={{
-          borderRadius: 12,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-          border: `1px solid ${token.colorBorderSecondary}`,
-        }}
-      >
-        {isLoading ? (
-          <Skeleton active paragraph={{ rows: 5 }} />
-        ) : (
-          <Table
-            columns={columns}
-            dataSource={licenses || []}
-            rowKey="id"
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Total ${total} licenses`,
-            }}
-            style={{ marginTop: 16 }}
-          />
-        )}
+      <Card>
+        <CardContent className="pt-6">
+          {isLoading ? (
+            <div className="space-y-4">
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+              <Skeleton className="h-12 w-full" />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>License Key</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created At</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {licenses?.map((license) => (
+                  <TableRow key={license.id}>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Input
+                          readOnly
+                          value={license.key}
+                          className="font-mono bg-muted"
+                        />
+                        <Button
+                          size="sm"
+                          onClick={() => handleCopyLicense(license.key)}
+                        >
+                          <Copy className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <span className="font-semibold">
+                        {license.name || "Unnamed License"}
+                      </span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={license.active ? "default" : "destructive"}
+                      >
+                        {license.active ? (
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                        ) : (
+                          <XCircle className="h-3 w-3 mr-1" />
+                        )}
+                        {license.active ? "Active" : "Inactive"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {license.createdAt
+                        ? new Date(license.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            }
+                          )
+                        : "-"}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
       </Card>
 
-      <Modal
-        title={
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <KeyOutlined style={{ color: token.colorPrimary }} />
-            <span style={{ fontWeight: 600 }}>Create New License</span>
+      <Dialog open={isModalVisible} onOpenChange={setIsModalVisible}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5 text-primary" />
+              Create New License
+            </DialogTitle>
+            <DialogDescription>
+              Enter a name for your new license key.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-semibold block mb-2">
+                License Name:
+              </label>
+              <Input
+                placeholder="Enter a name for this license"
+                value={licenseName}
+                onChange={(e) => setLicenseName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleCreateLicense();
+                  }
+                }}
+                maxLength={100}
+              />
+            </div>
+            <div className="p-3 bg-muted rounded-md text-sm text-muted-foreground">
+              You can create <span className="font-semibold">{remainingLicenses}</span> more{" "}
+              {remainingLicenses === 1 ? "license" : "licenses"} with your current
+              plan (<span className="font-semibold">{currentPlan.toUpperCase()}</span>).
+            </div>
           </div>
-        }
-        open={isModalVisible}
-        onOk={handleCreateLicense}
-        onCancel={() => {
-          setIsModalVisible(false);
-          setLicenseName("");
-        }}
-        confirmLoading={createLicense.isPending}
-        okText="Create License"
-        okButtonProps={{
-          style: { borderRadius: 6, fontWeight: 600 },
-        }}
-        cancelButtonProps={{
-          style: { borderRadius: 6 },
-        }}
-        style={{ borderRadius: 12 }}
-      >
-        <div style={{ marginBottom: 16 }}>
-          <Text strong style={{ display: "block", marginBottom: 8 }}>
-            License Name:
-          </Text>
-          <Input
-            placeholder="Enter a name for this license"
-            size="large"
-            value={licenseName}
-            onChange={(e) => setLicenseName(e.target.value)}
-            onPressEnter={handleCreateLicense}
-            maxLength={100}
-          />
-        </div>
-        <div
-          style={{
-            padding: 12,
-            backgroundColor: token.colorFillTertiary,
-            borderRadius: 6,
-            fontSize: 12,
-            color: token.colorTextSecondary,
-          }}
-        >
-          You can create <Text strong>{remainingLicenses}</Text> more{" "}
-          {remainingLicenses === 1 ? "license" : "licenses"} with your current
-          plan (<Text strong>{currentPlan.toUpperCase()}</Text>).
-        </div>
-      </Modal>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsModalVisible(false);
+                setLicenseName("");
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateLicense}
+              disabled={createLicense.isPending}
+            >
+              Create License
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
