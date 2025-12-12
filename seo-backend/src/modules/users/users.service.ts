@@ -60,7 +60,11 @@ export class UsersService {
 
     return {
       token,
-      user: { id: user._id, email: user.email },
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role || 'USER',
+      },
       license: { key: license.key, name: license.name },
     };
   }
@@ -89,7 +93,11 @@ export class UsersService {
 
     return {
       token,
-      user: { id: user._id, email: user.email },
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role || 'USER',
+      },
       license: license ? { key: license.key, name: license.name } : null,
     };
   }
@@ -121,7 +129,11 @@ export class UsersService {
     }
 
     return {
-      user: { id: String(user._id), email: user.email },
+      user: {
+        id: String(user._id),
+        email: user.email,
+        role: user.role || 'USER',
+      },
       sessionId: String(session._id),
     };
   }

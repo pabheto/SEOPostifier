@@ -1,15 +1,16 @@
 "use client";
 
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   useCancelSubscription,
   useCreateCheckout,
   useCustomerPortal,
   useSubscription,
+  type BillingPeriod,
 } from "@/queries/subscriptions";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar, CheckCircle2, CreditCard, DollarSign } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -21,9 +22,8 @@ export default function BillingPage() {
   const createCheckout = useCreateCheckout();
   const customerPortal = useCustomerPortal();
   const cancelSubscription = useCancelSubscription();
-  const [selectedBillingPeriod, setSelectedBillingPeriod] = useState<
-    "monthly" | "annual"
-  >("monthly");
+  const [selectedBillingPeriod, setSelectedBillingPeriod] =
+    useState<BillingPeriod>("monthly");
 
   // Handle Stripe redirects
   useEffect(() => {
@@ -103,7 +103,7 @@ export default function BillingPage() {
 
   const handleSubscribe = async (
     planIdentifier: "basic" | "premium" | "agency",
-    billingPeriod: "monthly" | "annual"
+    billingPeriod: BillingPeriod
   ) => {
     try {
       const response = await createCheckout.mutateAsync({
@@ -276,7 +276,10 @@ export default function BillingPage() {
                 >
                   <CardHeader>
                     <div className="flex justify-between items-center mb-4">
-                      <Badge variant={plan.color as any} className="text-sm px-3 py-1">
+                      <Badge
+                        variant={plan.color as any}
+                        className="text-sm px-3 py-1"
+                      >
                         {plan.name}
                       </Badge>
                       {isCurrentPlan && (
@@ -296,7 +299,7 @@ export default function BillingPage() {
                     <div className="mb-6 space-y-3">
                       {plan.features.map((feature, index) => (
                         <div key={index} className="flex items-center gap-2">
-                          <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0" />
+                          <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
                           <span className="text-sm">{feature}</span>
                         </div>
                       ))}
@@ -306,7 +309,10 @@ export default function BillingPage() {
                       className="w-full mt-auto"
                       disabled={isCurrentPlan}
                       onClick={() =>
-                        handleSubscribe(plan.identifier, selectedBillingPeriod)
+                        handleSubscribe(
+                          plan.identifier as "basic" | "premium" | "agency",
+                          selectedBillingPeriod
+                        )
                       }
                     >
                       {isCurrentPlan ? "Current Plan" : "Subscribe"}
@@ -364,4 +370,3 @@ export default function BillingPage() {
     </div>
   );
 }
-

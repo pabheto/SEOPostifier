@@ -84,12 +84,12 @@ export const ShowViewHeader = ({
         <div className="flex items-center gap-2">
           <RefreshButton
             variant="outline"
-            recordItemId={recordItemId}
+            recordItemId={recordItemId ? String(recordItemId) : undefined}
             resource={resourceName}
           />
           <EditButton
             variant="outline"
-            recordItemId={recordItemId}
+            recordItemId={recordItemId ? String(recordItemId) : undefined}
             resource={resourceName}
           />
         </div>

@@ -62,6 +62,7 @@ export class SubscriptionsController {
     return {
       subscription: {
         plan: subscription.plan,
+        status: subscription.stripeStatus || 'active',
         billingPeriodStart: subscription.billingPeriodStart,
         billingPeriodEnd: subscription.billingPeriodEnd,
       },
@@ -102,6 +103,7 @@ export class SubscriptionsController {
     return {
       subscription: {
         plan: subscription.plan,
+        status: subscription.stripeStatus || 'active',
         billingPeriodStart: subscription.billingPeriodStart,
         billingPeriodEnd: subscription.billingPeriodEnd,
       },

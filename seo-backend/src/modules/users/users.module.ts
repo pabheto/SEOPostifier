@@ -4,6 +4,7 @@ import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { AuthHelper } from './auth.helper';
 import { JwtGuard } from './guards/jwt.guard';
 import { LicenseGuard } from './guards/license.guard';
+import { RoleGuard } from './guards/role.guard';
 import { License, LicenseSchema } from './schemas/license.schema';
 import { Session, SessionSchema } from './schemas/session.schema';
 import { User, UserSchema } from './schemas/user.schema';
@@ -20,7 +21,7 @@ import { UsersService } from './users.service';
     forwardRef(() => SubscriptionsModule),
   ],
   controllers: [UsersController],
-  providers: [UsersService, AuthHelper, LicenseGuard, JwtGuard],
-  exports: [UsersService, AuthHelper, LicenseGuard, JwtGuard],
+  providers: [UsersService, AuthHelper, LicenseGuard, JwtGuard, RoleGuard],
+  exports: [UsersService, AuthHelper, LicenseGuard, JwtGuard, RoleGuard],
 })
 export class UsersModule {}

@@ -70,24 +70,6 @@ $settings = SEO_Postifier_Settings::get_all();
         </form>
     </div>
 
-    <div class="card" style="margin-top: 20px;">
-        <h2><?php _e('About Your License', 'seo-postifier'); ?></h2>
-        <p><?php _e('Your license key is used to authenticate all requests to the backend API. Different license tiers may have different features and usage limits:', 'seo-postifier'); ?></p>
-        <ul style="list-style: disc; margin-left: 20px;">
-            <li><strong>BASIC:</strong> <?php _e('Standard access to all post generation features', 'seo-postifier'); ?></li>
-            <li><strong>PREMIUM:</strong> <?php _e('Enhanced features with priority support', 'seo-postifier'); ?></li>
-            <li><strong>ENTERPRISE:</strong> <?php _e('Full access with dedicated resources', 'seo-postifier'); ?></li>
-        </ul>
-        <p>
-            <?php _e('Current status:', 'seo-postifier'); ?>
-            <?php if (SEO_Postifier_Settings::has_license_key()): ?>
-                <span style="color: #46b450; font-weight: bold;"><?php _e('Active', 'seo-postifier'); ?></span>
-            <?php else: ?>
-                <span style="color: #dc3232; font-weight: bold;"><?php _e('Not Configured', 'seo-postifier'); ?></span>
-            <?php endif; ?>
-        </p>
-    </div>
-
     <?php if (SEO_Postifier_Settings::has_license_key()): ?>
     <div class="card" style="margin-top: 20px;" id="subscription-usage-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">

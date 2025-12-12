@@ -10,7 +10,7 @@ export interface Subscription {
   billingPeriodEnd: string;
 }
 
-export interface BillingPeriod {
+export interface BillingPeriodData {
   start: string;
   end: string;
 }
@@ -22,7 +22,7 @@ export interface Usage {
 
 export interface SubscriptionAndUsage {
   subscription: Subscription;
-  billingPeriod: BillingPeriod;
+  billingPeriod: BillingPeriodData;
   usage: Usage;
 }
 
@@ -75,4 +75,3 @@ export const useCancelSubscription = () => {
     },
   });
 };
-

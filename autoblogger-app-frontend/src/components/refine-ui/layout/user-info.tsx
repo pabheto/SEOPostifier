@@ -1,21 +1,14 @@
+"use client";
+
 import { UserAvatar } from "@/components/refine-ui/layout/user-avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
-import { useGetIdentity } from "@refinedev/core";
-
-type User = {
-  id: number;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  email: string;
-  avatar?: string;
-};
+import { useSession } from "next-auth/react";
 
 export function UserInfo() {
-  const { data: user, isLoading: userIsLoading } = useGetIdentity<User>();
+  const { data: session, status } = useSession();
 
-  if (userIsLoading || !user) {
+  if (status === "loading" || !session?.user) {
     return (
       <div className={cn("flex", "items-center", "gap-x-2")}>
         <Skeleton className={cn("h-10", "w-10", "rounded-full")} />
@@ -27,7 +20,12 @@ export function UserInfo() {
     );
   }
 
-  const { firstName, lastName, email } = user;
+  const user = session.user;
+  const name = user.name || "";
+  const email = user.email || "";
+  const nameParts = name.split(" ");
+  const firstName = nameParts[0] || "";
+  const lastName = nameParts.slice(1).join(" ") || "";
 
   return (
     <div className={cn("flex", "items-center", "gap-x-2")}>

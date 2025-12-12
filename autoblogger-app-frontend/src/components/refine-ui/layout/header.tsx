@@ -1,3 +1,5 @@
+"use client";
+
 import { UserAvatar } from "@/components/refine-ui/layout/user-avatar";
 import { ThemeToggle } from "@/components/refine-ui/theme/theme-toggle";
 import {
@@ -8,12 +10,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import {
-  useActiveAuthProvider,
-  useLogout,
-  useRefineOptions,
-} from "@refinedev/core";
+import { signOut } from "next-auth/react";
 import { LogOutIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import React from "react";
 
 export const Header = () => {
   const { isMobile } = useSidebar();
@@ -48,8 +48,6 @@ function DesktopHeader() {
 
 function MobileHeader() {
   const { open, isMobile } = useSidebar();
-
-  const { title } = useRefineOptions();
 
   return (
     <header
@@ -95,7 +93,6 @@ function MobileHeader() {
           }
         )}
       >
-        <div>{title.icon}</div>
         <h2
           className={cn(
             "text-sm",
@@ -108,7 +105,7 @@ function MobileHeader() {
             }
           )}
         >
-          {title.text}
+          AI autoblogger
         </h2>
       </div>
 
@@ -118,13 +115,15 @@ function MobileHeader() {
 }
 
 const UserDropdown = () => {
-  const { mutate: logout, isPending: isLoggingOut } = useLogout();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = React.useState(false);
 
-  const authProvider = useActiveAuthProvider();
-
-  if (!authProvider?.getIdentity) {
-    return null;
-  }
+  const handleLogout = async () => {
+    setIsLoggingOut(true);
+    await signOut({ redirect: false });
+    router.push("/login");
+    router.refresh();
+  };
 
   return (
     <DropdownMenu>
@@ -132,11 +131,7 @@ const UserDropdown = () => {
         <UserAvatar />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem
-          onClick={() => {
-            logout();
-          }}
-        >
+        <DropdownMenuItem onClick={handleLogout}>
           <LogOutIcon
             className={cn("text-destructive", "hover:text-destructive")}
           />

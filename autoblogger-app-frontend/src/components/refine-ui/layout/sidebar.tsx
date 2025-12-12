@@ -27,12 +27,141 @@ import {
   useRefineOptions,
   type TreeMenuItem,
 } from "@refinedev/core";
-import { ChevronRight, ListIcon } from "lucide-react";
+import {
+  ChevronRight,
+  CreditCard,
+  Key,
+  LayoutDashboard,
+  ListIcon,
+  Shield,
+} from "lucide-react";
+import { useSession } from "next-auth/react";
+import { usePathname } from "next/navigation";
 import React from "react";
+
+// Resources to hide from sidebar
+const HIDDEN_RESOURCES = ["blog-posts", "categories"];
+
+// Custom menu items configuration for pages that aren't Refine resources
+function getCustomMenuItems(isAdmin: boolean = false): TreeMenuItem[] {
+  const items: TreeMenuItem[] = [
+    {
+      name: "dashboard",
+      key: "dashboard",
+      label: "Dashboard",
+      route: "/dashboard",
+      children: [],
+      meta: {
+        icon: <LayoutDashboard className="h-4 w-4" />,
+      },
+    },
+    {
+      name: "billing",
+      key: "billing",
+      label: "Billing",
+      route: "/billing",
+      children: [],
+      meta: {
+        icon: <CreditCard className="h-4 w-4" />,
+      },
+    },
+    {
+      name: "licenses",
+      key: "licenses",
+      label: "Licenses",
+      route: "/licenses",
+      children: [],
+      meta: {
+        icon: <Key className="h-4 w-4" />,
+      },
+    },
+  ];
+
+  if (isAdmin) {
+    items.push({
+      name: "administration",
+      key: "administration",
+      label: "Administration",
+      route: "/administration",
+      children: [],
+      meta: {
+        icon: <Shield className="h-4 w-4" />,
+      },
+    });
+  }
+
+  return items;
+}
+
+function filterMenuItems(items: TreeMenuItem[]): TreeMenuItem[] {
+  return items
+    .filter((item) => {
+      const resourceName = item.name || item.key || "";
+      return !HIDDEN_RESOURCES.includes(resourceName);
+    })
+    .map((item) => {
+      if (item.children && item.children.length > 0) {
+        const filteredChildren = filterMenuItems(item.children);
+        return {
+          ...item,
+          children: filteredChildren,
+        };
+      }
+      return item;
+    })
+    .filter((item) => {
+      // Only remove items that have children but all children were filtered out
+      if (item.children && item.children.length === 0) {
+        return false;
+      }
+      return true;
+    });
+}
 
 export function Sidebar() {
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
+  const pathname = usePathname();
+  const { data: session } = useSession();
+  const filteredMenuItems = filterMenuItems(menuItems);
+
+  // Debug: Log session to help troubleshoot
+  React.useEffect(() => {
+    if (session) {
+      console.log("Session data:", session);
+      console.log("User role:", (session.user as any)?.role);
+    }
+  }, [session]);
+
+  const isAdmin = (session?.user as any)?.role === "ADMIN";
+
+  // Memoize custom menu items to avoid recreating JSX on every render
+  const customMenuItems = React.useMemo(
+    () => getCustomMenuItems(isAdmin),
+    [isAdmin]
+  );
+
+  // Combine custom menu items with filtered Refine menu items
+  const allMenuItems = React.useMemo(
+    () => [...customMenuItems, ...filteredMenuItems],
+    [customMenuItems, filteredMenuItems]
+  );
+
+  // Determine selected key from pathname if not provided
+  const currentSelectedKey = React.useMemo(
+    () =>
+      selectedKey ||
+      (pathname?.startsWith("/dashboard")
+        ? "dashboard"
+        : pathname?.startsWith("/billing")
+        ? "billing"
+        : pathname?.startsWith("/licenses")
+        ? "licenses"
+        : pathname?.startsWith("/administration")
+        ? "administration"
+        : undefined),
+    [selectedKey, pathname]
+  );
 
   return (
     <ShadcnSidebar collapsible="icon" className={cn("border-none")}>
@@ -55,11 +184,11 @@ export function Sidebar() {
           }
         )}
       >
-        {menuItems.map((item: TreeMenuItem) => (
+        {allMenuItems.map((item: TreeMenuItem) => (
           <SidebarItem
             key={item.key || item.name}
             item={item}
-            selectedKey={selectedKey}
+            selectedKey={currentSelectedKey}
           />
         ))}
       </ShadcnSidebarContent>
@@ -256,7 +385,7 @@ function SidebarHeader() {
             }
           )}
         >
-          {title.text}
+          AI autoblogger
         </h2>
       </div>
 

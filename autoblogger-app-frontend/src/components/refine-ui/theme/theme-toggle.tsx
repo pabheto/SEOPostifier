@@ -3,7 +3,8 @@
 import { useTheme } from "@/components/refine-ui/theme/theme-provider";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Monitor, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 
 type ThemeToggleProps = {
   className?: string;
@@ -11,20 +12,26 @@ type ThemeToggleProps = {
 
 export function ThemeToggle({ className }: ThemeToggleProps) {
   const { theme, setTheme } = useTheme();
+  const [currentTheme, setCurrentTheme] = useState<"light" | "dark">("light");
 
-  const cycleTheme = () => {
-    switch (theme) {
-      case "light":
-        setTheme("dark");
-        break;
-      case "dark":
-        setTheme("system");
-        break;
-      case "system":
-        setTheme("light");
-        break;
-      default:
-        setTheme("light");
+  // Convert system theme to actual light/dark
+  useEffect(() => {
+    if (theme === "system") {
+      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
+        .matches
+        ? "dark"
+        : "light";
+      setCurrentTheme(systemTheme);
+    } else {
+      setCurrentTheme(theme);
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    if (currentTheme === "light") {
+      setTheme("dark");
+    } else {
+      setTheme("light");
     }
   };
 
@@ -32,60 +39,47 @@ export function ThemeToggle({ className }: ThemeToggleProps) {
     <Button
       variant="outline"
       size="icon"
-      onClick={cycleTheme}
+      onClick={toggleTheme}
       className={cn(
         "rounded-full",
         "border-sidebar-border",
         "bg-transparent",
+        "relative",
+        "overflow-hidden",
         className,
         "h-10",
         "w-10"
       )}
     >
-      <Sun
-        className={cn(
-          "h-[1.2rem]",
-          "w-[1.2rem]",
-          "rotate-0",
-          "scale-100",
-          "transition-all",
-          "duration-200",
-          {
-            "-rotate-90 scale-0": theme === "dark" || theme === "system",
-          }
-        )}
-      />
-      <Moon
-        className={cn(
-          "absolute",
-          "h-[1.2rem]",
-          "w-[1.2rem]",
-          "rotate-90",
-          "scale-0",
-          "transition-all",
-          "duration-200",
-          {
-            "rotate-0 scale-100": theme === "dark",
-            "rotate-90 scale-0": theme === "light" || theme === "system",
-          }
-        )}
-      />
-      <Monitor
-        className={cn(
-          "absolute",
-          "h-[1.2rem]",
-          "w-[1.2rem]",
-          "rotate-0",
-          "scale-0",
-          "transition-all",
-          "duration-200",
-          {
-            "scale-100": theme === "system",
-            "scale-0": theme === "light" || theme === "dark",
-          }
-        )}
-      />
-      <span className="sr-only">Toggle theme (Light → Dark → System)</span>
+      <div className="relative h-[1.2rem] w-[1.2rem] flex items-center justify-center">
+        <Sun
+          className={cn(
+            "absolute",
+            "h-[1.2rem]",
+            "w-[1.2rem]",
+            "transition-all",
+            "duration-200",
+            "pointer-events-none",
+            currentTheme === "light"
+              ? "rotate-0 scale-100 opacity-100 z-10"
+              : "rotate-90 scale-0 opacity-0 -z-10"
+          )}
+        />
+        <Moon
+          className={cn(
+            "absolute",
+            "h-[1.2rem]",
+            "w-[1.2rem]",
+            "transition-all",
+            "duration-200",
+            "pointer-events-none",
+            currentTheme === "dark"
+              ? "rotate-0 scale-100 opacity-100 z-10"
+              : "rotate-90 scale-0 opacity-0 -z-10"
+          )}
+        />
+      </div>
+      <span className="sr-only">Toggle theme (Light ↔ Dark)</span>
     </Button>
   );
 }

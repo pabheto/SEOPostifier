@@ -1,6 +1,7 @@
 "use client";
 
-import { useLogin } from "@refinedev/core";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -15,30 +16,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 
 export default function Login() {
-  const { mutate: login } = useLogin();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const onFinish = (e: React.FormEvent) => {
+  const onFinish = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    login(
-      {
+    
+    try {
+      const result = await signIn("credentials", {
         email,
         password,
-      },
-      {
-        onSuccess: () => {
-          setLoading(false);
-        },
-        onError: () => {
-          setLoading(false);
-        },
+        redirect: false,
+      });
+
+      if (result?.error) {
+        toast.error("Invalid email or password");
+        setLoading(false);
+      } else if (result?.ok) {
+        router.push("/dashboard");
+        router.refresh();
       }
-    );
+    } catch (error) {
+      toast.error("An error occurred. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (

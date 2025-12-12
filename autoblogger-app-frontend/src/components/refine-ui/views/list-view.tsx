@@ -6,7 +6,6 @@ import { CreateButton } from "@/components/refine-ui/buttons/create";
 import { Breadcrumb } from "@/components/refine-ui/layout/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
-import { useResourceParams, useUserFriendlyName } from "@refinedev/core";
 
 type ListViewProps = PropsWithChildren<{
   className?: string;
@@ -33,21 +32,9 @@ export const ListViewHeader = ({
   wrapperClassName,
   headerClassName,
 }: ListHeaderProps) => {
-  const getUserFriendlyName = useUserFriendlyName();
-
-  const { resource, identifier } = useResourceParams({
-    resource: resourceFromProps,
-  });
-  const resourceName = identifier ?? resource?.name;
-
-  const isCreateButtonVisible = canCreate ?? !!resource?.create;
-
-  const title =
-    titleFromProps ??
-    getUserFriendlyName(
-      resource?.meta?.label ?? identifier ?? resource?.name,
-      "plural"
-    );
+  const resourceName = resourceFromProps;
+  const isCreateButtonVisible = canCreate ?? true;
+  const title = titleFromProps ?? (resourceFromProps ? resourceFromProps.charAt(0).toUpperCase() + resourceFromProps.slice(1) : "List");
 
   return (
     <div className={cn("flex flex-col", "gap-4", wrapperClassName)}>

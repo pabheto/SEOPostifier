@@ -1,12 +1,12 @@
+import { ToasterWrapper } from "@/components/toaster-wrapper";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import React, { Suspense } from "react";
-import { RefineContext } from "./_refine_context";
-import { ToasterWrapper } from "@/components/toaster-wrapper";
+import { AppContext } from "./_refine_context";
 
 export const metadata: Metadata = {
-  title: "SEO CopyWriter",
-  description: "SEO CopyWriter Dashboard",
+  title: "AI autoblogger",
+  description: "AI autoblogger Dashboard",
   icons: {
     icon: "/favicon.ico",
   },
@@ -25,7 +25,7 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <Suspense>
-          <RefineContext defaultMode={defaultMode}>{children}</RefineContext>
+          <AppContext defaultMode={defaultMode}>{children}</AppContext>
         </Suspense>
         <ToasterWrapper />
       </body>

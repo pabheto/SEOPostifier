@@ -60,6 +60,17 @@ export class UsersController {
     return this.authHelper.getUserByLicense(licenseKey);
   }
 
+  @Get('me')
+  @RequireAuth()
+  @ApiOperation({ summary: 'Get current user information' })
+  getCurrentUser(@CurrentUser() user: AuthenticatedUser) {
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+    };
+  }
+
   @Get('licenses')
   @RequireAuth()
   @ApiOperation({ summary: 'Get all licenses for the current user' })

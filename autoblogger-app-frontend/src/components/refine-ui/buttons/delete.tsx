@@ -6,64 +6,48 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { type BaseKey, useDeleteButton } from "@refinedev/core";
 import { Loader2, Trash } from "lucide-react";
 import React from "react";
+import { apiClient } from "@/lib/api-client";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 type DeleteButtonProps = {
-  /**
-   * Resource name for API data interactions. `identifier` of the resource can be used instead of the `name` of the resource.
-   * @default Inferred resource name from the route
-   */
   resource?: string;
-  /**
-   * Data item identifier for the actions with the API
-   * @default Reads `:id` from the URL
-   */
-  recordItemId?: BaseKey;
-  /**
-   * Access Control configuration for the button
-   * @default `{ enabled: true, hideIfUnauthorized: false }`
-   */
-  accessControl?: {
-    enabled?: boolean;
-    hideIfUnauthorized?: boolean;
-  };
-  /**
-   * `meta` property is used when creating the URL for the related action and path.
-   */
-  meta?: Record<string, unknown>;
+  recordItemId?: string;
+  size?: "sm" | "md" | "lg" | "icon" | "default";
+  hidden?: boolean;
+  onSuccess?: () => void;
 } & React.ComponentProps<typeof Button>;
 
 export const DeleteButton = React.forwardRef<
   React.ComponentRef<typeof Button>,
   DeleteButtonProps
->(({ resource, recordItemId, accessControl, meta, children, ...rest }, ref) => {
-  const {
-    hidden,
-    disabled,
-    loading,
-    onConfirm,
-    label,
-    confirmTitle: defaultConfirmTitle,
-    confirmOkLabel: defaultConfirmOkLabel,
-    cancelLabel: defaultCancelLabel,
-  } = useDeleteButton({
-    resource,
-    id: recordItemId,
-    accessControl,
-    meta,
-  });
+>(({ resource = "blog-posts", recordItemId, size = "sm", hidden, onSuccess, children, ...rest }, ref) => {
   const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const router = useRouter();
 
-  const isDisabled = disabled || rest.disabled || loading;
-  const isHidden = hidden || rest.hidden;
+  if (hidden) return null;
 
-  if (isHidden) return null;
-
-  const confirmCancelText = defaultCancelLabel;
-  const confirmOkText = defaultConfirmOkLabel;
-  const confirmTitle = defaultConfirmTitle;
+  const handleDelete = async () => {
+    if (!recordItemId) return;
+    
+    setLoading(true);
+    try {
+      await apiClient.delete(`/${resource}/${recordItemId}`);
+      toast.success("Item deleted successfully");
+      setOpen(false);
+      router.refresh();
+      if (onSuccess) {
+        onSuccess();
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Failed to delete item");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -73,13 +57,14 @@ export const DeleteButton = React.forwardRef<
             variant="destructive"
             {...rest}
             ref={ref}
-            disabled={isDisabled}
+            size={size}
+            disabled={loading || rest.disabled}
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {children ?? (
               <div className="flex items-center gap-2 font-semibold">
                 <Trash className="h-4 w-4" />
-                <span>{label}</span>
+                <span>Delete</span>
               </div>
             )}
           </Button>
@@ -87,23 +72,18 @@ export const DeleteButton = React.forwardRef<
       </PopoverTrigger>
       <PopoverContent className="w-auto" align="start">
         <div className="flex flex-col gap-2">
-          <p className="text-sm">{confirmTitle}</p>
+          <p className="text-sm">Are you sure you want to delete this item?</p>
           <div className="flex justify-end gap-2">
             <Button variant="outline" size="sm" onClick={() => setOpen(false)}>
-              {confirmCancelText}
+              Cancel
             </Button>
             <Button
               variant="destructive"
               size="sm"
               disabled={loading}
-              onClick={() => {
-                if (typeof onConfirm === "function") {
-                  onConfirm();
-                }
-                setOpen(false);
-              }}
+              onClick={handleDelete}
             >
-              {confirmOkText}
+              Delete
             </Button>
           </div>
         </div>

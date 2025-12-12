@@ -1,10 +1,10 @@
 "use client";
 
-import { useSubscription } from "@/queries/subscriptions";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSubscription } from "@/queries/subscriptions";
 import { Calendar, FileText, Image } from "lucide-react";
 
 export default function DashboardPage() {
@@ -81,7 +81,9 @@ export default function DashboardPage() {
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge variant={getPlanColor(subscription?.plan || "free") as any}>
+                  <Badge
+                    variant={getPlanColor(subscription?.plan || "free") as any}
+                  >
                     {subscription?.plan?.toUpperCase() || "FREE"}
                   </Badge>
                   <span className="text-2xl font-bold">
@@ -103,11 +105,14 @@ export default function DashboardPage() {
               <CardContent>
                 <p className="text-xl font-semibold">
                   {billingPeriod?.start
-                    ? new Date(billingPeriod.start).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })
+                    ? new Date(billingPeriod.start).toLocaleDateString(
+                        "en-US",
+                        {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        }
+                      )
                     : "-"}
                 </p>
               </CardContent>
@@ -148,10 +153,7 @@ export default function DashboardPage() {
                 <div className="text-3xl font-bold mb-4">
                   {usage?.aiGeneratedImages || 0} / {limits.images}
                 </div>
-                <Progress
-                  value={imagesUsagePercent}
-                  className="mb-2"
-                />
+                <Progress value={imagesUsagePercent} className="mb-2" />
                 <p className="text-sm text-muted-foreground">
                   {limits.images - (usage?.aiGeneratedImages || 0)} images
                   remaining
@@ -170,12 +172,11 @@ export default function DashboardPage() {
                 <div className="text-3xl font-bold mb-4">
                   {usage?.generatedWords || 0} / {limits.words.toLocaleString()}
                 </div>
-                <Progress
-                  value={wordsUsagePercent}
-                  className="mb-2"
-                />
+                <Progress value={wordsUsagePercent} className="mb-2" />
                 <p className="text-sm text-muted-foreground">
-                  {(limits.words - (usage?.generatedWords || 0)).toLocaleString()}{" "}
+                  {(
+                    limits.words - (usage?.generatedWords || 0)
+                  ).toLocaleString()}{" "}
                   words remaining
                 </p>
               </CardContent>
@@ -186,4 +187,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

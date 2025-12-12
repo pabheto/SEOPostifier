@@ -69,6 +69,27 @@ export class UsageService {
       activeSubscription.billingPeriodEnd,
     );
 
+    // First, ensure the document exists with proper structure
+    await this.usageModel
+      .findOneAndUpdate(
+        {
+          subscriptionId: activeSubscription._id,
+          billingPeriodIdentifier,
+        },
+        {
+          $setOnInsert: {
+            subscriptionId: activeSubscription._id,
+            billingPeriodIdentifier,
+            usage: emptyUsage(),
+          },
+        },
+        {
+          upsert: true,
+        },
+      )
+      .exec();
+
+    // Then increment the usage values
     await this.usageModel
       .findOneAndUpdate(
         {
@@ -80,14 +101,6 @@ export class UsageService {
             'usage.aiGeneratedImages': usage.aiGeneratedImages,
             'usage.generatedWords': usage.generatedWords,
           },
-          $setOnInsert: {
-            subscriptionId: activeSubscription._id,
-            billingPeriodIdentifier,
-            usage: emptyUsage(),
-          },
-        },
-        {
-          upsert: true,
         },
       )
       .exec();

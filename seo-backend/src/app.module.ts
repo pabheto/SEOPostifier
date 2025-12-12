@@ -8,6 +8,7 @@ import { ImageGenerationModule } from './modules/image-generation/image-generati
 import { LlmManagerModule } from './modules/llm-manager';
 import { PostsManagementModule } from './modules/posts-management/posts-management.module';
 import { StorageModule } from './modules/storage';
+import { AdministrationModule } from './modules/administration/administration.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -31,6 +32,7 @@ import { UsersModule } from './modules/users/users.module';
     StorageModule,
     UsersModule,
     SubscriptionsModule,
+    AdministrationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

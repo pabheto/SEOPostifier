@@ -43,6 +43,7 @@ const authOptions: NextAuthOptions = {
             email: data.user.email,
             name: data.user.email,
             accessToken: data.token,
+            role: data.user.role || "USER",
           };
         } catch (error) {
           console.error("Authentication error:", error);
@@ -64,6 +65,27 @@ const authOptions: NextAuthOptions = {
         token.accessToken = (user as any).accessToken;
         token.id = user.id;
         token.email = user.email;
+        token.role = (user as any).role || "USER";
+      }
+      // If no user (session refresh), ensure role persists
+      // If role is missing, try to fetch it from the backend
+      if (!token.role && token.accessToken) {
+        try {
+          const API_BASE_URL =
+            process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+          const response = await fetch(`${API_BASE_URL}/users/validate`, {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token.accessToken}`,
+            },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            token.role = data.user?.role || "USER";
+          }
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+        }
       }
       return token;
     },
@@ -75,6 +97,8 @@ const authOptions: NextAuthOptions = {
       if (token.id) {
         (session as any).user.id = token.id as string;
       }
+      // Always set role from token, even if it's undefined (will be 'USER' by default)
+      (session as any).user.role = (token.role as string) || "USER";
       return session;
     },
   },

@@ -30,7 +30,7 @@ export class JwtGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest<{
       headers: { authorization?: string };
-      user?: { id: string; email: string };
+      user?: { id: string; email: string; role: string };
     }>();
     const authHeader = request.headers?.authorization;
 
@@ -56,6 +56,7 @@ export class JwtGuard implements CanActivate {
       request.user = {
         id: String(sessionData.user.id),
         email: sessionData.user.email,
+        role: sessionData.user.role,
       };
 
       return true;
