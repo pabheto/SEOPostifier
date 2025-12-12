@@ -1,14 +1,14 @@
 import { applyDecorators, SetMetadata, UseGuards } from '@nestjs/common';
 import { UserRole } from '../enums/role.enum';
+import { JwtGuard, REQUIRE_AUTH_KEY } from '../guards/jwt.guard';
 import { RoleGuard, ROLES_KEY } from '../guards/role.guard';
 
 /**
  * Decorator to protect endpoints with role-based authorization
- * Must be used in combination with @RequireAuth() decorator
+ * Automatically includes authentication, so no need to use @RequireAuth() separately
  *
  * @example
  * ```typescript
- * @RequireAuth()
  * @RequireRole(UserRole.ADMIN)
  * @Get('admin-only')
  * async adminOnly(@CurrentUser() user: AuthenticatedUser) {
@@ -18,8 +18,8 @@ import { RoleGuard, ROLES_KEY } from '../guards/role.guard';
  */
 export function RequireRole(...roles: UserRole[]) {
   return applyDecorators(
+    SetMetadata(REQUIRE_AUTH_KEY, true),
     SetMetadata(ROLES_KEY, roles),
-    UseGuards(RoleGuard),
+    UseGuards(JwtGuard, RoleGuard),
   );
 }
-

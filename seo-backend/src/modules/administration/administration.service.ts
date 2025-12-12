@@ -20,6 +20,8 @@ export class AdministrationService {
       id: user._id.toString(),
       email: user.email,
       role: user.role || 'USER',
+      createdAt: user.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: user.updatedAt?.toISOString() || new Date().toISOString(),
     }));
   }
 
@@ -37,6 +39,8 @@ export class AdministrationService {
       id: user._id.toString(),
       email: user.email,
       role: user.role || 'USER',
+      createdAt: user.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: user.updatedAt?.toISOString() || new Date().toISOString(),
     };
   }
 
@@ -55,6 +59,8 @@ export class AdministrationService {
       id: user._id.toString(),
       email: user.email,
       role: user.role || 'USER',
+      createdAt: user.createdAt?.toISOString() || new Date().toISOString(),
+      updatedAt: user.updatedAt?.toISOString() || new Date().toISOString(),
     };
   }
 }

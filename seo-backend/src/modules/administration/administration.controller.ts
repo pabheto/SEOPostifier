@@ -7,13 +7,12 @@ import {
   Patch,
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { RequireAuth, RequireRole } from '../users/auth';
+import { RequireRole } from '../users/auth';
 import { UserRole } from '../users/enums/role.enum';
 import { AdministrationService } from './administration.service';
 
 @ApiTags('administration')
 @Controller('administration')
-@RequireAuth()
 @RequireRole(UserRole.ADMIN)
 export class AdministrationController {
   constructor(private readonly administrationService: AdministrationService) {}

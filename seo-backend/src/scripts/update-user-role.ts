@@ -8,9 +8,9 @@
  *   ts-node src/scripts/update-user-role.ts admin@example.com ADMIN
  */
 
-import { connect } from 'mongoose';
+import { connect, model } from 'mongoose';
+import { User, UserSchema } from 'src/modules/users';
 import { UserRole } from '../modules/users/enums/role.enum';
-import { User } from 'src/modules/users';
 
 async function updateUserRole() {
   const email = process.argv[2];
@@ -34,7 +34,8 @@ async function updateUserRole() {
     await connect(mongoUri);
     console.log('Connected to MongoDB');
 
-    const user = await User.findById(userId);
+    const UserModel = model<User>('User', UserSchema);
+    const user = await UserModel.findOne({ email });
 
     if (!user) {
       console.error(`User with email ${email} not found`);
@@ -54,4 +55,7 @@ async function updateUserRole() {
   }
 }
 
-updateUserRole();
+updateUserRole().catch((error) => {
+  console.error('Fatal error:', error);
+  process.exit(1);
+});
