@@ -22,7 +22,7 @@ export default async function RootLayout({
   const defaultMode = theme?.value === "dark" ? "dark" : "light";
 
   return (
-    <html lang="en">
+    <html lang="en" className={defaultMode} suppressHydrationWarning>
       <body>
         <Suspense>
           <AppContext defaultMode={defaultMode}>{children}</AppContext>
