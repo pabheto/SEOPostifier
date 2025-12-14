@@ -23,6 +23,25 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className={defaultMode} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                const theme = localStorage.getItem('refine-ui-theme') || '${defaultMode}';
+                const root = document.documentElement;
+                root.classList.remove('light', 'dark');
+                if (theme === 'system') {
+                  const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  root.classList.add(systemTheme);
+                } else {
+                  root.classList.add(theme);
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body>
         <Suspense>
           <AppContext defaultMode={defaultMode}>{children}</AppContext>

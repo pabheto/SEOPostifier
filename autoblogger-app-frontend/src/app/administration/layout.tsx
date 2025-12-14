@@ -21,3 +21,4 @@ export default async function AdministrationLayout({
 
   return <Layout>{children}</Layout>;
 }
+

@@ -1,7 +1,6 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -10,6 +9,14 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
   Table,
   TableBody,
   TableCell,
@@ -17,18 +24,10 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useUsers, useUpdateUserRole } from "@/queries/administration";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
+import { useUpdateUserRole, useUsers } from "@/queries/administration";
 import { Shield } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 export default function AdministrationPage() {
   const { data: users, isLoading, error } = useUsers();
