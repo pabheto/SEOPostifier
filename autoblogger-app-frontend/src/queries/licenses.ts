@@ -7,15 +7,16 @@ export interface License {
   id: string;
   key: string;
   name: string;
-  active: boolean;
+  activated: boolean;
+  activatedForSite?: string | null;
+  activatedAt?: string | null;
   createdAt: string;
-  updatedAt: string;
 }
 
 export const useLicenses = () => {
   return useQuery<License[]>({
     queryKey: ["licenses"],
-    queryFn: () => apiClient.get<License[]>("/users/licenses"),
+    queryFn: () => apiClient.get<License[]>("/licenses"),
   });
 };
 
@@ -23,11 +24,12 @@ export const useCreateLicense = () => {
   const queryClient = useQueryClient();
 
   return useMutation<License, Error, { name: string }>({
-    mutationFn: (data) => apiClient.post<License>("/users/licenses", data),
+    mutationFn: (data) => apiClient.post<License>("/licenses", data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["licenses"] });
     },
   });
 };
+
 
 

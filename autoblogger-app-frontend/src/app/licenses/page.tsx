@@ -28,7 +28,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, Copy, Key, XCircle, Plus } from "lucide-react";
+import { CheckCircle2, Copy, Key, XCircle, Plus, Eye, EyeOff, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -38,6 +38,8 @@ export default function LicensesPage() {
   const createLicense = useCreateLicense();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [licenseName, setLicenseName] = useState<string>("");
+  const [showLicenseKeys, setShowLicenseKeys] = useState(false);
+  const [visibleLicenses, setVisibleLicenses] = useState<Set<string>>(new Set());
 
   const subscription = subscriptionData?.subscription;
   const currentPlan = subscription?.plan || "free";
@@ -51,9 +53,9 @@ export default function LicensesPage() {
   };
 
   const maxLicenses = planLimits[currentPlan] || 1;
-  const activeLicenses = licenses?.filter((l) => l.active) || [];
-  const activeCount = activeLicenses.length;
-  const remainingLicenses = Math.max(0, maxLicenses - activeCount);
+  const activatedLicenses = licenses?.filter((l) => l.activated) || [];
+  const activatedCount = activatedLicenses.length;
+  const remainingLicenses = Math.max(0, maxLicenses - activatedCount);
 
   const handleCreateLicense = async () => {
     if (!licenseName.trim()) {
@@ -75,6 +77,22 @@ export default function LicensesPage() {
     toast.success("License key copied to clipboard!");
   };
 
+  const toggleLicenseVisibility = (licenseId: string) => {
+    setVisibleLicenses((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(licenseId)) {
+        newSet.delete(licenseId);
+      } else {
+        newSet.add(licenseId);
+      }
+      return newSet;
+    });
+  };
+
+  const maskLicenseKey = (key: string) => {
+    return "*".repeat(key.length);
+  };
+
   if (error) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -93,7 +111,7 @@ export default function LicensesPage() {
           </p>
           <div className="mt-2">
             <p className="text-sm text-muted-foreground">
-              Active licenses: <span className="font-semibold">{activeCount}</span> / {maxLicenses}
+              Activated licenses: <span className="font-semibold">{activatedCount}</span> / {maxLicenses}
               {remainingLicenses > 0 && (
                 <span className="text-green-600 dark:text-green-400 ml-2">
                   ({remainingLicenses} remaining)
@@ -102,14 +120,28 @@ export default function LicensesPage() {
             </p>
           </div>
         </div>
-        <Button
-          onClick={() => setIsModalVisible(true)}
-          disabled={remainingLicenses === 0}
-          size="lg"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Create License
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowLicenseKeys(!showLicenseKeys)}
+            size="lg"
+          >
+            {showLicenseKeys ? (
+              <EyeOff className="h-4 w-4 mr-2" />
+            ) : (
+              <Eye className="h-4 w-4 mr-2" />
+            )}
+            {showLicenseKeys ? "Hide Keys" : "Show Keys"}
+          </Button>
+          <Button
+            onClick={() => setIsModalVisible(true)}
+            disabled={remainingLicenses === 0}
+            size="lg"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create License
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -127,58 +159,109 @@ export default function LicensesPage() {
                   <TableHead>License Key</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Activated Site</TableHead>
                   <TableHead>Created At</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {licenses?.map((license) => (
-                  <TableRow key={license.id}>
-                    <TableCell>
-                      <div className="flex gap-2">
-                        <Input
-                          readOnly
-                          value={license.key}
-                          className="font-mono bg-muted"
-                        />
-                        <Button
-                          size="sm"
-                          onClick={() => handleCopyLicense(license.key)}
+                {licenses?.map((license) => {
+                  const isVisible = showLicenseKeys || visibleLicenses.has(license.id);
+                  const displayKey = isVisible ? license.key : maskLicenseKey(license.key);
+                  
+                  return (
+                    <TableRow key={license.id}>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          <Input
+                            readOnly
+                            value={displayKey}
+                            className="font-mono bg-muted"
+                          />
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => toggleLicenseVisibility(license.id)}
+                          >
+                            {isVisible ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            onClick={() => handleCopyLicense(license.key)}
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <span className="font-semibold">
+                          {license.name || "Unnamed License"}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={license.activated ? "default" : "secondary"}
                         >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <span className="font-semibold">
-                        {license.name || "Unnamed License"}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={license.active ? "default" : "destructive"}
-                      >
-                        {license.active ? (
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          {license.activated ? (
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                          ) : (
+                            <XCircle className="h-3 w-3 mr-1" />
+                          )}
+                          {license.activated ? "Activated" : "Not Activated"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {license.activated && license.activatedForSite ? (
+                          <a
+                            href={license.activatedForSite}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline"
+                          >
+                            {license.activatedForSite}
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
                         ) : (
-                          <XCircle className="h-3 w-3 mr-1" />
+                          <span className="text-muted-foreground text-sm">
+                            Not activated
+                          </span>
                         )}
-                        {license.active ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {license.createdAt
-                        ? new Date(license.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            }
-                          )
-                        : "-"}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex flex-col gap-1">
+                          <span className="text-sm">
+                            {license.createdAt
+                              ? new Date(license.createdAt).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "short",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  }
+                                )
+                              : "-"}
+                          </span>
+                          {license.activated && license.activatedAt && (
+                            <span className="text-xs text-muted-foreground">
+                              Activated:{" "}
+                              {new Date(license.activatedAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                }
+                              )}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           )}
