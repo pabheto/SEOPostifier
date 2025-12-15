@@ -71,9 +71,13 @@ export class PostsInterviewsController {
     status: 404,
     description: 'Interview not found',
   })
-  async generateScriptText(@Body() dto: GetInterviewByIdDto) {
+  async generateScriptText(
+    @Body() dto: GetInterviewByIdDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     const postInterview = await this.postInterviewsService.getPostInterviewById(
       dto.interviewId,
+      user.id,
     );
 
     const updatedInterview =
@@ -103,9 +107,13 @@ export class PostsInterviewsController {
     status: 404,
     description: 'Interview not found',
   })
-  async generateScriptDefinition(@Body() dto: GetInterviewByIdDto) {
+  async generateScriptDefinition(
+    @Body() dto: GetInterviewByIdDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     const postInterview = await this.postInterviewsService.getPostInterviewById(
       dto.interviewId,
+      user.id,
     );
 
     const updatedInterview =
@@ -137,9 +145,11 @@ export class PostsInterviewsController {
   })
   async generatePostFromInterview(
     @Body() generatePostDto: GeneratePostFromInterviewDto,
+    @CurrentUser() user: AuthenticatedUser,
   ) {
     const postInterview = await this.postInterviewsService.getPostInterviewById(
       generatePostDto.interviewId,
+      user.id,
     );
 
     const post =
@@ -161,8 +171,10 @@ export class PostsInterviewsController {
     status: 401,
     description: 'Unauthorized - invalid or missing license key',
   })
-  async getInterviewsList() {
-    const interviews = await this.postInterviewsService.getInterviewsList();
+  async getInterviewsList(@CurrentUser() user: AuthenticatedUser) {
+    const userId = user.id;
+    const interviews =
+      await this.postInterviewsService.getInterviewsList(userId);
     return { interviews };
   }
 
@@ -182,9 +194,14 @@ export class PostsInterviewsController {
     status: 404,
     description: 'Interview not found',
   })
-  async getScriptText(@Param('interviewId') interviewId: string) {
-    const postInterview =
-      await this.postInterviewsService.getPostInterviewById(interviewId);
+  async getScriptText(
+    @Param('interviewId') interviewId: string,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const postInterview = await this.postInterviewsService.getPostInterviewById(
+      interviewId,
+      user.id,
+    );
 
     return { interview: postInterview };
   }
@@ -210,7 +227,14 @@ export class PostsInterviewsController {
   })
   async updatePostInterview(
     @Body() updatePostInterviewDto: UpdatePostInterviewDto,
+    @CurrentUser() user: AuthenticatedUser,
   ) {
+    // Verify user owns the interview before updating
+    await this.postInterviewsService.getPostInterviewById(
+      updatePostInterviewDto.interviewId,
+      user.id,
+    );
+
     const interview = await this.postInterviewsService.updatePostInterview(
       updatePostInterviewDto,
     );
@@ -238,9 +262,13 @@ export class PostsInterviewsController {
     status: 404,
     description: 'Interview not found',
   })
-  async generateSuggestions(@Body() dto: GetInterviewByIdDto) {
+  async generateSuggestions(
+    @Body() dto: GetInterviewByIdDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
     const postInterview = await this.postInterviewsService.getPostInterviewById(
       dto.interviewId,
+      user.id,
     );
 
     const suggestionsObject =

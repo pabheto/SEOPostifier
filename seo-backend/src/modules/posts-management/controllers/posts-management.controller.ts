@@ -53,9 +53,11 @@ export class PostsManagementController {
   })
   async generatePostFromInterview(
     @Body() generatePostDto: GeneratePostFromInterviewDto,
+    @CurrentUser() user: AuthenticatedUser,
   ) {
     const postInterview = await this.postInterviewsService.getPostInterviewById(
       generatePostDto.interviewId,
+      user.id,
     );
 
     const post =
@@ -102,8 +104,14 @@ export class PostsManagementController {
     status: 404,
     description: 'Post not found',
   })
-  async getPostById(@Param() dto: GetPostByIdDto) {
-    const post = await this.postsManagementService.getPostById(dto.postId);
+  async getPostById(
+    @Param() dto: GetPostByIdDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const post = await this.postsManagementService.getPostById(
+      dto.postId,
+      user.id,
+    );
     if (!post) {
       throw new NotFoundException(`Post not found with id: ${dto.postId}`);
     }

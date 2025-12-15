@@ -1,6 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LicensesModule } from '../licenses/licenses.module';
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { AuthHelper } from './auth.helper';
 import { JwtGuard } from './guards/jwt.guard';
 import { LicenseGuard } from './guards/license.guard';
@@ -19,6 +20,7 @@ import { UsersService } from './users.service';
       { name: Session.name, schema: SessionSchema },
     ]),
     forwardRef(() => LicensesModule),
+    forwardRef(() => SubscriptionsModule),
   ],
   controllers: [UsersController],
   providers: [UsersService, AuthHelper, LicenseGuard, JwtGuard, RoleGuard],

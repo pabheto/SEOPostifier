@@ -1,5 +1,7 @@
 import { Body, Controller, Get, Headers, Post } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AVAILABLE_PLANS } from '../subscriptions/plans/plans.definition';
+import { SubscriptionService } from '../subscriptions/subscription.service';
 import type { AuthenticatedUser } from './auth';
 import { CurrentUser, RequireAuth } from './auth';
 import { AuthHelper } from './auth.helper';
@@ -13,6 +15,7 @@ export class UsersController {
   constructor(
     private readonly usersService: UsersService,
     private readonly authHelper: AuthHelper,
+    private readonly subscriptionService: SubscriptionService,
   ) {}
 
   @Post('register')
@@ -50,11 +53,16 @@ export class UsersController {
   @Get('me')
   @RequireAuth()
   @ApiOperation({ summary: 'Get current user information' })
-  getCurrentUser(@CurrentUser() user: AuthenticatedUser) {
+  async getCurrentUser(@CurrentUser() user: AuthenticatedUser) {
+    const subscription =
+      await this.subscriptionService.getOrCreateSubscriptionForUser(user.id);
+
+    const plan = AVAILABLE_PLANS[subscription.plan];
     return {
       id: user.id,
       email: user.email,
       role: user.role,
+      plan,
     };
   }
 }

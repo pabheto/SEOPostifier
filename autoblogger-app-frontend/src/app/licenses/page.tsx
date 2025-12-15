@@ -22,7 +22,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useCreateLicense, useLicenses } from "@/queries/licenses";
-import { useSubscription } from "@/queries/subscriptions";
+import { useCurrentUser } from "@/queries/users";
 import {
   CheckCircle2,
   Copy,
@@ -38,7 +38,7 @@ import { toast } from "sonner";
 
 export default function LicensesPage() {
   const { data: licenses, isLoading, error } = useLicenses();
-  const { data: subscriptionData } = useSubscription();
+  const { data: currentUser, isLoading: isLoadingUser } = useCurrentUser();
   const createLicense = useCreateLicense();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [licenseName, setLicenseName] = useState<string>("");
@@ -47,18 +47,10 @@ export default function LicensesPage() {
     new Set()
   );
 
-  const subscription = subscriptionData?.subscription;
-  const currentPlan = subscription?.plan || "free";
-
-  // Plan limits for maximum active licenses
-  const planLimits: Record<string, number> = {
-    free: 1,
-    basic: 1,
-    premium: 1,
-    agency: 1,
-  };
-
-  const maxLicenses = planLimits[currentPlan] || 1;
+  // Get maxLicenses from the plan information returned by /users/me endpoint
+  const maxLicenses = currentUser?.plan?.maximumActiveLicenses || 1;
+  const currentPlan = currentUser?.plan?.identifier || "free";
+  const planName = currentUser?.plan?.name || "Free";
   const activatedLicenses = licenses?.filter((l) => l.activated) || [];
   const activatedCount = activatedLicenses.length;
   const remainingLicenses = Math.max(0, maxLicenses - activatedCount);
@@ -107,6 +99,18 @@ export default function LicensesPage() {
     );
   }
 
+  if (isLoadingUser) {
+    return (
+      <div className="min-h-screen p-8 bg-gradient-to-br from-background to-muted/20">
+        <div className="space-y-4">
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+          <Skeleton className="h-12 w-full" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen p-8 bg-gradient-to-br from-background to-muted/20">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
@@ -115,14 +119,23 @@ export default function LicensesPage() {
           <p className="text-muted-foreground text-base">
             Manage your license keys
           </p>
-          <div className="mt-2">
+          <div className="mt-2 space-y-1">
+            <p className="text-sm text-muted-foreground">
+              Current Plan:{" "}
+              <span className="font-semibold text-foreground">{planName}</span>
+            </p>
             <p className="text-sm text-muted-foreground">
               Activated licenses:{" "}
               <span className="font-semibold">{activatedCount}</span> /{" "}
-              {maxLicenses}
+              <span className="font-semibold">{maxLicenses}</span>
               {remainingLicenses > 0 && (
                 <span className="text-green-600 dark:text-green-400 ml-2">
                   ({remainingLicenses} remaining)
+                </span>
+              )}
+              {remainingLicenses === 0 && activatedCount > 0 && (
+                <span className="text-amber-600 dark:text-amber-400 ml-2">
+                  (Limit reached)
                 </span>
               )}
             </p>
@@ -299,8 +312,7 @@ export default function LicensesPage() {
               You can create{" "}
               <span className="font-semibold">{remainingLicenses}</span> more{" "}
               {remainingLicenses === 1 ? "license" : "licenses"} with your
-              current plan (
-              <span className="font-semibold">{currentPlan.toUpperCase()}</span>
+              current plan (<span className="font-semibold">{planName}</span>
               ).
             </div>
           </div>

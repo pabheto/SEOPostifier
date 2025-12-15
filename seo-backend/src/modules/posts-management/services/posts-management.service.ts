@@ -407,7 +407,10 @@ export class PostsManagementService {
     return this.postModel.find({ userId });
   }
 
-  async getPostById(postId: string) {
+  async getPostById(postId: string, userId?: string) {
+    if (userId) {
+      return this.postModel.findOne({ _id: postId, userId });
+    }
     return this.postModel.findById(postId);
   }
 }

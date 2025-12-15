@@ -43,10 +43,14 @@ export class PostInterviewsService {
 
   async getPostInterviewById(
     interviewId: string,
+    userId?: string,
   ): Promise<PostInterviewDocument> {
-    const postInterview = await this.postInterviewModel.findOne({
-      interviewId,
-    });
+    const query: { interviewId: string; userId?: string } = { interviewId };
+    if (userId) {
+      query.userId = userId;
+    }
+    
+    const postInterview = await this.postInterviewModel.findOne(query);
     if (!postInterview) {
       throw new NotFoundException(
         `Post interview not found with interviewId: ${interviewId}`,
@@ -97,8 +101,8 @@ export class PostInterviewsService {
     return postInterview;
   }
 
-  async getInterviewsList(): Promise<PostInterviewDocument[]> {
-    const interviews = await this.postInterviewModel.find();
+  async getInterviewsList(userId: string): Promise<PostInterviewDocument[]> {
+    const interviews = await this.postInterviewModel.find({ userId });
     return interviews;
   }
 
