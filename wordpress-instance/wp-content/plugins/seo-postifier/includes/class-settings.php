@@ -23,6 +23,7 @@ class SEO_Postifier_Settings {
         return get_option(self::OPTION_NAME, array(
             'license_key' => '',
             'backend_url' => SEO_POSTIFIER_BACKEND_URL,
+            'activated' => false,
         ));
     }
 
@@ -65,6 +66,29 @@ class SEO_Postifier_Settings {
     public static function has_license_key() {
         $license_key = self::get_license_key();
         return !empty($license_key);
+    }
+
+    /**
+     * Check if plugin is activated
+     */
+    public static function is_activated() {
+        return (bool) self::get('activated', false);
+    }
+
+    /**
+     * Activate the plugin
+     */
+    public static function activate() {
+        return self::update('activated', true);
+    }
+
+    /**
+     * Deactivate the plugin
+     */
+    public static function deactivate() {
+        self::update('activated', false);
+        self::update('license_key', '');
+        return true;
     }
 
     /**

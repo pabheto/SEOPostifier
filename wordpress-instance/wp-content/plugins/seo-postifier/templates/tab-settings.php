@@ -28,15 +28,21 @@ $settings = SEO_Postifier_Settings::get_all();
                                name="license_key" 
                                class="large-text code" 
                                value="<?php echo esc_attr($settings['license_key']); ?>" 
-                               placeholder="BASIC-xxxxxxxxx-XXXXXXXXX" />
+                               placeholder="Enter your license key" 
+                               readonly />
                         <p class="description">
-                            <?php _e('Enter your license key to authenticate with the backend API. You should have received this key when you registered.', 'seo-postifier'); ?>
+                            <?php _e('Your activated license key. To change it, you must first deactivate this license.', 'seo-postifier'); ?>
                         </p>
                         <?php if (SEO_Postifier_Settings::has_license_key()): ?>
                             <p class="description" style="color: #46b450;">
-                                ✓ <?php _e('License key is configured', 'seo-postifier'); ?>
+                                ✓ <?php _e('License key is active', 'seo-postifier'); ?>
                             </p>
                         <?php endif; ?>
+                        <div style="margin-top: 10px;">
+                            <button type="button" id="deactivate-license-btn" class="button button-danger">
+                                <?php _e('Deactivate License', 'seo-postifier'); ?>
+                            </button>
+                        </div>
                     </td>
                 </tr>
                 <?php if (defined('SEO_POSTIFIER_DEV_MODE') && SEO_POSTIFIER_DEV_MODE): ?>
@@ -59,6 +65,7 @@ $settings = SEO_Postifier_Settings::get_all();
                 <?php endif; ?>
             </table>
 
+            <?php if (defined('SEO_POSTIFIER_DEV_MODE') && SEO_POSTIFIER_DEV_MODE): ?>
             <p class="submit">
                 <button type="submit" class="button button-primary">
                     <?php _e('Save Settings', 'seo-postifier'); ?>
@@ -67,6 +74,13 @@ $settings = SEO_Postifier_Settings::get_all();
                     <?php _e('Test License & Connection', 'seo-postifier'); ?>
                 </button>
             </p>
+            <?php else: ?>
+            <p class="submit">
+                <button type="button" id="test-license-btn" class="button button-secondary">
+                    <?php _e('Test License & Connection', 'seo-postifier'); ?>
+                </button>
+            </p>
+            <?php endif; ?>
 
             <div id="settings-status" style="margin-top: 15px;"></div>
         </form>
@@ -94,7 +108,48 @@ $settings = SEO_Postifier_Settings::get_all();
 jQuery(document).ready(function($) {
     'use strict';
 
-    // Save settings
+    // Deactivate license
+    $('#deactivate-license-btn').on('click', function() {
+        const confirmed = confirm('<?php _e('Warning: Deactivating your license will close the plugin and you will need to enter a valid license key again to reactivate it.\n\nAre you sure you want to continue?', 'seo-postifier'); ?>');
+        
+        if (!confirmed) {
+            return;
+        }
+
+        const $button = $(this);
+        const originalText = $button.text();
+        const $status = $('#settings-status');
+
+        $button.prop('disabled', true).text('<?php _e('Deactivating...', 'seo-postifier'); ?>');
+        $status.html('');
+
+        $.ajax({
+            url: seoPostifierData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'seo_postifier_deactivate_license',
+                nonce: seoPostifierData.nonce
+            },
+            success: function(response) {
+                if (response.success) {
+                    $status.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
+                    // Reload page after 1.5 seconds to show activation screen
+                    setTimeout(function() {
+                        window.location.href = '?page=seo-postifier';
+                    }, 1500);
+                } else {
+                    $status.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
+                    $button.prop('disabled', false).text(originalText);
+                }
+            },
+            error: function() {
+                $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to deactivate license', 'seo-postifier'); ?></p></div>');
+                $button.prop('disabled', false).text(originalText);
+            }
+        });
+    });
+
+    // Save settings (only in dev mode)
     $('#seo-postifier-settings-form').on('submit', function(e) {
         e.preventDefault();
 
@@ -107,8 +162,7 @@ jQuery(document).ready(function($) {
 
         var postData = {
             action: 'seo_postifier_save_settings',
-            nonce: seoPostifierData.nonce,
-            license_key: $('#license-key').val()
+            nonce: seoPostifierData.nonce
         };
         
         // Only include backend_url if the field exists (dev mode)
@@ -145,12 +199,6 @@ jQuery(document).ready(function($) {
         const $status = $('#settings-status');
         const $button = $(this);
         const originalText = $button.text();
-        const licenseKey = $('#license-key').val();
-
-        if (!licenseKey) {
-            $status.html('<div class="notice notice-warning inline"><p><?php _e('Please enter a license key first', 'seo-postifier'); ?></p></div>');
-            return;
-        }
 
         $button.prop('disabled', true).text('<?php _e('Testing...', 'seo-postifier'); ?>');
         $status.html('');
@@ -160,8 +208,7 @@ jQuery(document).ready(function($) {
             type: 'POST',
             data: {
                 action: 'seo_postifier_test_license',
-                nonce: seoPostifierData.nonce,
-                license_key: licenseKey
+                nonce: seoPostifierData.nonce
             },
             success: function(response) {
                 if (response.success) {

@@ -17,6 +17,8 @@ class SEO_Postifier_AJAX_Handlers {
     public static function register() {
         // Settings
         add_action('wp_ajax_seo_postifier_save_settings', array(__CLASS__, 'save_settings'));
+        add_action('wp_ajax_seo_postifier_activate_license', array(__CLASS__, 'activate_license'));
+        add_action('wp_ajax_seo_postifier_deactivate_license', array(__CLASS__, 'deactivate_license'));
         add_action('wp_ajax_seo_postifier_test_license', array(__CLASS__, 'test_license'));
         add_action('wp_ajax_seo_postifier_get_subscription', array(__CLASS__, 'get_subscription'));
         
@@ -65,6 +67,81 @@ class SEO_Postifier_AJAX_Handlers {
     }
 
     /**
+     * Activate license (AJAX handler)
+     */
+    public static function activate_license() {
+        check_ajax_referer('seo_postifier_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        $license_key = isset($_POST['license_key']) ? sanitize_text_field($_POST['license_key']) : '';
+        $site_url = isset($_POST['site_url']) ? esc_url_raw($_POST['site_url']) : get_site_url();
+
+        if (empty($license_key)) {
+            wp_send_json_error(array('message' => 'Please enter a license key'));
+            return;
+        }
+
+        // Activate license using the /licenses/activate endpoint
+        $response = SEO_Postifier_API_Client::activate_license($license_key, $site_url);
+        $result = SEO_Postifier_API_Client::parse_response($response);
+
+        if ($result['success']) {
+            // Save license key and activate plugin
+            SEO_Postifier_Settings::update('license_key', $license_key);
+            SEO_Postifier_Settings::activate();
+
+            $response_data = $result['data'];
+            $license_data = isset($response_data['license']) ? $response_data['license'] : $response_data;
+            $message = isset($response_data['message']) ? $response_data['message'] : 'License activated successfully!';
+            
+            if (isset($license_data['name'])) {
+                $message .= ' - License: ' . $license_data['name'];
+            }
+
+            wp_send_json_success(array(
+                'message' => $message,
+                'data' => $license_data
+            ));
+        } else {
+            $error_message = $result['message'];
+            
+            // Provide more helpful error messages
+            if ($result['code'] === 400) {
+                $error_message = isset($result['message']) ? $result['message'] : 'Invalid license key or site URL';
+            } elseif ($result['code'] === 404) {
+                $error_message = 'License key not found';
+            }
+
+            wp_send_json_error(array(
+                'message' => $error_message
+            ));
+        }
+    }
+
+    /**
+     * Deactivate license (AJAX handler)
+     */
+    public static function deactivate_license() {
+        check_ajax_referer('seo_postifier_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        // Deactivate plugin locally (remove license key and set activated to false)
+        SEO_Postifier_Settings::deactivate();
+
+        wp_send_json_success(array(
+            'message' => 'License deactivated successfully. Please refresh the page to enter a new license key.'
+        ));
+    }
+
+    /**
      * Test license key (AJAX handler)
      */
     public static function test_license() {
@@ -75,40 +152,43 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
-        $license_key = isset($_POST['license_key']) ? sanitize_text_field($_POST['license_key']) : '';
+        $license_key = isset($_POST['license_key']) ? sanitize_text_field($_POST['license_key']) : SEO_Postifier_Settings::get_license_key();
 
         if (empty($license_key)) {
             wp_send_json_error(array('message' => 'Please enter a license key first'));
             return;
         }
 
-        // Validate license using the /users/auth/license endpoint
+        // Validate license using the /licenses/:key endpoint
         $response = SEO_Postifier_API_Client::validate_license($license_key);
         $result = SEO_Postifier_API_Client::parse_response($response);
 
         if ($result['success']) {
-            $user_data = $result['data'];
+            $license_data = $result['data'];
             $message = 'License is valid!';
             
-            if (isset($user_data['user']['email'])) {
-                $message .= ' User: ' . $user_data['user']['email'];
+            if (isset($license_data['name'])) {
+                $message .= ' Name: ' . $license_data['name'];
             }
             
-            if (isset($user_data['license']['name'])) {
-                $message .= ' | Name: ' . $user_data['license']['name'];
+            if (isset($license_data['activated']) && $license_data['activated']) {
+                $message .= ' | Status: Activated';
+                if (isset($license_data['siteUrl'])) {
+                    $message .= ' for ' . $license_data['siteUrl'];
+                }
+            } else {
+                $message .= ' | Status: Not Activated';
             }
 
             wp_send_json_success(array(
                 'message' => $message,
-                'data' => $user_data
+                'data' => $license_data
             ));
         } else {
             $error_message = $result['message'];
             
             // Provide more helpful error messages
-            if ($result['code'] === 401) {
-                $error_message = 'Invalid or inactive license key';
-            } elseif ($result['code'] === 404) {
+            if ($result['code'] === 404) {
                 $error_message = 'License key not found';
             }
 
@@ -129,8 +209,8 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
-        if (!SEO_Postifier_Settings::has_license_key()) {
-            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+        if (!SEO_Postifier_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
             return;
         }
 
@@ -160,8 +240,8 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
-        if (!SEO_Postifier_Settings::has_license_key()) {
-            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+        if (!SEO_Postifier_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
             return;
         }
 
@@ -191,8 +271,8 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
-        if (!SEO_Postifier_Settings::has_license_key()) {
-            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+        if (!SEO_Postifier_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
             return;
         }
 
@@ -231,8 +311,8 @@ class SEO_Postifier_AJAX_Handlers {
                 return;
             }
 
-            if (!SEO_Postifier_Settings::has_license_key()) {
-                wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+            if (!SEO_Postifier_Settings::is_activated()) {
+                wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
                 return;
             }
 
@@ -282,8 +362,8 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
-        if (!SEO_Postifier_Settings::has_license_key()) {
-            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+        if (!SEO_Postifier_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
             return;
         }
 
@@ -313,8 +393,8 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
-        if (!SEO_Postifier_Settings::has_license_key()) {
-            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+        if (!SEO_Postifier_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
             return;
         }
 
@@ -356,8 +436,8 @@ class SEO_Postifier_AJAX_Handlers {
                 return;
             }
 
-            if (!SEO_Postifier_Settings::has_license_key()) {
-                wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+            if (!SEO_Postifier_Settings::is_activated()) {
+                wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
                 return;
             }
 
@@ -407,8 +487,8 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
-        if (!SEO_Postifier_Settings::has_license_key()) {
-            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+        if (!SEO_Postifier_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
             return;
         }
 
@@ -447,8 +527,8 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
-        if (!SEO_Postifier_Settings::has_license_key()) {
-            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+        if (!SEO_Postifier_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
             return;
         }
 
@@ -487,8 +567,8 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
-        if (!SEO_Postifier_Settings::has_license_key()) {
-            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+        if (!SEO_Postifier_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
             return;
         }
 
@@ -527,8 +607,8 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
-        if (!SEO_Postifier_Settings::has_license_key()) {
-            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+        if (!SEO_Postifier_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
             return;
         }
 
@@ -565,8 +645,8 @@ class SEO_Postifier_AJAX_Handlers {
             return;
         }
 
-        if (!SEO_Postifier_Settings::has_license_key()) {
-            wp_send_json_error(array('message' => 'Please configure your license key in Settings'));
+        if (!SEO_Postifier_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
             return;
         }
 

@@ -109,6 +109,7 @@ function seo_postifier_activate() {
         SEO_Postifier_Settings::update_all(array(
             'license_key' => '',
             'backend_url' => SEO_POSTIFIER_BACKEND_URL,
+            'activated' => false,
         ));
     }
     flush_rewrite_rules();

@@ -123,12 +123,20 @@ class SEO_Postifier_API_Client {
     }
 
     /**
-     * Validate license key
+     * Activate license key for this site
+     */
+    public static function activate_license($license_key, $site_url) {
+        return self::request('/licenses/activate', 'POST', array(
+            'licenseKey' => $license_key,
+            'siteUrl' => $site_url
+        ), 10);
+    }
+
+    /**
+     * Validate license key (get license details)
      */
     public static function validate_license($license_key) {
-        return self::request('/users/auth/license', 'POST', array(
-            'licenseKey' => $license_key
-        ), 10);
+        return self::request('/licenses/' . $license_key, 'GET', null, 10);
     }
 
     /**

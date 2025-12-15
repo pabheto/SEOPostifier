@@ -12,16 +12,6 @@ if (!defined('ABSPATH')) {
 <div class="wrap seo-postifier-admin">
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
-    <?php if (!SEO_Postifier_Settings::has_license_key() && $current_tab !== 'settings'): ?>
-        <div class="notice notice-warning">
-            <p>
-                <strong><?php _e('License Key Required:', 'seo-postifier'); ?></strong>
-                <?php _e('Please configure your license key in the Settings tab to use the plugin.', 'seo-postifier'); ?>
-                <a href="?page=seo-postifier&tab=settings" class="button button-small"><?php _e('Go to Settings', 'seo-postifier'); ?></a>
-            </p>
-        </div>
-    <?php endif; ?>
-
     <!-- Tabs Navigation -->
     <?php if ($current_tab !== 'create-script' && $current_tab !== 'edit-script' && $current_tab !== 'view-script'): ?>
     <nav class="nav-tab-wrapper wp-clearfix" style="margin-bottom: 20px;">

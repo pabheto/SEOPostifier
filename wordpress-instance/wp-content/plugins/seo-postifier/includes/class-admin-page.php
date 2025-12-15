@@ -52,6 +52,7 @@ class SEO_Postifier_Admin_Page {
             'backendUrl' => SEO_Postifier_Settings::get_backend_url(),
             'hasLicense' => SEO_Postifier_Settings::has_license_key(),
             'licenseKey' => SEO_Postifier_Settings::get_license_key(),
+            'isActivated' => SEO_Postifier_Settings::is_activated(),
         ));
     }
 
@@ -59,6 +60,12 @@ class SEO_Postifier_Admin_Page {
      * Render admin page
      */
     public static function render_page() {
+        // Check if plugin is activated
+        if (!SEO_Postifier_Settings::is_activated()) {
+            include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-activation.php';
+            return;
+        }
+
         // Get current tab
         $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'scripts';
 
