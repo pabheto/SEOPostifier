@@ -13,7 +13,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AVAILABLE_PLANS } from '../subscriptions/plans/plans.definition';
 import { SubscriptionService } from '../subscriptions/subscription.service';
 import type { AuthenticatedUser } from '../users/auth';
-import { CurrentUser, RequireAuth } from '../users/auth';
+import { CurrentUser, RequireAuth, UserRole } from '../users/auth';
 import { ActivateLicenseDto } from './dto/activate-license.dto';
 import { CreateLicenseDto } from './dto/create-license.dto';
 import { LicensesService } from './licenses.service';
@@ -58,7 +58,10 @@ export class LicensesController {
     const licenses = await this.licensesService.getLicensesForUser(user.id);
     const activatedLicenses = licenses.filter((l) => l.activated);
 
-    if (activatedLicenses.length >= plan.maximumActiveLicenses) {
+    if (
+      activatedLicenses.length >= plan.maximumActiveLicenses &&
+      user.role !== UserRole.ADMIN
+    ) {
       throw new BadRequestException(
         `You have reached the maximum number of activated licenses (${plan.maximumActiveLicenses}) for your ${plan.name} plan.`,
       );
