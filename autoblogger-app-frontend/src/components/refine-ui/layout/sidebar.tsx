@@ -122,7 +122,7 @@ export function Sidebar() {
   const { open } = useShadcnSidebar();
   const { menuItems, selectedKey } = useMenu();
   const pathname = usePathname();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const filteredMenuItems = filterMenuItems(menuItems);
 
   // Debug: Log session to help troubleshoot
@@ -130,10 +130,13 @@ export function Sidebar() {
     if (session) {
       console.log("Session data:", session);
       console.log("User role:", (session.user as any)?.role);
+      console.log("Session status:", status);
     }
-  }, [session]);
+  }, [session, status]);
 
-  const isAdmin = (session?.user as any)?.role === "ADMIN";
+  // Only check admin status when session is loaded
+  const isAdmin =
+    status === "authenticated" && (session?.user as any)?.role === "ADMIN";
 
   // Memoize custom menu items to avoid recreating JSX on every render
   const customMenuItems = React.useMemo(
