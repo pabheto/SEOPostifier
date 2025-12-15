@@ -16,6 +16,7 @@ export enum PlanIdentifier {
   BASIC = 'basic',
   PREMIUM = 'premium',
   AGENCY = 'agency',
+  PARTNER = 'partner',
 }
 
 export const FREE_PLAN: PlanDefinition = {
@@ -33,33 +34,44 @@ export const BASIC_PLAN: PlanDefinition = {
   identifier: PlanIdentifier.BASIC,
   name: 'Basic',
   description: 'Basic plan',
-  monthlyPrice: 10,
-  anualPrice: 99,
-  aiImageGenerationPerMonth: 64,
-  generatedWordsPerMonth: 50000,
+  monthlyPrice: 19,
+  anualPrice: 197,
+  aiImageGenerationPerMonth: 6,
+  generatedWordsPerMonth: 24000,
   maximumActiveLicenses: 1,
 };
 
 export const PREMIUM_PLAN: PlanDefinition = {
   identifier: PlanIdentifier.PREMIUM,
-  name: 'Premium',
-  description: 'Premium plan',
-  monthlyPrice: 20,
-  anualPrice: 199,
-  aiImageGenerationPerMonth: 128,
-  generatedWordsPerMonth: 100000,
-  maximumActiveLicenses: 1,
+  name: 'Business',
+  description: 'Business plan',
+  monthlyPrice: 29,
+  anualPrice: 287,
+  aiImageGenerationPerMonth: 144,
+  generatedWordsPerMonth: 72000,
+  maximumActiveLicenses: 3,
 };
 
 export const AGENCY_PLAN: PlanDefinition = {
   identifier: PlanIdentifier.AGENCY,
   name: 'Agency',
   description: 'Agency plan',
-  monthlyPrice: 50,
-  anualPrice: 499,
-  aiImageGenerationPerMonth: 256,
-  generatedWordsPerMonth: 100000,
-  maximumActiveLicenses: 1,
+  monthlyPrice: 79,
+  anualPrice: 787,
+  aiImageGenerationPerMonth: 360,
+  generatedWordsPerMonth: 180000,
+  maximumActiveLicenses: 10,
+};
+
+export const PARTNER_PLAN: PlanDefinition = {
+  identifier: PlanIdentifier.PARTNER,
+  name: 'Partner',
+  description: 'Partner plan',
+  monthlyPrice: 0,
+  anualPrice: 0,
+  aiImageGenerationPerMonth: 1000,
+  generatedWordsPerMonth: 1000000,
+  maximumActiveLicenses: 30,
 };
 
 export const AVAILABLE_PLANS: {
@@ -69,6 +81,7 @@ export const AVAILABLE_PLANS: {
   [PlanIdentifier.BASIC]: BASIC_PLAN,
   [PlanIdentifier.PREMIUM]: PREMIUM_PLAN,
   [PlanIdentifier.AGENCY]: AGENCY_PLAN,
+  [PlanIdentifier.PARTNER]: PARTNER_PLAN,
 };
 
 export const DEFAULT_PLAN: PlanDefinition = FREE_PLAN;
