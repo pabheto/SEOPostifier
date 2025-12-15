@@ -12,36 +12,36 @@ if (!defined('ABSPATH')) {
 $interview_id = isset($_GET['interviewId']) ? sanitize_text_field($_GET['interviewId']) : '';
 
 if (empty($interview_id)) {
-    echo '<div class="notice notice-error"><p>' . __('No interview ID provided.', 'seo-postifier') . '</p></div>';
+    echo '<div class="notice notice-error"><p>' . __('No interview ID provided.', 'autoblogger') . '</p></div>';
     return;
 }
 ?>
 
-<div class="seo-postifier-view-script">
+<div class="autoblogger-view-script">
     <div class="card">
-        <h2><?php _e('Draft Settings', 'seo-postifier'); ?></h2>
+        <h2><?php _e('Draft Settings', 'autoblogger'); ?></h2>
         
         <p>
-            <a href="?page=seo-postifier&tab=scripts" class="button button-secondary">
-                <?php _e('← Back to My Drafts', 'seo-postifier'); ?>
+            <a href="?page=autoblogger&tab=scripts" class="button button-secondary">
+                <?php _e('← Back to My Drafts', 'autoblogger'); ?>
             </a>
             <button type="button" id="create-wp-draft-btn" class="button button-primary" style="display: none; margin-left: 10px;">
-                <?php _e('Create WordPress Draft', 'seo-postifier'); ?>
+                <?php _e('Create WordPress Draft', 'autoblogger'); ?>
             </button>
         </p>
 
         <div id="loading-interview" style="margin: 20px 0;">
-            <p><?php _e('Loading draft data...', 'seo-postifier'); ?></p>
+            <p><?php _e('Loading draft data...', 'autoblogger'); ?></p>
         </div>
 
         <div id="interview-container" style="display: none; margin-top: 20px;">
             <!-- Tab Navigation -->
-            <div class="seo-postifier-form-tabs">
+            <div class="autoblogger-form-tabs">
                 <button type="button" class="form-tab active" data-tab="draft">
-                    <?php _e('Draft Information', 'seo-postifier'); ?>
+                    <?php _e('Draft Information', 'autoblogger'); ?>
                 </button>
                 <button type="button" class="form-tab" data-tab="settings">
-                    <?php _e('Settings', 'seo-postifier'); ?>
+                    <?php _e('Settings', 'autoblogger'); ?>
                 </button>
             </div>
 
@@ -53,21 +53,21 @@ if (empty($interview_id)) {
                     <table class="form-table">
                         <tr>
                             <th scope="row">
-                                <label for="edit-main-keyword"><?php _e('Search Intent', 'seo-postifier'); ?> *</label>
+                                <label for="edit-main-keyword"><?php _e('Search Intent', 'autoblogger'); ?> *</label>
                             </th>
                             <td>
                                 <input type="text" id="edit-main-keyword" name="mainKeyword" class="regular-text" required />
-                                <p class="description"><?php _e('Primary keyword or search intent to optimize for', 'seo-postifier'); ?></p>
+                                <p class="description"><?php _e('Primary keyword or search intent to optimize for', 'autoblogger'); ?></p>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">
-                                <label for="edit-user-description"><?php _e('Post Description', 'seo-postifier'); ?></label>
+                                <label for="edit-user-description"><?php _e('Post Description', 'autoblogger'); ?></label>
                             </th>
                             <td>
                                 <textarea id="edit-user-description" name="userDescription" rows="6"
                                           class="large-text"></textarea>
-                                <p class="description"><?php _e('Optional: Describe what the post should be about', 'seo-postifier'); ?></p>
+                                <p class="description"><?php _e('Optional: Describe what the post should be about', 'autoblogger'); ?></p>
                             </td>
                         </tr>
                     </table>
@@ -75,47 +75,47 @@ if (empty($interview_id)) {
 
                 <!-- Tab 2: Settings -->
                 <div id="tab-settings" class="form-tab-content">
-                    <h3><?php _e('Advanced Settings', 'seo-postifier'); ?></h3>
-                    <p class="description"><?php _e('Configure additional settings for your draft. Click on each section to expand.', 'seo-postifier'); ?></p>
+                    <h3><?php _e('Advanced Settings', 'autoblogger'); ?></h3>
+                    <p class="description"><?php _e('Configure additional settings for your draft. Click on each section to expand.', 'autoblogger'); ?></p>
 
                     <!-- Accordion: Images -->
                     <div class="settings-accordion">
                         <div class="accordion-header">
-                            <h4><?php _e('Images', 'seo-postifier'); ?></h4>
+                            <h4><?php _e('Images', 'autoblogger'); ?></h4>
                             <span class="accordion-toggle">▼</span>
                         </div>
                         <div class="accordion-content">
                             <table class="form-table">
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-ai-images-mode"><?php _e('AI Images', 'seo-postifier'); ?></label>
+                                        <label for="edit-ai-images-mode"><?php _e('AI Images', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <select id="edit-ai-images-mode" name="aiImagesMode">
-                                            <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
-                                            <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
-                                            <option value="custom"><?php _e('Custom', 'seo-postifier'); ?></option>
+                                            <option value="disabled"><?php _e('Disabled', 'autoblogger'); ?></option>
+                                            <option value="auto" selected><?php _e('Auto', 'autoblogger'); ?></option>
+                                            <option value="custom"><?php _e('Custom', 'autoblogger'); ?></option>
                                         </select>
-                                        <p class="description"><?php _e('Select how AI images should be generated', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('Select how AI images should be generated', 'autoblogger'); ?></p>
                                     </td>
                                 </tr>
                                 <tr id="edit-ai-images-custom-count-row" style="display: none;">
                                     <th scope="row">
-                                        <label for="edit-ai-images-count"><?php _e('Number of Images', 'seo-postifier'); ?></label>
+                                        <label for="edit-ai-images-count"><?php _e('Number of Images', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <input type="number" id="edit-ai-images-count" name="aiImagesCount"
                                                value="5" min="1" class="small-text" />
-                                        <p class="description"><?php _e('Number of AI-generated images to create', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('Number of AI-generated images to create', 'autoblogger'); ?></p>
                                     </td>
                                 </tr>
                                 <tr id="edit-ai-images-custom-descriptions-row" style="display: none;">
                                     <th scope="row">
-                                        <label for="edit-use-custom-ai-descriptions"><?php _e('Custom AI Descriptions', 'seo-postifier'); ?></label>
+                                        <label for="edit-use-custom-ai-descriptions"><?php _e('Custom AI Descriptions', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <input type="checkbox" id="edit-use-custom-ai-descriptions" name="useCustomAiDescriptions" value="1" />
-                                        <label for="edit-use-custom-ai-descriptions"><?php _e('Provide custom descriptions for each AI image', 'seo-postifier'); ?></label>
+                                        <label for="edit-use-custom-ai-descriptions"><?php _e('Provide custom descriptions for each AI image', 'autoblogger'); ?></label>
                                     </td>
                                 </tr>
                                 <tr id="edit-ai-images-descriptions-container" style="display: none;">
@@ -125,13 +125,13 @@ if (empty($interview_id)) {
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label><?php _e('User Images', 'seo-postifier'); ?></label>
+                                        <label><?php _e('User Images', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <button type="button" id="edit-add-user-image" class="button button-secondary">
-                                            <?php _e('+ Add User Image', 'seo-postifier'); ?>
+                                            <?php _e('+ Add User Image', 'autoblogger'); ?>
                                         </button>
-                                        <p class="description"><?php _e('Add your own images to be used in the post', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('Add your own images to be used in the post', 'autoblogger'); ?></p>
                                         <div id="edit-user-images-list" style="margin-top: 15px;"></div>
                                     </td>
                                 </tr>
@@ -142,14 +142,14 @@ if (empty($interview_id)) {
                     <!-- Accordion: Style and Audience -->
                     <div class="settings-accordion">
                         <div class="accordion-header">
-                            <h4><?php _e('Style and Audience', 'seo-postifier'); ?></h4>
+                            <h4><?php _e('Style and Audience', 'autoblogger'); ?></h4>
                             <span class="accordion-toggle">▼</span>
                         </div>
                         <div class="accordion-content">
                             <table class="form-table">
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-language"><?php _e('Language', 'seo-postifier'); ?></label>
+                                        <label for="edit-language"><?php _e('Language', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <select id="edit-language" name="language">
@@ -164,7 +164,7 @@ if (empty($interview_id)) {
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-search-intent"><?php _e('Search Intent Type', 'seo-postifier'); ?></label>
+                                        <label for="edit-search-intent"><?php _e('Search Intent Type', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <select id="edit-search-intent" name="searchIntent">
@@ -173,22 +173,22 @@ if (empty($interview_id)) {
                                             <option value="commercial">Commercial</option>
                                             <option value="navigational">Navigational</option>
                                         </select>
-                                        <p class="description"><?php _e('User\'s search intent type', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('User\'s search intent type', 'autoblogger'); ?></p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-target-audience"><?php _e('Target Audience', 'seo-postifier'); ?></label>
+                                        <label for="edit-target-audience"><?php _e('Target Audience', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <input type="text" id="edit-target-audience" name="targetAudience"
                                                class="regular-text" value="General audience" />
-                                        <p class="description"><?php _e('Describe your target audience', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('Describe your target audience', 'autoblogger'); ?></p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-tone-of-voice"><?php _e('Tone of Voice', 'seo-postifier'); ?></label>
+                                        <label for="edit-tone-of-voice"><?php _e('Tone of Voice', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <select id="edit-tone-of-voice" name="toneOfVoice">
@@ -203,7 +203,7 @@ if (empty($interview_id)) {
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-min-word-count"><?php _e('Minimum Word Count', 'seo-postifier'); ?></label>
+                                        <label for="edit-min-word-count"><?php _e('Minimum Word Count', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <input type="number" id="edit-min-word-count" name="minWordCount"
@@ -212,7 +212,7 @@ if (empty($interview_id)) {
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-max-word-count"><?php _e('Maximum Word Count', 'seo-postifier'); ?></label>
+                                        <label for="edit-max-word-count"><?php _e('Maximum Word Count', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <input type="number" id="edit-max-word-count" name="maxWordCount"
@@ -221,21 +221,21 @@ if (empty($interview_id)) {
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-needs-faq"><?php _e('Include FAQ Section', 'seo-postifier'); ?></label>
+                                        <label for="edit-needs-faq"><?php _e('Include FAQ Section', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <input type="checkbox" id="edit-needs-faq" name="needsFaqSection" value="1" checked />
-                                        <label for="edit-needs-faq"><?php _e('Add FAQ section at the end', 'seo-postifier'); ?></label>
+                                        <label for="edit-needs-faq"><?php _e('Add FAQ section at the end', 'autoblogger'); ?></label>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-notes-for-writer"><?php _e('Additional Instructions', 'seo-postifier'); ?></label>
+                                        <label for="edit-notes-for-writer"><?php _e('Additional Instructions', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <textarea id="edit-notes-for-writer" name="notesForWriter" rows="3"
                                                   class="large-text"></textarea>
-                                        <p class="description"><?php _e('Any additional instructions or requirements', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('Any additional instructions or requirements', 'autoblogger'); ?></p>
                                     </td>
                                 </tr>
                             </table>
@@ -245,28 +245,28 @@ if (empty($interview_id)) {
                     <!-- Accordion: Keywords -->
                     <div class="settings-accordion">
                         <div class="accordion-header">
-                            <h4><?php _e('Keywords', 'seo-postifier'); ?></h4>
+                            <h4><?php _e('Keywords', 'autoblogger'); ?></h4>
                             <span class="accordion-toggle">▼</span>
                         </div>
                         <div class="accordion-content">
                             <table class="form-table">
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-secondary-keywords"><?php _e('Secondary Keywords', 'seo-postifier'); ?></label>
+                                        <label for="edit-secondary-keywords"><?php _e('Secondary Keywords', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <input type="text" id="edit-secondary-keywords" name="secondaryKeywords" class="large-text" />
-                                        <p class="description"><?php _e('Comma-separated list of secondary keywords', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('Comma-separated list of secondary keywords', 'autoblogger'); ?></p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-keyword-density"><?php _e('Keyword Density Target', 'seo-postifier'); ?></label>
+                                        <label for="edit-keyword-density"><?php _e('Keyword Density Target', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <input type="number" id="edit-keyword-density" name="keywordDensityTarget"
                                                value="0.015" min="0" max="1" step="0.001" class="small-text" />
-                                        <p class="description"><?php _e('Target keyword density (0-1, default: 0.015)', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('Target keyword density (0-1, default: 0.015)', 'autoblogger'); ?></p>
                                     </td>
                                 </tr>
                             </table>
@@ -276,64 +276,64 @@ if (empty($interview_id)) {
                     <!-- Accordion: Link Mentions -->
                     <div class="settings-accordion">
                         <div class="accordion-header">
-                            <h4><?php _e('Link Mentions', 'seo-postifier'); ?></h4>
+                            <h4><?php _e('Link Mentions', 'autoblogger'); ?></h4>
                             <span class="accordion-toggle">▼</span>
                         </div>
                         <div class="accordion-content">
                             <table class="form-table">
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-internal-links-mode"><?php _e('Internal Links', 'seo-postifier'); ?></label>
+                                        <label for="edit-internal-links-mode"><?php _e('Internal Links', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <select id="edit-internal-links-mode" name="internalLinksMode">
-                                            <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
-                                            <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
-                                            <option value="custom"><?php _e('Custom', 'seo-postifier'); ?></option>
+                                            <option value="auto" selected><?php _e('Auto', 'autoblogger'); ?></option>
+                                            <option value="disabled"><?php _e('Disabled', 'autoblogger'); ?></option>
+                                            <option value="custom"><?php _e('Custom', 'autoblogger'); ?></option>
                                         </select>
-                                        <p class="description"><?php _e('Select how internal links should be handled', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('Select how internal links should be handled', 'autoblogger'); ?></p>
                                     </td>
                                 </tr>
                                 <tr class="edit-internal-links-custom-fields" style="display: none;">
                                     <th scope="row">
-                                        <label for="edit-internal-links-to-use"><?php _e('Internal Links URLs', 'seo-postifier'); ?></label>
+                                        <label for="edit-internal-links-to-use"><?php _e('Internal Links URLs', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <textarea id="edit-internal-links-to-use" name="internalLinksToUse" rows="3"
                                                   class="large-text" placeholder="One URL per line"></textarea>
-                                        <p class="description"><?php _e('Specific internal links to include (one per line)', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('Specific internal links to include (one per line)', 'autoblogger'); ?></p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-external-links-research-mode"><?php _e('External Link Research', 'seo-postifier'); ?></label>
+                                        <label for="edit-external-links-research-mode"><?php _e('External Link Research', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <select id="edit-external-links-research-mode" name="externalLinksResearchMode">
-                                            <option value="auto" selected><?php _e('Auto', 'seo-postifier'); ?></option>
-                                            <option value="disabled"><?php _e('Disabled', 'seo-postifier'); ?></option>
+                                            <option value="auto" selected><?php _e('Auto', 'autoblogger'); ?></option>
+                                            <option value="disabled"><?php _e('Disabled', 'autoblogger'); ?></option>
                                         </select>
-                                        <p class="description"><?php _e('Automatically research and include external links', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('Automatically research and include external links', 'autoblogger'); ?></p>
                                     </td>
                                 </tr>
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-use-custom-external-links"><?php _e('Use Custom External Links', 'seo-postifier'); ?></label>
+                                        <label for="edit-use-custom-external-links"><?php _e('Use Custom External Links', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <input type="checkbox" id="edit-use-custom-external-links"
                                                name="useCustomExternalLinks" value="1" />
-                                        <label for="edit-use-custom-external-links"><?php _e('Provide specific external links to include', 'seo-postifier'); ?></label>
+                                        <label for="edit-use-custom-external-links"><?php _e('Provide specific external links to include', 'autoblogger'); ?></label>
                                     </td>
                                 </tr>
                                 <tr class="edit-external-links-custom-fields" style="display: none;">
                                     <th scope="row">
-                                        <label for="edit-external-links-to-use"><?php _e('External Links URLs', 'seo-postifier'); ?></label>
+                                        <label for="edit-external-links-to-use"><?php _e('External Links URLs', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <textarea id="edit-external-links-to-use" name="externalLinksToUse" rows="3"
                                                   class="large-text" placeholder="One URL per line"></textarea>
-                                        <p class="description"><?php _e('Specific external links to include (one per line)', 'seo-postifier'); ?></p>
+                                        <p class="description"><?php _e('Specific external links to include (one per line)', 'autoblogger'); ?></p>
                                     </td>
                                 </tr>
                             </table>
@@ -343,23 +343,23 @@ if (empty($interview_id)) {
                     <!-- Accordion: Brand Mentions -->
                     <div class="settings-accordion">
                         <div class="accordion-header">
-                            <h4><?php _e('Brand Mentions', 'seo-postifier'); ?></h4>
+                            <h4><?php _e('Brand Mentions', 'autoblogger'); ?></h4>
                             <span class="accordion-toggle">▼</span>
                         </div>
                         <div class="accordion-content">
                             <table class="form-table">
                                 <tr>
                                     <th scope="row">
-                                        <label for="edit-mentions-brand"><?php _e('Mention Brand', 'seo-postifier'); ?></label>
+                                        <label for="edit-mentions-brand"><?php _e('Mention Brand', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <input type="checkbox" id="edit-mentions-brand" name="mentionsBrand" value="1" />
-                                        <label for="edit-mentions-brand"><?php _e('Include brand mentions', 'seo-postifier'); ?></label>
+                                        <label for="edit-mentions-brand"><?php _e('Include brand mentions', 'autoblogger'); ?></label>
                                     </td>
                                 </tr>
                                 <tr class="edit-brand-fields" style="display: none;">
                                     <th scope="row">
-                                        <label for="edit-brand-name"><?php _e('Brand Name', 'seo-postifier'); ?></label>
+                                        <label for="edit-brand-name"><?php _e('Brand Name', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <input type="text" id="edit-brand-name" name="brandName" class="regular-text" />
@@ -367,7 +367,7 @@ if (empty($interview_id)) {
                                 </tr>
                                 <tr class="edit-brand-fields" style="display: none;">
                                     <th scope="row">
-                                        <label for="edit-brand-description"><?php _e('Brand Description', 'seo-postifier'); ?></label>
+                                        <label for="edit-brand-description"><?php _e('Brand Description', 'autoblogger'); ?></label>
                                     </th>
                                     <td>
                                         <textarea id="edit-brand-description" name="brandDescription" rows="2"
@@ -381,7 +381,7 @@ if (empty($interview_id)) {
 
                 <p class="submit" style="margin-top: 20px;">
                     <button type="submit" id="update-settings-btn" class="button button-primary button-large">
-                        <?php _e('Update Settings & Re-create Post', 'seo-postifier'); ?>
+                        <?php _e('Update Settings & Re-create Post', 'autoblogger'); ?>
                     </button>
                 </p>
                 <div id="update-status" style="margin-top: 15px;"></div>
@@ -519,9 +519,9 @@ jQuery(document).ready(function($) {
         for (let i = 0; i < count; i++) {
             const item = $('<div class="ai-image-description-item" style="margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
             item.append('<label style="display: block; font-weight: 600; margin-bottom: 5px;">' + 
-                '<?php _e('Image', 'seo-postifier'); ?> ' + (i + 1) + ':</label>');
+                '<?php _e('Image', 'autoblogger'); ?> ' + (i + 1) + ':</label>');
             item.append('<textarea class="large-text edit-ai-image-description" data-index="' + i + '" ' +
-                'placeholder="<?php _e('Describe what this image should show...', 'seo-postifier'); ?>" ' +
+                'placeholder="<?php _e('Describe what this image should show...', 'autoblogger'); ?>" ' +
                 'rows="2" style="width: 100%;"></textarea>');
             container.append(item);
         }
@@ -533,45 +533,45 @@ jQuery(document).ready(function($) {
         const item = $('<div class="edit-user-image-item" data-id="' + imageId + '" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
         
         item.append('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">' +
-            '<strong><?php _e('User Image', 'seo-postifier'); ?> #' + (editUserImageCounter) + '</strong>' +
+            '<strong><?php _e('User Image', 'autoblogger'); ?> #' + (editUserImageCounter) + '</strong>' +
             '<button type="button" class="button button-link-delete edit-remove-user-image" style="color: #b32d2e;">' +
-            '<?php _e('Remove', 'seo-postifier'); ?></button></div>');
+            '<?php _e('Remove', 'autoblogger'); ?></button></div>');
         
         item.append('<table class="form-table" style="margin: 0;"><tbody>');
         
         // Source Type
         item.find('tbody').append('<tr>' +
-            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Source Type', 'seo-postifier'); ?></label></th>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Source Type', 'autoblogger'); ?></label></th>' +
             '<td style="padding: 10px 0;"><input type="text" class="regular-text edit-user-image-source-type" ' +
-            'placeholder="<?php _e('e.g., url, wordpress_id', 'seo-postifier'); ?>" /></td>' +
+            'placeholder="<?php _e('e.g., url, wordpress_id', 'autoblogger'); ?>" /></td>' +
             '</tr>');
         
         // Source Value (Link)
         item.find('tbody').append('<tr>' +
-            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Link/URL', 'seo-postifier'); ?> *</label></th>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Link/URL', 'autoblogger'); ?> *</label></th>' +
             '<td style="padding: 10px 0;"><input type="text" class="regular-text edit-user-image-source-value" ' +
-            'placeholder="<?php _e('Image URL or WordPress ID', 'seo-postifier'); ?>" required /></td>' +
+            'placeholder="<?php _e('Image URL or WordPress ID', 'autoblogger'); ?>" required /></td>' +
             '</tr>');
         
         // Suggested Alt
         item.find('tbody').append('<tr>' +
-            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Alt Text', 'seo-postifier'); ?></label></th>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Alt Text', 'autoblogger'); ?></label></th>' +
             '<td style="padding: 10px 0;"><input type="text" class="regular-text edit-user-image-alt" ' +
-            'placeholder="<?php _e('Suggested alt text for the image', 'seo-postifier'); ?>" /></td>' +
+            'placeholder="<?php _e('Suggested alt text for the image', 'autoblogger'); ?>" /></td>' +
             '</tr>');
         
         // Image Description
         item.find('tbody').append('<tr>' +
-            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Image Description', 'seo-postifier'); ?></label></th>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Image Description', 'autoblogger'); ?></label></th>' +
             '<td style="padding: 10px 0;"><textarea class="large-text edit-user-image-description" rows="2" ' +
-            'placeholder="<?php _e('Describe the image and what it shows', 'seo-postifier'); ?>"></textarea></td>' +
+            'placeholder="<?php _e('Describe the image and what it shows', 'autoblogger'); ?>"></textarea></td>' +
             '</tr>');
         
         // Usage Notes
         item.find('tbody').append('<tr>' +
-            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Usage Notes', 'seo-postifier'); ?></label></th>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Usage Notes', 'autoblogger'); ?></label></th>' +
             '<td style="padding: 10px 0;"><textarea class="large-text edit-user-image-notes" rows="2" ' +
-            'placeholder="<?php _e('How should this image be used in the post?', 'seo-postifier'); ?>"></textarea></td>' +
+            'placeholder="<?php _e('How should this image be used in the post?', 'autoblogger'); ?>"></textarea></td>' +
             '</tr>');
         
         item.find('tbody').append('</tbody></table>');
@@ -702,7 +702,7 @@ jQuery(document).ready(function($) {
         const $button = $('#update-settings-btn');
         const originalText = $button.text();
         
-        $button.prop('disabled', true).text('<?php _e('Updating...', 'seo-postifier'); ?>');
+        $button.prop('disabled', true).text('<?php _e('Updating...', 'autoblogger'); ?>');
         $status.html('');
 
         // Collect images configuration
@@ -810,11 +810,11 @@ jQuery(document).ready(function($) {
         // If internal links mode is auto, fetch blog links
         if (internalLinksMode === 'auto') {
             $.ajax({
-                url: seoPostifierData.ajaxUrl,
+                url: autobloggerData.ajaxUrl,
                 type: 'POST',
                 data: {
-                    action: 'seo_postifier_get_blog_links',
-                    nonce: seoPostifierData.nonce
+                    action: 'autoblogger_get_blog_links',
+                    nonce: autobloggerData.nonce
                 },
                 success: function(linksResponse) {
                     if (linksResponse.success && linksResponse.data.formatted) {
@@ -833,117 +833,117 @@ jQuery(document).ready(function($) {
 
         function submitUpdate() {
         $.ajax({
-            url: seoPostifierData.ajaxUrl,
+            url: autobloggerData.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'seo_postifier_update_interview',
-                nonce: seoPostifierData.nonce,
+                action: 'autoblogger_update_interview',
+                nonce: autobloggerData.nonce,
                 interview_data: formData
             },
             success: function(response) {
                 if (response.success) {
                     currentInterview = response.data.interview;
-                    $status.html('<div class="notice notice-info inline"><p><?php _e('Settings updated. Generating script text...', 'seo-postifier'); ?></p></div>');
-                    $button.text('<?php _e('Generating Script Text...', 'seo-postifier'); ?>');
+                    $status.html('<div class="notice notice-info inline"><p><?php _e('Settings updated. Generating script text...', 'autoblogger'); ?></p></div>');
+                    $button.text('<?php _e('Generating Script Text...', 'autoblogger'); ?>');
                     
                     // Step 1: Generate script text
                     $.ajax({
-                        url: seoPostifierData.ajaxUrl,
+                        url: autobloggerData.ajaxUrl,
                         type: 'POST',
                         timeout: 180000,
                         data: {
-                            action: 'seo_postifier_generate_script_text',
-                            nonce: seoPostifierData.nonce,
+                            action: 'autoblogger_generate_script_text',
+                            nonce: autobloggerData.nonce,
                             interview_id: interviewId
                         },
                         success: function(genResponse) {
                             if (genResponse.success) {
-                                $status.html('<div class="notice notice-info inline"><p><?php _e('Script text generated. Generating script definition...', 'seo-postifier'); ?></p></div>');
-                                $button.text('<?php _e('Generating Script Definition...', 'seo-postifier'); ?>');
+                                $status.html('<div class="notice notice-info inline"><p><?php _e('Script text generated. Generating script definition...', 'autoblogger'); ?></p></div>');
+                                $button.text('<?php _e('Generating Script Definition...', 'autoblogger'); ?>');
                                 
                                 // Step 2: Generate script definition
                                 $.ajax({
-                                    url: seoPostifierData.ajaxUrl,
+                                    url: autobloggerData.ajaxUrl,
                                     type: 'POST',
                                     timeout: 180000,
                                     data: {
-                                        action: 'seo_postifier_generate_script_definition',
-                                        nonce: seoPostifierData.nonce,
+                                        action: 'autoblogger_generate_script_definition',
+                                        nonce: autobloggerData.nonce,
                                         interview_id: interviewId
                                     },
                                     success: function(defResponse) {
                                         if (defResponse.success) {
-                                            $status.html('<div class="notice notice-info inline"><p><?php _e('Script definition generated. Generating post...', 'seo-postifier'); ?></p></div>');
-                                            $button.text('<?php _e('Generating Post...', 'seo-postifier'); ?>');
+                                            $status.html('<div class="notice notice-info inline"><p><?php _e('Script definition generated. Generating post...', 'autoblogger'); ?></p></div>');
+                                            $button.text('<?php _e('Generating Post...', 'autoblogger'); ?>');
                                             
                                             // Step 3: Generate post
                                             $.ajax({
-                                                url: seoPostifierData.ajaxUrl,
+                                                url: autobloggerData.ajaxUrl,
                                                 type: 'POST',
                                                 timeout: 300000,
                                                 data: {
-                                                    action: 'seo_postifier_generate_post',
-                                                    nonce: seoPostifierData.nonce,
+                                                    action: 'autoblogger_generate_post',
+                                                    nonce: autobloggerData.nonce,
                                                     interview_id: interviewId
                                                 },
                                                 success: function(postResponse) {
                                                     if (postResponse.success) {
                                                         const postId = postResponse.data.post._id || postResponse.data.post.id;
-                                                        $status.html('<div class="notice notice-info inline"><p><?php _e('Post generated. Creating WordPress draft...', 'seo-postifier'); ?></p></div>');
-                                                        $button.text('<?php _e('Creating WordPress Draft...', 'seo-postifier'); ?>');
+                                                        $status.html('<div class="notice notice-info inline"><p><?php _e('Post generated. Creating WordPress draft...', 'autoblogger'); ?></p></div>');
+                                                        $button.text('<?php _e('Creating WordPress Draft...', 'autoblogger'); ?>');
                                                         
                                                         // Step 4: Create WordPress draft
                                                         $.ajax({
-                                                            url: seoPostifierData.ajaxUrl,
+                                                            url: autobloggerData.ajaxUrl,
                                                             type: 'POST',
                                                             data: {
-                                                                action: 'seo_postifier_create_wp_draft',
-                                                                nonce: seoPostifierData.nonce,
+                                                                action: 'autoblogger_create_wp_draft',
+                                                                nonce: autobloggerData.nonce,
                                                                 post_id: postId
                                                             },
                                                             success: function(draftResponse) {
                                                                 if (draftResponse.success) {
-                                                                    $status.html('<div class="notice notice-success inline"><p><?php _e('Settings updated and WordPress draft re-created successfully! Redirecting...', 'seo-postifier'); ?></p></div>');
+                                                                    $status.html('<div class="notice notice-success inline"><p><?php _e('Settings updated and WordPress draft re-created successfully! Redirecting...', 'autoblogger'); ?></p></div>');
                                                                     setTimeout(function() {
                                                                         window.location.href = draftResponse.data.edit_url;
                                                                     }, 1000);
                                                                 } else {
-                                                                    $status.html('<div class="notice notice-warning inline"><p><?php _e('Post generated but draft creation failed: ', 'seo-postifier'); ?>' + (draftResponse.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>') + '</p></div>');
+                                                                    $status.html('<div class="notice notice-warning inline"><p><?php _e('Post generated but draft creation failed: ', 'autoblogger'); ?>' + (draftResponse.data.message || '<?php _e('Unknown error', 'autoblogger'); ?>') + '</p></div>');
                                                                     $button.prop('disabled', false).text(originalText);
                                                                 }
                                                             },
                                                             error: function() {
-                                                                $status.html('<div class="notice notice-warning inline"><p><?php _e('Post generated but draft creation failed. Please try creating manually.', 'seo-postifier'); ?></p></div>');
+                                                                $status.html('<div class="notice notice-warning inline"><p><?php _e('Post generated but draft creation failed. Please try creating manually.', 'autoblogger'); ?></p></div>');
                                                                 $button.prop('disabled', false).text(originalText);
                                                             }
                                                         });
                                                     } else {
-                                                        $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate post: ', 'seo-postifier'); ?>' + (postResponse.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>') + '</p></div>');
+                                                        $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate post: ', 'autoblogger'); ?>' + (postResponse.data.message || '<?php _e('Unknown error', 'autoblogger'); ?>') + '</p></div>');
                                                         $button.prop('disabled', false).text(originalText);
                                                     }
                                                 },
                                                 error: function() {
-                                                    $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate post. Please try again.', 'seo-postifier'); ?></p></div>');
+                                                    $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate post. Please try again.', 'autoblogger'); ?></p></div>');
                                                     $button.prop('disabled', false).text(originalText);
                                                 }
                                             });
                                         } else {
-                                            $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script definition: ', 'seo-postifier'); ?>' + (defResponse.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>') + '</p></div>');
+                                            $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script definition: ', 'autoblogger'); ?>' + (defResponse.data.message || '<?php _e('Unknown error', 'autoblogger'); ?>') + '</p></div>');
                                             $button.prop('disabled', false).text(originalText);
                                         }
                                     },
                                     error: function() {
-                                        $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script definition. Please try again.', 'seo-postifier'); ?></p></div>');
+                                        $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script definition. Please try again.', 'autoblogger'); ?></p></div>');
                                         $button.prop('disabled', false).text(originalText);
                                     }
                                 });
                             } else {
-                                $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script text: ', 'seo-postifier'); ?>' + (genResponse.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>') + '</p></div>');
+                                $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script text: ', 'autoblogger'); ?>' + (genResponse.data.message || '<?php _e('Unknown error', 'autoblogger'); ?>') + '</p></div>');
                                 $button.prop('disabled', false).text(originalText);
                             }
                         },
                         error: function() {
-                            $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script text. Please try again.', 'seo-postifier'); ?></p></div>');
+                            $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to generate script text. Please try again.', 'autoblogger'); ?></p></div>');
                             $button.prop('disabled', false).text(originalText);
                         }
                     });
@@ -953,7 +953,7 @@ jQuery(document).ready(function($) {
                 }
             },
             error: function(xhr, status, error) {
-                let errorMsg = '<?php _e('Failed to update settings.', 'seo-postifier'); ?>';
+                let errorMsg = '<?php _e('Failed to update settings.', 'autoblogger'); ?>';
                 if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
                     errorMsg = xhr.responseJSON.data.message;
                 }
@@ -967,11 +967,11 @@ jQuery(document).ready(function($) {
     // Load interview data
     function loadInterview() {
         $.ajax({
-            url: seoPostifierData.ajaxUrl,
+            url: autobloggerData.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'seo_postifier_get_interview',
-                nonce: seoPostifierData.nonce,
+                action: 'autoblogger_get_interview',
+                nonce: autobloggerData.nonce,
                 interview_id: interviewId
             },
             success: function(response) {
@@ -997,7 +997,7 @@ jQuery(document).ready(function($) {
             },
             error: function() {
                 $loading.hide();
-                $error.html('<div class="notice notice-error"><p><?php _e('Failed to load interview. Please try again.', 'seo-postifier'); ?></p></div>');
+                $error.html('<div class="notice notice-error"><p><?php _e('Failed to load interview. Please try again.', 'autoblogger'); ?></p></div>');
                 $error.show();
             }
         });
@@ -1010,35 +1010,35 @@ jQuery(document).ready(function($) {
         const originalText = $button.text();
         
         if (!postId) {
-            alert('<?php _e('Post ID not found', 'seo-postifier'); ?>');
+            alert('<?php _e('Post ID not found', 'autoblogger'); ?>');
             return;
         }
         
-        $button.prop('disabled', true).text('<?php _e('Creating...', 'seo-postifier'); ?>');
+        $button.prop('disabled', true).text('<?php _e('Creating...', 'autoblogger'); ?>');
         
         $.ajax({
-            url: seoPostifierData.ajaxUrl,
+            url: autobloggerData.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'seo_postifier_create_wp_draft',
-                nonce: seoPostifierData.nonce,
+                action: 'autoblogger_create_wp_draft',
+                nonce: autobloggerData.nonce,
                 post_id: postId
             },
             success: function(response) {
                 if (response.success) {
-                    alert('<?php _e('WordPress draft created successfully! Redirecting...', 'seo-postifier'); ?>');
+                    alert('<?php _e('WordPress draft created successfully! Redirecting...', 'autoblogger'); ?>');
                     if (response.data.edit_url) {
                         window.location.href = response.data.edit_url;
                     } else {
                         $button.prop('disabled', false).text(originalText);
                     }
                 } else {
-                    alert('<?php _e('Failed to create WordPress draft: ', 'seo-postifier'); ?>' + (response.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>'));
+                    alert('<?php _e('Failed to create WordPress draft: ', 'autoblogger'); ?>' + (response.data.message || '<?php _e('Unknown error', 'autoblogger'); ?>'));
                     $button.prop('disabled', false).text(originalText);
                 }
             },
             error: function() {
-                alert('<?php _e('Failed to create WordPress draft. Please try again.', 'seo-postifier'); ?>');
+                alert('<?php _e('Failed to create WordPress draft. Please try again.', 'autoblogger'); ?>');
                 $button.prop('disabled', false).text(originalText);
             }
         });

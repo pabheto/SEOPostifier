@@ -63,7 +63,7 @@
 }
 
 /* Table of Contents Styles */
-.wp-block-group.seo-postifier-index {
+.wp-block-group.autoblogger-index {
   margin-bottom: 2em;
   padding: 1.5em;
   background: transparent;
@@ -71,45 +71,45 @@
   border-opacity: 0.2;
 }
 
-.wp-block-group.seo-postifier-index .index-title {
+.wp-block-group.autoblogger-index .index-title {
   font-weight: 600;
   font-size: 1.2em;
   margin-bottom: 1em;
   color: inherit;
 }
 
-.wp-block-group.seo-postifier-index .index-list {
+.wp-block-group.autoblogger-index .index-list {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.wp-block-group.seo-postifier-index .index-list li {
+.wp-block-group.autoblogger-index .index-list li {
   margin-bottom: 0.5em;
   padding-left: 0;
 }
 
-.wp-block-group.seo-postifier-index .index-list li a {
+.wp-block-group.autoblogger-index .index-list li a {
   color: inherit;
   text-decoration: none;
   opacity: 0.8;
   transition: opacity 0.2s ease;
 }
 
-.wp-block-group.seo-postifier-index .index-list li a:hover {
+.wp-block-group.autoblogger-index .index-list li a:hover {
   opacity: 1;
   text-decoration: underline;
 }
 
-.wp-block-group.seo-postifier-index .index-list li.index-level-2 {
+.wp-block-group.autoblogger-index .index-list li.index-level-2 {
   padding-left: 0;
 }
 
-.wp-block-group.seo-postifier-index .index-list li.index-level-3 {
+.wp-block-group.autoblogger-index .index-list li.index-level-3 {
   padding-left: 1.5em;
 }
 
-.wp-block-group.seo-postifier-index .index-list li.index-level-4 {
+.wp-block-group.autoblogger-index .index-list li.index-level-4 {
   padding-left: 3em;
 }
 
@@ -119,15 +119,15 @@
     font-size: 1em;
   }
 
-  .wp-block-group.seo-postifier-index {
+  .wp-block-group.autoblogger-index {
     padding: 1em;
   }
 
-  .wp-block-group.seo-postifier-index .index-list li.index-level-3 {
+  .wp-block-group.autoblogger-index .index-list li.index-level-3 {
     padding-left: 1em;
   }
 
-  .wp-block-group.seo-postifier-index .index-list li.index-level-4 {
+  .wp-block-group.autoblogger-index .index-list li.index-level-4 {
     padding-left: 2em;
   }
 }

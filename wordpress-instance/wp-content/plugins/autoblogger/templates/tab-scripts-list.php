@@ -9,19 +9,19 @@ if (!defined('ABSPATH')) {
 }
 ?>
 
-<div class="seo-postifier-drafts-list">
+<div class="autoblogger-drafts-list">
     <div class="card">
-        <h2><?php _e('My Drafts', 'seo-postifier'); ?></h2>
-        <p><?php _e('View and manage your post drafts.', 'seo-postifier'); ?></p>
+        <h2><?php _e('My Drafts', 'autoblogger'); ?></h2>
+        <p><?php _e('View and manage your post drafts.', 'autoblogger'); ?></p>
 
         <p class="submit" style="margin: 15px 0;">
-            <a href="?page=seo-postifier&tab=create-script" class="button button-primary button-large">
-                <?php _e('+ Create New Draft', 'seo-postifier'); ?>
+            <a href="?page=autoblogger&tab=create-script" class="button button-primary button-large">
+                <?php _e('+ Create New Draft', 'autoblogger'); ?>
             </a>
         </p>
 
         <div id="scripts-loading" style="margin: 20px 0;">
-            <p><?php _e('Loading drafts...', 'seo-postifier'); ?></p>
+            <p><?php _e('Loading drafts...', 'autoblogger'); ?></p>
         </div>
 
         <div id="scripts-list-container" style="display: none; margin-top: 20px;">
@@ -45,11 +45,11 @@ jQuery(document).ready(function($) {
     // Load scripts list
     function loadScripts() {
         $.ajax({
-            url: seoPostifierData.ajaxUrl,
+            url: autobloggerData.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'seo_postifier_get_interviews_list',
-                nonce: seoPostifierData.nonce
+                action: 'autoblogger_get_interviews_list',
+                nonce: autobloggerData.nonce
             },
             success: function(response) {
                 $loading.hide();
@@ -58,30 +58,30 @@ jQuery(document).ready(function($) {
                     const interviews = response.data.interviews || [];
                     
                     if (interviews.length === 0) {
-                        $container.html('<p><?php _e('No drafts yet. Create your first draft to get started!', 'seo-postifier'); ?></p>');
+                        $container.html('<p><?php _e('No drafts yet. Create your first draft to get started!', 'autoblogger'); ?></p>');
                     } else {
                         let html = '<table class="wp-list-table widefat fixed striped">';
                         html += '<thead><tr>';
-                        html += '<th><?php _e('Created', 'seo-postifier'); ?></th>';
-                        html += '<th><?php _e('Main Keyword', 'seo-postifier'); ?></th>';
-                        html += '<th><?php _e('Language', 'seo-postifier'); ?></th>';
-                        html += '<th><?php _e('Status', 'seo-postifier'); ?></th>';
-                        html += '<th><?php _e('Actions', 'seo-postifier'); ?></th>';
+                        html += '<th><?php _e('Created', 'autoblogger'); ?></th>';
+                        html += '<th><?php _e('Main Keyword', 'autoblogger'); ?></th>';
+                        html += '<th><?php _e('Language', 'autoblogger'); ?></th>';
+                        html += '<th><?php _e('Status', 'autoblogger'); ?></th>';
+                        html += '<th><?php _e('Actions', 'autoblogger'); ?></th>';
                         html += '</tr></thead><tbody>';
                         
                         interviews.forEach(function(interview) {
                             const date = new Date(interview.createdAt);
                             const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                             
-                            let status = '<?php _e('Draft', 'seo-postifier'); ?>';
+                            let status = '<?php _e('Draft', 'autoblogger'); ?>';
                             if (interview.scriptText) {
-                                status = '<?php _e('Script Generated', 'seo-postifier'); ?>';
+                                status = '<?php _e('Script Generated', 'autoblogger'); ?>';
                             }
                             if (interview.scriptDefinition) {
-                                status = '<?php _e('Definition Ready', 'seo-postifier'); ?>';
+                                status = '<?php _e('Definition Ready', 'autoblogger'); ?>';
                             }
                             if (interview.associatedPostId) {
-                                status = '<?php _e('Post Generated', 'seo-postifier'); ?>';
+                                status = '<?php _e('Post Generated', 'autoblogger'); ?>';
                             }
                             
                             // Get post ID - could be _id, id, or associatedPostId
@@ -94,9 +94,9 @@ jQuery(document).ready(function($) {
                             html += '<td>' + (interview.language || '-') + '</td>';
                             html += '<td>' + status + '</td>';
                             html += '<td>';
-                            html += '<a href="?page=seo-postifier&tab=view-script&interviewId=' + interview.interviewId + '" class="button button-small"><?php _e('View', 'seo-postifier'); ?></a>';
+                            html += '<a href="?page=autoblogger&tab=view-script&interviewId=' + interview.interviewId + '" class="button button-small"><?php _e('View', 'autoblogger'); ?></a>';
                             if (hasPost) {
-                                html += ' <button type="button" class="button button-small button-primary create-wp-draft-btn" data-post-id="' + postId + '" style="margin-left: 5px;"><?php _e('Create WP Draft', 'seo-postifier'); ?></button>';
+                                html += ' <button type="button" class="button button-small button-primary create-wp-draft-btn" data-post-id="' + postId + '" style="margin-left: 5px;"><?php _e('Create WP Draft', 'autoblogger'); ?></button>';
                             }
                             html += '</td>';
                             html += '</tr>';
@@ -114,7 +114,7 @@ jQuery(document).ready(function($) {
             },
             error: function() {
                 $loading.hide();
-                $error.html('<div class="notice notice-error"><p><?php _e('Failed to load drafts. Please try again.', 'seo-postifier'); ?></p></div>');
+                $error.html('<div class="notice notice-error"><p><?php _e('Failed to load drafts. Please try again.', 'autoblogger'); ?></p></div>');
                 $error.show();
             }
         });
@@ -127,33 +127,33 @@ jQuery(document).ready(function($) {
         const originalText = $button.text();
         
         if (!postId) {
-            alert('<?php _e('Post ID not found', 'seo-postifier'); ?>');
+            alert('<?php _e('Post ID not found', 'autoblogger'); ?>');
             return;
         }
         
-        $button.prop('disabled', true).text('<?php _e('Creating...', 'seo-postifier'); ?>');
+        $button.prop('disabled', true).text('<?php _e('Creating...', 'autoblogger'); ?>');
         
         $.ajax({
-            url: seoPostifierData.ajaxUrl,
+            url: autobloggerData.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'seo_postifier_create_wp_draft',
-                nonce: seoPostifierData.nonce,
+                action: 'autoblogger_create_wp_draft',
+                nonce: autobloggerData.nonce,
                 post_id: postId
             },
             success: function(response) {
                 if (response.success) {
-                    alert('<?php _e('WordPress draft created successfully!', 'seo-postifier'); ?>');
+                    alert('<?php _e('WordPress draft created successfully!', 'autoblogger'); ?>');
                     if (response.data.edit_url) {
                         window.location.href = response.data.edit_url;
                     }
                 } else {
-                    alert('<?php _e('Failed to create WordPress draft: ', 'seo-postifier'); ?>' + (response.data.message || '<?php _e('Unknown error', 'seo-postifier'); ?>'));
+                    alert('<?php _e('Failed to create WordPress draft: ', 'autoblogger'); ?>' + (response.data.message || '<?php _e('Unknown error', 'autoblogger'); ?>'));
                     $button.prop('disabled', false).text(originalText);
                 }
             },
             error: function() {
-                alert('<?php _e('Failed to create WordPress draft. Please try again.', 'seo-postifier'); ?>');
+                alert('<?php _e('Failed to create WordPress draft. Please try again.', 'autoblogger'); ?>');
                 $button.prop('disabled', false).text(originalText);
             }
         });

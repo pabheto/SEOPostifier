@@ -9,25 +9,25 @@ if (!defined('ABSPATH')) {
 }
 ?>
 
-<div class="wrap seo-postifier-admin">
+<div class="wrap autoblogger-admin">
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
     <!-- Tabs Navigation -->
     <?php if ($current_tab !== 'create-script' && $current_tab !== 'edit-script' && $current_tab !== 'view-script'): ?>
     <nav class="nav-tab-wrapper wp-clearfix" style="margin-bottom: 20px;">
-        <a href="?page=seo-postifier&tab=scripts" 
+        <a href="?page=autoblogger&tab=scripts" 
            class="nav-tab <?php echo $current_tab === 'scripts' ? 'nav-tab-active' : ''; ?>">
-            <?php _e('My Drafts', 'seo-postifier'); ?>
+            <?php _e('My Drafts', 'autoblogger'); ?>
         </a>
-        <a href="?page=seo-postifier&tab=settings" 
+        <a href="?page=autoblogger&tab=settings" 
            class="nav-tab <?php echo $current_tab === 'settings' ? 'nav-tab-active' : ''; ?>">
-            <?php _e('Settings', 'seo-postifier'); ?>
+            <?php _e('Settings', 'autoblogger'); ?>
         </a>
     </nav>
     <?php endif; ?>
 
     <!-- Tab Content -->
-    <div class="seo-postifier-tab-content">
+    <div class="autoblogger-tab-content">
         <?php
         switch ($current_tab) {
             case 'settings':

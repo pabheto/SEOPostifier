@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 }
 ?>
 
-<div class="seo-postifier-activation">
+<div class="autoblogger-activation">
     <div class="activation-card">
         <div class="activation-logo">
             <span class="dashicons dashicons-edit-large" style="font-size: 64px; width: 64px; height: 64px; color: #2271b1;"></span>
@@ -22,11 +22,11 @@ if (!defined('ABSPATH')) {
         <div class="activation-divider"></div>
         
         <p class="activation-info">
-            <?php _e('To get started, you need a license key.', 'seo-postifier'); ?>
+            <?php _e('To get started, you need a license key.', 'autoblogger'); ?>
         </p>
         
         <p class="activation-get-license">
-            <?php _e('To get a license, visit', 'seo-postifier'); ?> 
+            <?php _e('To get a license, visit', 'autoblogger'); ?> 
             <a href="https://autoblogger.es/" target="_blank" rel="noopener noreferrer">
                 <strong>https://autoblogger.es/</strong>
             </a>
@@ -34,10 +34,10 @@ if (!defined('ABSPATH')) {
         
         <div class="activation-divider"></div>
         
-        <form id="seo-postifier-activation-form">
+        <form id="autoblogger-activation-form">
             <div class="form-group">
                 <label for="activation-license-key">
-                    <?php _e('Enter your license key:', 'seo-postifier'); ?>
+                    <?php _e('Enter your license key:', 'autoblogger'); ?>
                 </label>
                 <input type="text" 
                        id="activation-license-key" 
@@ -49,7 +49,7 @@ if (!defined('ABSPATH')) {
             
             <p class="submit">
                 <button type="submit" class="button button-primary button-hero">
-                    <?php _e('Activate License', 'seo-postifier'); ?>
+                    <?php _e('Activate License', 'autoblogger'); ?>
                 </button>
             </p>
             
@@ -63,7 +63,7 @@ jQuery(document).ready(function($) {
     'use strict';
 
     // Handle activation form submission
-    $('#seo-postifier-activation-form').on('submit', function(e) {
+    $('#autoblogger-activation-form').on('submit', function(e) {
         e.preventDefault();
 
         const $status = $('#activation-status');
@@ -73,19 +73,19 @@ jQuery(document).ready(function($) {
         const licenseKey = $licenseInput.val().trim();
 
         if (!licenseKey) {
-            $status.html('<div class="notice notice-error inline"><p><?php _e('Please enter a license key', 'seo-postifier'); ?></p></div>');
+            $status.html('<div class="notice notice-error inline"><p><?php _e('Please enter a license key', 'autoblogger'); ?></p></div>');
             return;
         }
 
-        $button.prop('disabled', true).text('<?php _e('Activating...', 'seo-postifier'); ?>');
+        $button.prop('disabled', true).text('<?php _e('Activating...', 'autoblogger'); ?>');
         $status.html('');
 
         $.ajax({
-            url: seoPostifierData.ajaxUrl,
+            url: autobloggerData.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'seo_postifier_activate_license',
-                nonce: seoPostifierData.nonce,
+                action: 'autoblogger_activate_license',
+                nonce: autobloggerData.nonce,
                 license_key: licenseKey,
                 site_url: window.location.origin
             },
@@ -95,7 +95,7 @@ jQuery(document).ready(function($) {
                     
                     // Reload page after 1.5 seconds to show the main interface
                     setTimeout(function() {
-                        window.location.href = '?page=seo-postifier';
+                        window.location.href = '?page=autoblogger';
                     }, 1500);
                 } else {
                     $status.html('<div class="notice notice-error inline"><p><strong>✗ Error:</strong> ' + response.data.message + '</p></div>');
@@ -103,7 +103,7 @@ jQuery(document).ready(function($) {
                 }
             },
             error: function(xhr) {
-                let errorMsg = '<?php _e('Failed to connect to activation server', 'seo-postifier'); ?>';
+                let errorMsg = '<?php _e('Failed to connect to activation server', 'autoblogger'); ?>';
                 if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
                     errorMsg = xhr.responseJSON.data.message;
                 }

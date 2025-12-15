@@ -8,19 +8,19 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$settings = SEO_Postifier_Settings::get_all();
+$settings = Autoblogger_Settings::get_all();
 ?>
 
-<div class="seo-postifier-settings">
+<div class="autoblogger-settings">
     <div class="card">
-        <h2><?php _e('Plugin Settings', 'seo-postifier'); ?></h2>
-        <p><?php _e('Configure your SEO Postifier plugin settings below.', 'seo-postifier'); ?></p>
+        <h2><?php _e('Plugin Settings', 'autoblogger'); ?></h2>
+        <p><?php _e('Configure your Autoblogger plugin settings below.', 'autoblogger'); ?></p>
 
-        <form id="seo-postifier-settings-form">
+        <form id="autoblogger-settings-form">
             <table class="form-table">
                 <tr>
                     <th scope="row">
-                        <label for="license-key"><?php _e('License Key', 'seo-postifier'); ?> *</label>
+                        <label for="license-key"><?php _e('License Key', 'autoblogger'); ?> *</label>
                     </th>
                     <td>
                         <input type="text" 
@@ -31,16 +31,16 @@ $settings = SEO_Postifier_Settings::get_all();
                                placeholder="Enter your license key" 
                                readonly />
                         <p class="description">
-                            <?php _e('Your activated license key. To change it, you must first deactivate this license.', 'seo-postifier'); ?>
+                            <?php _e('Your activated license key. To change it, you must first deactivate this license.', 'autoblogger'); ?>
                         </p>
-                        <?php if (SEO_Postifier_Settings::has_license_key()): ?>
+                        <?php if (Autoblogger_Settings::has_license_key()): ?>
                             <p class="description" style="color: #46b450;">
-                                ✓ <?php _e('License key is active', 'seo-postifier'); ?>
+                                ✓ <?php _e('License key is active', 'autoblogger'); ?>
                             </p>
                         <?php endif; ?>
                         <div style="margin-top: 10px;">
                             <button type="button" id="deactivate-license-btn" class="button">
-                                <?php _e('Deactivate License', 'seo-postifier'); ?>
+                                <?php _e('Deactivate License', 'autoblogger'); ?>
                             </button>
                         </div>
                     </td>
@@ -48,7 +48,7 @@ $settings = SEO_Postifier_Settings::get_all();
                 <?php if (defined('SEO_POSTIFIER_DEV_MODE') && SEO_POSTIFIER_DEV_MODE): ?>
                 <tr>
                     <th scope="row">
-                        <label for="backend-url"><?php _e('Backend URL', 'seo-postifier'); ?></label>
+                        <label for="backend-url"><?php _e('Backend URL', 'autoblogger'); ?></label>
                     </th>
                     <td>
                         <input type="url" 
@@ -56,9 +56,9 @@ $settings = SEO_Postifier_Settings::get_all();
                                name="backend_url" 
                                class="large-text code" 
                                value="<?php echo esc_attr($settings['backend_url']); ?>" 
-                               placeholder="https://seo-postifier-backend-nmb9f.ondigitalocean.app/" />
+                               placeholder="https://autoblogger-backend-nmb9f.ondigitalocean.app/" />
                         <p class="description">
-                            <?php _e('The URL of your SEO Postifier backend server. Leave default unless you have a custom setup.', 'seo-postifier'); ?>
+                            <?php _e('The URL of your Autoblogger backend server. Leave default unless you have a custom setup.', 'autoblogger'); ?>
                         </p>
                     </td>
                 </tr>
@@ -68,16 +68,16 @@ $settings = SEO_Postifier_Settings::get_all();
             <?php if (defined('SEO_POSTIFIER_DEV_MODE') && SEO_POSTIFIER_DEV_MODE): ?>
             <p class="submit">
                 <button type="submit" class="button button-primary">
-                    <?php _e('Save Settings', 'seo-postifier'); ?>
+                    <?php _e('Save Settings', 'autoblogger'); ?>
                 </button>
                 <button type="button" id="test-license-btn" class="button button-secondary">
-                    <?php _e('Test License & Connection', 'seo-postifier'); ?>
+                    <?php _e('Test License & Connection', 'autoblogger'); ?>
                 </button>
             </p>
             <?php else: ?>
             <p class="submit">
                 <button type="button" id="test-license-btn" class="button button-secondary">
-                    <?php _e('Test License & Connection', 'seo-postifier'); ?>
+                    <?php _e('Test License & Connection', 'autoblogger'); ?>
                 </button>
             </p>
             <?php endif; ?>
@@ -86,18 +86,18 @@ $settings = SEO_Postifier_Settings::get_all();
         </form>
     </div>
 
-    <?php if (SEO_Postifier_Settings::has_license_key()): ?>
+    <?php if (Autoblogger_Settings::has_license_key()): ?>
     <div class="card" style="margin-top: 20px;" id="subscription-usage-card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h2 style="margin: 0;"><?php _e('Subscription & Usage', 'seo-postifier'); ?></h2>
+            <h2 style="margin: 0;"><?php _e('Subscription & Usage', 'autoblogger'); ?></h2>
             <button type="button" id="refresh-usage-btn" class="button button-secondary">
-                <?php _e('Refresh', 'seo-postifier'); ?>
+                <?php _e('Refresh', 'autoblogger'); ?>
             </button>
         </div>
         <div id="subscription-usage-content">
             <p style="text-align: center; padding: 20px;">
                 <span class="spinner is-active" style="float: none; margin: 0 auto;"></span>
-                <?php _e('Loading subscription information...', 'seo-postifier'); ?>
+                <?php _e('Loading subscription information...', 'autoblogger'); ?>
             </p>
         </div>
     </div>
@@ -110,7 +110,7 @@ jQuery(document).ready(function($) {
 
     // Deactivate license
     $('#deactivate-license-btn').on('click', function() {
-        const confirmed = confirm('<?php _e('Warning: Deactivating your license will close the plugin and you will need to enter a valid license key again to reactivate it.\n\nAre you sure you want to continue?', 'seo-postifier'); ?>');
+        const confirmed = confirm('<?php _e('Warning: Deactivating your license will close the plugin and you will need to enter a valid license key again to reactivate it.\n\nAre you sure you want to continue?', 'autoblogger'); ?>');
         
         if (!confirmed) {
             return;
@@ -120,22 +120,22 @@ jQuery(document).ready(function($) {
         const originalText = $button.text();
         const $status = $('#settings-status');
 
-        $button.prop('disabled', true).text('<?php _e('Deactivating...', 'seo-postifier'); ?>');
+        $button.prop('disabled', true).text('<?php _e('Deactivating...', 'autoblogger'); ?>');
         $status.html('');
 
         $.ajax({
-            url: seoPostifierData.ajaxUrl,
+            url: autobloggerData.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'seo_postifier_deactivate_license',
-                nonce: seoPostifierData.nonce
+                action: 'autoblogger_deactivate_license',
+                nonce: autobloggerData.nonce
             },
             success: function(response) {
                 if (response.success) {
                     $status.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
                     // Reload page after 1.5 seconds to show activation screen
                     setTimeout(function() {
-                        window.location.href = '?page=seo-postifier';
+                        window.location.href = '?page=autoblogger';
                     }, 1500);
                 } else {
                     $status.html('<div class="notice notice-error inline"><p>' + response.data.message + '</p></div>');
@@ -143,26 +143,26 @@ jQuery(document).ready(function($) {
                 }
             },
             error: function() {
-                $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to deactivate license', 'seo-postifier'); ?></p></div>');
+                $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to deactivate license', 'autoblogger'); ?></p></div>');
                 $button.prop('disabled', false).text(originalText);
             }
         });
     });
 
     // Save settings (only in dev mode)
-    $('#seo-postifier-settings-form').on('submit', function(e) {
+    $('#autoblogger-settings-form').on('submit', function(e) {
         e.preventDefault();
 
         const $status = $('#settings-status');
         const $button = $(this).find('button[type="submit"]');
         const originalText = $button.text();
 
-        $button.prop('disabled', true).text('<?php _e('Saving...', 'seo-postifier'); ?>');
+        $button.prop('disabled', true).text('<?php _e('Saving...', 'autoblogger'); ?>');
         $status.html('');
 
         var postData = {
-            action: 'seo_postifier_save_settings',
-            nonce: seoPostifierData.nonce
+            action: 'autoblogger_save_settings',
+            nonce: autobloggerData.nonce
         };
         
         // Only include backend_url if the field exists (dev mode)
@@ -171,7 +171,7 @@ jQuery(document).ready(function($) {
         }
 
         $.ajax({
-            url: seoPostifierData.ajaxUrl,
+            url: autobloggerData.ajaxUrl,
             type: 'POST',
             data: postData,
             success: function(response) {
@@ -186,7 +186,7 @@ jQuery(document).ready(function($) {
                 }
             },
             error: function() {
-                $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to save settings', 'seo-postifier'); ?></p></div>');
+                $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to save settings', 'autoblogger'); ?></p></div>');
             },
             complete: function() {
                 $button.prop('disabled', false).text(originalText);
@@ -200,15 +200,15 @@ jQuery(document).ready(function($) {
         const $button = $(this);
         const originalText = $button.text();
 
-        $button.prop('disabled', true).text('<?php _e('Testing...', 'seo-postifier'); ?>');
+        $button.prop('disabled', true).text('<?php _e('Testing...', 'autoblogger'); ?>');
         $status.html('');
 
         $.ajax({
-            url: seoPostifierData.ajaxUrl,
+            url: autobloggerData.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'seo_postifier_test_license',
-                nonce: seoPostifierData.nonce
+                action: 'autoblogger_test_license',
+                nonce: autobloggerData.nonce
             },
             success: function(response) {
                 if (response.success) {
@@ -218,9 +218,9 @@ jQuery(document).ready(function($) {
                 }
             },
             error: function(xhr) {
-                let errorMsg = '<?php _e('Connection test failed', 'seo-postifier'); ?>';
+                let errorMsg = '<?php _e('Connection test failed', 'autoblogger'); ?>';
                 if (xhr.status === 0) {
-                    errorMsg = '<?php _e('Cannot connect to backend server. Check your Backend URL.', 'seo-postifier'); ?>';
+                    errorMsg = '<?php _e('Cannot connect to backend server. Check your Backend URL.', 'autoblogger'); ?>';
                 }
                 $status.html('<div class="notice notice-error inline"><p>✗ ' + errorMsg + '</p></div>');
             },
@@ -230,18 +230,18 @@ jQuery(document).ready(function($) {
         });
     });
 
-    <?php if (SEO_Postifier_Settings::has_license_key()): ?>
+    <?php if (Autoblogger_Settings::has_license_key()): ?>
     // Load subscription usage on page load
     function loadSubscriptionUsage() {
         const $content = $('#subscription-usage-content');
-        $content.html('<p style="text-align: center; padding: 20px;"><span class="spinner is-active" style="float: none; margin: 0 auto;"></span> <?php _e('Loading subscription information...', 'seo-postifier'); ?></p>');
+        $content.html('<p style="text-align: center; padding: 20px;"><span class="spinner is-active" style="float: none; margin: 0 auto;"></span> <?php _e('Loading subscription information...', 'autoblogger'); ?></p>');
 
         $.ajax({
-            url: seoPostifierData.ajaxUrl,
+            url: autobloggerData.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'seo_postifier_get_subscription',
-                nonce: seoPostifierData.nonce
+                action: 'autoblogger_get_subscription',
+                nonce: autobloggerData.nonce
             },
             success: function(response) {
                 if (response.success && response.data && response.data.data) {
@@ -250,34 +250,34 @@ jQuery(document).ready(function($) {
                     
                     // Subscription Plan
                     html += '<div class="usage-section" style="margin-bottom: 20px;">';
-                    html += '<h3 style="margin-top: 0;"><?php _e('Current Plan', 'seo-postifier'); ?></h3>';
-                    html += '<p style="font-size: 16px; margin: 5px 0;"><strong><?php _e('Plan:', 'seo-postifier'); ?></strong> <span style="text-transform: uppercase; color: #2271b1;">' + escapeHtml(data.subscription.plan || 'N/A') + '</span></p>';
-                    html += '<p style="font-size: 16px; margin: 5px 0;"><strong><?php _e('Status:', 'seo-postifier'); ?></strong> <span style="text-transform: capitalize; color: ' + (data.subscription.status === 'active' ? '#46b450' : '#dc3232') + ';">' + escapeHtml(data.subscription.status || 'N/A') + '</span></p>';
+                    html += '<h3 style="margin-top: 0;"><?php _e('Current Plan', 'autoblogger'); ?></h3>';
+                    html += '<p style="font-size: 16px; margin: 5px 0;"><strong><?php _e('Plan:', 'autoblogger'); ?></strong> <span style="text-transform: uppercase; color: #2271b1;">' + escapeHtml(data.subscription.plan || 'N/A') + '</span></p>';
+                    html += '<p style="font-size: 16px; margin: 5px 0;"><strong><?php _e('Status:', 'autoblogger'); ?></strong> <span style="text-transform: capitalize; color: ' + (data.subscription.status === 'active' ? '#46b450' : '#dc3232') + ';">' + escapeHtml(data.subscription.status || 'N/A') + '</span></p>';
                     html += '</div>';
                     
                     // Billing Period
                     if (data.billingPeriod) {
                         html += '<div class="usage-section" style="margin-bottom: 20px;">';
-                        html += '<h3><?php _e('Billing Period', 'seo-postifier'); ?></h3>';
+                        html += '<h3><?php _e('Billing Period', 'autoblogger'); ?></h3>';
                         const startDate = new Date(data.billingPeriod.start);
                         const endDate = new Date(data.billingPeriod.end);
-                        html += '<p style="margin: 5px 0;"><strong><?php _e('Start:', 'seo-postifier'); ?></strong> ' + formatDate(startDate) + '</p>';
-                        html += '<p style="margin: 5px 0;"><strong><?php _e('End:', 'seo-postifier'); ?></strong> ' + formatDate(endDate) + '</p>';
+                        html += '<p style="margin: 5px 0;"><strong><?php _e('Start:', 'autoblogger'); ?></strong> ' + formatDate(startDate) + '</p>';
+                        html += '<p style="margin: 5px 0;"><strong><?php _e('End:', 'autoblogger'); ?></strong> ' + formatDate(endDate) + '</p>';
                         html += '</div>';
                     }
                     
                     // Usage Statistics
                     if (data.usage) {
                         html += '<div class="usage-section">';
-                        html += '<h3><?php _e('Usage This Period', 'seo-postifier'); ?></h3>';
+                        html += '<h3><?php _e('Usage This Period', 'autoblogger'); ?></h3>';
                         html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 10px;">';
                         html += '<div style="background: #f0f0f1; padding: 15px; border-radius: 4px;">';
                         html += '<div style="font-size: 24px; font-weight: bold; color: #2271b1; margin-bottom: 5px;">' + (data.usage.aiGeneratedImages || 0) + '</div>';
-                        html += '<div style="color: #646970;"><?php _e('AI Generated Images', 'seo-postifier'); ?></div>';
+                        html += '<div style="color: #646970;"><?php _e('AI Generated Images', 'autoblogger'); ?></div>';
                         html += '</div>';
                         html += '<div style="background: #f0f0f1; padding: 15px; border-radius: 4px;">';
                         html += '<div style="font-size: 24px; font-weight: bold; color: #2271b1; margin-bottom: 5px;">' + formatNumber(data.usage.generatedWords || 0) + '</div>';
-                        html += '<div style="color: #646970;"><?php _e('Generated Words', 'seo-postifier'); ?></div>';
+                        html += '<div style="color: #646970;"><?php _e('Generated Words', 'autoblogger'); ?></div>';
                         html += '</div>';
                         html += '</div>';
                         html += '</div>';
@@ -286,11 +286,11 @@ jQuery(document).ready(function($) {
                     html += '</div>';
                     $content.html(html);
                 } else {
-                    $content.html('<div class="notice notice-error inline"><p><?php _e('Failed to load subscription information', 'seo-postifier'); ?></p></div>');
+                    $content.html('<div class="notice notice-error inline"><p><?php _e('Failed to load subscription information', 'autoblogger'); ?></p></div>');
                 }
             },
             error: function(xhr) {
-                let errorMsg = '<?php _e('Failed to load subscription information', 'seo-postifier'); ?>';
+                let errorMsg = '<?php _e('Failed to load subscription information', 'autoblogger'); ?>';
                 if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
                     errorMsg = xhr.responseJSON.data.message;
                 }
