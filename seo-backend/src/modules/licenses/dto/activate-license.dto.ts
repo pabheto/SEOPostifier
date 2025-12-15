@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, IsUrl } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class ActivateLicenseDto {
   @ApiProperty({
@@ -16,6 +16,5 @@ export class ActivateLicenseDto {
   })
   @IsString()
   @IsNotEmpty()
-  @IsUrl()
   siteUrl: string;
 }

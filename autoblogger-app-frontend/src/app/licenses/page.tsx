@@ -1,15 +1,8 @@
 "use client";
 
-import { useCreateLicense, useLicenses } from "@/queries/licenses";
-import { useSubscription } from "@/queries/subscriptions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -19,6 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -27,8 +21,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
-import { CheckCircle2, Copy, Key, XCircle, Plus, Eye, EyeOff, ExternalLink } from "lucide-react";
+import { useCreateLicense, useLicenses } from "@/queries/licenses";
+import { useSubscription } from "@/queries/subscriptions";
+import {
+  CheckCircle2,
+  Copy,
+  ExternalLink,
+  Eye,
+  EyeOff,
+  Key,
+  Plus,
+  XCircle,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -39,7 +43,9 @@ export default function LicensesPage() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [licenseName, setLicenseName] = useState<string>("");
   const [showLicenseKeys, setShowLicenseKeys] = useState(false);
-  const [visibleLicenses, setVisibleLicenses] = useState<Set<string>>(new Set());
+  const [visibleLicenses, setVisibleLicenses] = useState<Set<string>>(
+    new Set()
+  );
 
   const subscription = subscriptionData?.subscription;
   const currentPlan = subscription?.plan || "free";
@@ -111,7 +117,9 @@ export default function LicensesPage() {
           </p>
           <div className="mt-2">
             <p className="text-sm text-muted-foreground">
-              Activated licenses: <span className="font-semibold">{activatedCount}</span> / {maxLicenses}
+              Activated licenses:{" "}
+              <span className="font-semibold">{activatedCount}</span> /{" "}
+              {maxLicenses}
               {remainingLicenses > 0 && (
                 <span className="text-green-600 dark:text-green-400 ml-2">
                   ({remainingLicenses} remaining)
@@ -165,9 +173,12 @@ export default function LicensesPage() {
               </TableHeader>
               <TableBody>
                 {licenses?.map((license) => {
-                  const isVisible = showLicenseKeys || visibleLicenses.has(license.id);
-                  const displayKey = isVisible ? license.key : maskLicenseKey(license.key);
-                  
+                  const isVisible =
+                    showLicenseKeys || visibleLicenses.has(license.id);
+                  const displayKey = isVisible
+                    ? license.key
+                    : maskLicenseKey(license.key);
+
                   return (
                     <TableRow key={license.id}>
                       <TableCell>
@@ -232,18 +243,6 @@ export default function LicensesPage() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col gap-1">
-                          <span className="text-sm">
-                            {license.createdAt
-                              ? new Date(license.createdAt).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    month: "short",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  }
-                                )
-                              : "-"}
-                          </span>
                           {license.activated && license.activatedAt && (
                             <span className="text-xs text-muted-foreground">
                               Activated:{" "}
@@ -297,9 +296,12 @@ export default function LicensesPage() {
               />
             </div>
             <div className="p-3 bg-muted rounded-md text-sm text-muted-foreground">
-              You can create <span className="font-semibold">{remainingLicenses}</span> more{" "}
-              {remainingLicenses === 1 ? "license" : "licenses"} with your current
-              plan (<span className="font-semibold">{currentPlan.toUpperCase()}</span>).
+              You can create{" "}
+              <span className="font-semibold">{remainingLicenses}</span> more{" "}
+              {remainingLicenses === 1 ? "license" : "licenses"} with your
+              current plan (
+              <span className="font-semibold">{currentPlan.toUpperCase()}</span>
+              ).
             </div>
           </div>
           <DialogFooter>
@@ -324,4 +326,3 @@ export default function LicensesPage() {
     </div>
   );
 }
-
