@@ -39,7 +39,7 @@ $settings = SEO_Postifier_Settings::get_all();
                             </p>
                         <?php endif; ?>
                         <div style="margin-top: 10px;">
-                            <button type="button" id="deactivate-license-btn" class="button button-danger">
+                            <button type="button" id="deactivate-license-btn" class="button">
                                 <?php _e('Deactivate License', 'seo-postifier'); ?>
                             </button>
                         </div>
