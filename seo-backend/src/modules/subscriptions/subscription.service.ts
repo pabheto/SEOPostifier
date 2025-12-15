@@ -82,6 +82,8 @@ export class SubscriptionService {
       throw new Error(`Plan not found for price ID: ${priceId}`);
     }
 
+    console.log('Stripe subscription:', stripeSubscription);
+
     // Calculate billing period dates
     // Stripe returns timestamps as Unix timestamps (seconds since epoch)
     const subscriptionData = stripeSubscription as any;

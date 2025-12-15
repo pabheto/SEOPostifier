@@ -13,7 +13,7 @@ export class AuthHelper {
 
   async getUserByLicense(licenseKey: string) {
     const license = await this.licenseModel.findOne({ key: licenseKey });
-    if (!license || !license.active) {
+    if (!license || !license.activated) {
       throw new UnauthorizedException('Invalid or inactive license');
     }
 
@@ -24,7 +24,12 @@ export class AuthHelper {
 
     return {
       user: { id: user._id, email: user.email },
-      license: { key: license.key, name: license.name },
+      license: {
+        key: license.key,
+        name: license.name,
+        activated: license.activated,
+        activatedForSite: license.activatedForSite,
+      },
     };
   }
 }

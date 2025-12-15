@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSubscription } from "@/queries/subscriptions";
-import { Calendar, FileText, Image } from "lucide-react";
+import { FileText, Image } from "lucide-react";
 
 export default function DashboardPage() {
   const { data, isLoading, error } = useSubscription();
@@ -20,7 +20,6 @@ export default function DashboardPage() {
 
   const subscription = data?.subscription;
   const usage = data?.usage;
-  const billingPeriod = data?.billingPeriod;
 
   const planLimits: Record<string, { images: number; words: number }> = {
     free: { images: 16, words: 10000 },
@@ -50,140 +49,103 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen p-8 bg-gradient-to-br from-background to-muted/20">
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold mb-2">Dashboard</h2>
-        <p className="text-muted-foreground text-base">
-          Overview of your subscription and usage
-        </p>
-      </div>
-
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Card key={i}>
-              <CardHeader>
-                <Skeleton className="h-4 w-24" />
-              </CardHeader>
-              <CardContent>
-                <Skeleton className="h-8 w-32 mb-2" />
-                <Skeleton className="h-4 w-20" />
-              </CardContent>
-            </Card>
-          ))}
+    <div className="min-h-screen p-6 md:p-8 lg:p-10 bg-background">
+      <div className="mb-10 max-w-7xl mx-auto">
+        <div className="mb-2">
+          <div className="flex items-center gap-3 mb-3">
+            <h1 className="text-4xl font-semibold tracking-tight">Dashboard</h1>
+            {!isLoading && subscription?.plan && (
+              <Badge
+                variant={getPlanColor(subscription.plan) as any}
+                className="text-xs font-semibold px-3 py-1"
+              >
+                {subscription.plan.toUpperCase()}
+              </Badge>
+            )}
+          </div>
+          <p className="text-muted-foreground text-lg">
+            Overview of your usage and subscription
+          </p>
         </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <p className="text-sm text-muted-foreground">Current Plan</p>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge
-                    variant={getPlanColor(subscription?.plan || "free") as any}
-                  >
-                    {subscription?.plan?.toUpperCase() || "FREE"}
-                  </Badge>
-                  <span className="text-2xl font-bold">
-                    {subscription?.plan?.toUpperCase() || "FREE"}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Billing Period Start
-                  </p>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xl font-semibold">
-                  {billingPeriod?.start
-                    ? new Date(billingPeriod.start).toLocaleDateString(
-                        "en-US",
-                        {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        }
-                      )
-                    : "-"}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    Billing Period End
-                  </p>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <p className="text-xl font-semibold">
-                  {billingPeriod?.end
-                    ? new Date(billingPeriod.end).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })
-                    : "-"}
-                </p>
-              </CardContent>
-            </Card>
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="border-border/50">
+                <CardHeader>
+                  <Skeleton className="h-4 w-24" />
+                </CardHeader>
+                <CardContent>
+                  <Skeleton className="h-8 w-32 mb-2" />
+                  <Skeleton className="h-4 w-20" />
+                </CardContent>
+              </Card>
+            ))}
           </div>
+        ) : (
+          <div className="max-w-7xl mx-auto space-y-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card className="border-border/50 hover:border-border transition-colors shadow-sm hover:shadow-md">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <Image className="h-5 w-5 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl font-semibold tracking-tight">
+                      AI Generated Images
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-4xl font-semibold tracking-tight">
+                    {usage?.aiGeneratedImages || 0}{" "}
+                    <span className="text-2xl text-muted-foreground font-normal">
+                      / {limits.images}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <Progress value={imagesUsagePercent} className="h-2" />
+                    <p className="text-sm text-muted-foreground">
+                      {limits.images - (usage?.aiGeneratedImages || 0)} images
+                      remaining
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <Image className="h-5 w-5 text-primary" />
-                  <CardTitle>AI Generated Images</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold mb-4">
-                  {usage?.aiGeneratedImages || 0} / {limits.images}
-                </div>
-                <Progress value={imagesUsagePercent} className="mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  {limits.images - (usage?.aiGeneratedImages || 0)} images
-                  remaining
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  <CardTitle>Generated Words</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold mb-4">
-                  {usage?.generatedWords || 0} / {limits.words.toLocaleString()}
-                </div>
-                <Progress value={wordsUsagePercent} className="mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  {(
-                    limits.words - (usage?.generatedWords || 0)
-                  ).toLocaleString()}{" "}
-                  words remaining
-                </p>
-              </CardContent>
-            </Card>
+              <Card className="border-border/50 hover:border-border transition-colors shadow-sm hover:shadow-md">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl font-semibold tracking-tight">
+                      Generated Words
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="text-4xl font-semibold tracking-tight">
+                    {usage?.generatedWords || 0}{" "}
+                    <span className="text-2xl text-muted-foreground font-normal">
+                      / {limits.words.toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <Progress value={wordsUsagePercent} className="h-2" />
+                    <p className="text-sm text-muted-foreground">
+                      {(
+                        limits.words - (usage?.generatedWords || 0)
+                      ).toLocaleString()}{" "}
+                      words remaining
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
-        </>
-      )}
+        )}
+      </div>
     </div>
   );
 }

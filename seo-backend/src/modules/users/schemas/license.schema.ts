@@ -12,8 +12,14 @@ export class License extends Document {
   @Prop({ required: true, unique: true })
   key: string;
 
-  @Prop({ default: true })
-  active: boolean;
+  @Prop({ default: false })
+  activated?: boolean;
+
+  @Prop({ default: null })
+  activatedForSite?: string; // url of the site of the activation
+
+  @Prop({ default: null })
+  activatedAt?: Date;
 }
 
 export const LicenseSchema = SchemaFactory.createForClass(License);

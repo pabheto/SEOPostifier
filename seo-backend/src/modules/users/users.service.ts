@@ -1,15 +1,17 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   UnauthorizedException,
+  forwardRef,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { Model } from 'mongoose';
+import { LicensesService } from '../licenses/licenses.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
-import { License } from './schemas/license.schema';
 import { Session } from './schemas/session.schema';
 import { User } from './schemas/user.schema';
 
@@ -20,8 +22,9 @@ export class UsersService {
 
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
-    @InjectModel(License.name) private licenseModel: Model<License>,
     @InjectModel(Session.name) private sessionModel: Model<Session>,
+    @Inject(forwardRef(() => LicensesService))
+    private licensesService: LicensesService,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -34,14 +37,6 @@ export class UsersService {
     const user = await this.userModel.create({
       email: dto.email,
       password: hashedPassword,
-    });
-
-    // Create a default license
-    const licenseKey = this.generateLicenseKey();
-    const license = await this.licenseModel.create({
-      userId: user._id,
-      name: 'Default License',
-      key: licenseKey,
     });
 
     // Create session
@@ -65,7 +60,6 @@ export class UsersService {
         email: user.email,
         role: user.role || 'USER',
       },
-      license: { key: license.key, name: license.name },
     };
   }
 
@@ -74,8 +68,6 @@ export class UsersService {
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
-
-    const license = await this.licenseModel.findOne({ userId: user._id });
 
     // Create new session
     const sessionToken = this.generateSessionToken();
@@ -98,7 +90,6 @@ export class UsersService {
         email: user.email,
         role: user.role || 'USER',
       },
-      license: license ? { key: license.key, name: license.name } : null,
     };
   }
 
@@ -138,37 +129,7 @@ export class UsersService {
     };
   }
 
-  async getLicensesForUser(userId: string) {
-    const licenses = await this.licenseModel.find({ userId }).exec();
-    return licenses.map((license) => ({
-      id: license._id,
-      key: license.key,
-      name: license.name,
-      active: license.active,
-    }));
-  }
-
-  async createLicenseForUser(userId: string, name: string) {
-    const licenseKey = this.generateLicenseKey();
-    const license = await this.licenseModel.create({
-      userId,
-      name,
-      key: licenseKey,
-      active: true,
-    });
-    return {
-      id: license._id,
-      key: license.key,
-      name: license.name,
-      active: license.active,
-    };
-  }
-
   private generateSessionToken(): string {
     return `${Date.now()}-${Math.random().toString(36).substr(2, 16)}`;
-  }
-
-  private generateLicenseKey(): string {
-    return `LIC-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
   }
 }

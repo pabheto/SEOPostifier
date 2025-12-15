@@ -10,8 +10,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-import { signOut } from "next-auth/react";
 import { LogOutIcon } from "lucide-react";
+import { signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import React from "react";
 
@@ -93,20 +93,27 @@ function MobileHeader() {
           }
         )}
       >
-        <h2
-          className={cn(
-            "text-sm",
-            "font-bold",
-            "transition-opacity",
-            "duration-200",
-            {
-              "opacity-0": !open,
-              "opacity-100": open,
-            }
-          )}
-        >
-          AI autoblogger
-        </h2>
+        <div className="flex items-center gap-2">
+          <img
+            src="/logo.png"
+            alt="AI AutoBlogger"
+            className="h-6 w-auto object-contain"
+          />
+          <h2
+            className={cn(
+              "text-sm",
+              "font-semibold",
+              "transition-opacity",
+              "duration-200",
+              {
+                "opacity-0": !open,
+                "opacity-100": open,
+              }
+            )}
+          >
+            AI AutoBlogger
+          </h2>
+        </div>
       </div>
 
       <ThemeToggle className={cn("h-8", "w-8")} />

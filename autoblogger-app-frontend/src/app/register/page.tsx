@@ -83,65 +83,83 @@ export default function Register() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen p-6">
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Sign up</CardTitle>
-          <CardDescription>Create an account to get started</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={onFinish} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm Password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={6}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Signing up..." : "Sign up"}
-            </Button>
-          </form>
-        </CardContent>
-        <Separator />
-        <CardFooter className="text-center text-sm">
-          <span className="text-muted-foreground">
-            Already have an account?{" "}
-          </span>
-          <Link href="/login" className="text-primary hover:underline">
-            Sign in
-          </Link>
-        </CardFooter>
-      </Card>
+    <div className="flex items-center justify-center min-h-screen p-6 bg-background">
+      <div className="w-full max-w-md space-y-6">
+        <div className="flex flex-col items-center gap-4 mb-8">
+          <img
+            src="/logo.png"
+            alt="AI AutoBlogger"
+            className="h-16 w-auto object-contain"
+          />
+          <div className="text-center">
+            <h1 className="text-3xl font-semibold tracking-tight mb-2">
+              AI AutoBlogger
+            </h1>
+            <p className="text-muted-foreground text-sm">
+              AI-powered content creation platform
+            </p>
+          </div>
+        </div>
+        <Card className="w-full">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-semibold tracking-tight">
+              Sign up
+            </CardTitle>
+            <CardDescription>Create an account to get started</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={onFinish} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirm Password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Signing up..." : "Sign up"}
+              </Button>
+            </form>
+          </CardContent>
+          <Separator />
+          <CardFooter className="text-center text-sm">
+            <span className="text-muted-foreground">
+              Already have an account?{" "}
+            </span>
+            <Link href="/login" className="text-primary hover:underline">
+              Sign in
+            </Link>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 }
-

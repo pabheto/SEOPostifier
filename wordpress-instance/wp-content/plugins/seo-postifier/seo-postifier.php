@@ -23,6 +23,9 @@ define('SEO_POSTIFIER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('SEO_POSTIFIER_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('SEO_POSTIFIER_BACKEND_URL', getenv('SEO_BACKEND_URL') ?: 'https://seo-postifier-backend-nmb9f.ondigitalocean.app/');
 
+// Development mode flag - set to true to show backend URL configuration
+define('SEO_POSTIFIER_DEV_MODE', false);
+
 // Require plugin classes
 require_once SEO_POSTIFIER_PLUGIN_DIR . 'includes/class-settings.php';
 require_once SEO_POSTIFIER_PLUGIN_DIR . 'includes/class-api-client.php';

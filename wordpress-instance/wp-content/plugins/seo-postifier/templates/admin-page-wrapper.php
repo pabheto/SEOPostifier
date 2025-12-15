@@ -33,10 +33,6 @@ if (!defined('ABSPATH')) {
            class="nav-tab <?php echo $current_tab === 'settings' ? 'nav-tab-active' : ''; ?>">
             <?php _e('Settings', 'seo-postifier'); ?>
         </a>
-        <a href="?page=seo-postifier&tab=dev" 
-           class="nav-tab <?php echo $current_tab === 'dev' ? 'nav-tab-active' : ''; ?>">
-            <?php _e('Dev', 'seo-postifier'); ?>
-        </a>
     </nav>
     <?php endif; ?>
 
@@ -53,9 +49,6 @@ if (!defined('ABSPATH')) {
                 break;
             case 'view-script':
                 include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-view-script.php';
-                break;
-            case 'dev':
-                include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-dev.php';
                 break;
             case 'scripts':
             default:

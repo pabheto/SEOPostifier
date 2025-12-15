@@ -1,8 +1,16 @@
 import { ToasterWrapper } from "@/components/toaster-wrapper";
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { cookies } from "next/headers";
 import React, { Suspense } from "react";
 import { AppContext } from "./_refine_context";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+  preload: true,
+});
 
 export const metadata: Metadata = {
   title: "AI autoblogger",
@@ -22,7 +30,11 @@ export default async function RootLayout({
   const defaultMode = theme?.value === "dark" ? "dark" : "light";
 
   return (
-    <html lang="en" className={defaultMode} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${defaultMode} ${inter.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -42,7 +54,7 @@ export default async function RootLayout({
           }}
         />
       </head>
-      <body>
+      <body className={inter.variable}>
         <Suspense>
           <AppContext defaultMode={defaultMode}>{children}</AppContext>
         </Suspense>

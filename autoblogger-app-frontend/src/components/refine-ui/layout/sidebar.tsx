@@ -372,21 +372,30 @@ function SidebarHeader() {
           }
         )}
       >
-        <div>{title.icon}</div>
-        <h2
-          className={cn(
-            "text-sm",
-            "font-bold",
-            "transition-opacity",
-            "duration-200",
-            {
-              "opacity-0": !open,
-              "opacity-100": open,
-            }
-          )}
-        >
-          AI autoblogger
-        </h2>
+        <div className="flex items-center gap-2">
+          <img
+            src="/logo.png"
+            alt="AI AutoBlogger"
+            className={cn("w-auto object-contain transition-all duration-200", {
+              "h-8": open || isMobile,
+              "h-6": !open && !isMobile,
+            })}
+          />
+          <h2
+            className={cn(
+              "text-sm",
+              "font-semibold",
+              "transition-opacity",
+              "duration-200",
+              {
+                "opacity-0": !open,
+                "opacity-100": open,
+              }
+            )}
+          >
+            AI AutoBlogger
+          </h2>
+        </div>
       </div>
 
       <ShadcnSidebarTrigger

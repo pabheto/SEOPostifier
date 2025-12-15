@@ -39,6 +39,7 @@ $settings = SEO_Postifier_Settings::get_all();
                         <?php endif; ?>
                     </td>
                 </tr>
+                <?php if (defined('SEO_POSTIFIER_DEV_MODE') && SEO_POSTIFIER_DEV_MODE): ?>
                 <tr>
                     <th scope="row">
                         <label for="backend-url"><?php _e('Backend URL', 'seo-postifier'); ?></label>
@@ -55,6 +56,7 @@ $settings = SEO_Postifier_Settings::get_all();
                         </p>
                     </td>
                 </tr>
+                <?php endif; ?>
             </table>
 
             <p class="submit">
@@ -103,15 +105,21 @@ jQuery(document).ready(function($) {
         $button.prop('disabled', true).text('<?php _e('Saving...', 'seo-postifier'); ?>');
         $status.html('');
 
+        var postData = {
+            action: 'seo_postifier_save_settings',
+            nonce: seoPostifierData.nonce,
+            license_key: $('#license-key').val()
+        };
+        
+        // Only include backend_url if the field exists (dev mode)
+        if ($('#backend-url').length) {
+            postData.backend_url = $('#backend-url').val();
+        }
+
         $.ajax({
             url: seoPostifierData.ajaxUrl,
             type: 'POST',
-            data: {
-                action: 'seo_postifier_save_settings',
-                nonce: seoPostifierData.nonce,
-                license_key: $('#license-key').val(),
-                backend_url: $('#backend-url').val()
-            },
+            data: postData,
             success: function(response) {
                 if (response.success) {
                     $status.html('<div class="notice notice-success inline"><p>' + response.data.message + '</p></div>');
