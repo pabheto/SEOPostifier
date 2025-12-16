@@ -17,11 +17,11 @@ if (!defined('ABSPATH')) {
     <nav class="nav-tab-wrapper wp-clearfix" style="margin-bottom: 20px;">
         <a href="?page=autoblogger&tab=scripts" 
            class="nav-tab <?php echo $current_tab === 'scripts' ? 'nav-tab-active' : ''; ?>">
-            <?php _e('My Drafts', 'autoblogger'); ?>
+            <?php esc_html_e('My Drafts', 'autoblogger'); ?>
         </a>
         <a href="?page=autoblogger&tab=settings" 
            class="nav-tab <?php echo $current_tab === 'settings' ? 'nav-tab-active' : ''; ?>">
-            <?php _e('Settings', 'autoblogger'); ?>
+            <?php esc_html_e('Settings', 'autoblogger'); ?>
         </a>
     </nav>
     <?php endif; ?>

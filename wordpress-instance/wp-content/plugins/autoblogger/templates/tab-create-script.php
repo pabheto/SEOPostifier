@@ -16,12 +16,12 @@ $mode = $is_edit_mode ? 'edit' : 'create';
 
 <div class="autoblogger-create-script">
     <div class="card">
-        <h2><?php echo $is_edit_mode ? __('Edit Draft', 'autoblogger') : __('Create New Draft', 'autoblogger'); ?></h2>
-        <p><?php echo $is_edit_mode ? __('Update your draft parameters and settings.', 'autoblogger') : __('Define the SEO specifications for your new draft.', 'autoblogger'); ?></p>
+        <h2><?php echo esc_html($is_edit_mode ? __('Edit Draft', 'autoblogger') : __('Create New Draft', 'autoblogger')); ?></h2>
+        <p><?php echo esc_html($is_edit_mode ? __('Update your draft parameters and settings.', 'autoblogger') : __('Define the SEO specifications for your new draft.', 'autoblogger')); ?></p>
 
         <p>
             <a href="?page=autoblogger&tab=scripts" class="button button-secondary">
-                <?php _e('← Back to My Drafts', 'autoblogger'); ?>
+                <?php esc_html_e('← Back to My Drafts', 'autoblogger'); ?>
             </a>
         </p>
 
@@ -30,10 +30,10 @@ $mode = $is_edit_mode ? 'edit' : 'create';
             <!-- Tab Navigation -->
             <div class="autoblogger-form-tabs">
                 <button type="button" class="form-tab active" data-tab="draft">
-                    <?php _e('Draft Information', 'autoblogger'); ?>
+                    <?php esc_html_e('Draft Information', 'autoblogger'); ?>
                 </button>
                 <button type="button" class="form-tab" data-tab="settings">
-                    <?php _e('Settings', 'autoblogger'); ?>
+                    <?php esc_html_e('Settings', 'autoblogger'); ?>
                 </button>
             </div>
 
@@ -42,21 +42,21 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                 <table class="form-table">
                     <tr>
                         <th scope="row">
-                            <label for="main-keyword"><?php _e('Search Intent', 'autoblogger'); ?> *</label>
+                            <label for="main-keyword"><?php esc_html_e('Search Intent', 'autoblogger'); ?> *</label>
                         </th>
                         <td>
                             <input type="text" id="main-keyword" name="mainKeyword" class="regular-text" required />
-                            <p class="description"><?php _e('Primary keyword or search intent to optimize for', 'autoblogger'); ?></p>
+                            <p class="description"><?php esc_html_e('Primary keyword or search intent to optimize for', 'autoblogger'); ?></p>
                         </td>
                     </tr>
                     <tr>
                         <th scope="row">
-                            <label for="user-description"><?php _e('Post Description', 'autoblogger'); ?></label>
+                            <label for="user-description"><?php esc_html_e('Post Description', 'autoblogger'); ?></label>
                         </th>
                         <td>
                             <textarea id="user-description" name="userDescription" rows="6"
                                       class="large-text"></textarea>
-                            <p class="description"><?php _e('Optional: Describe what the post should be about', 'autoblogger'); ?></p>
+                            <p class="description"><?php esc_html_e('Optional: Describe what the post should be about', 'autoblogger'); ?></p>
                         </td>
                     </tr>
                 </table>
@@ -64,47 +64,47 @@ $mode = $is_edit_mode ? 'edit' : 'create';
 
             <!-- Tab 2: Settings -->
             <div id="tab-settings" class="form-tab-content">
-                <h3><?php _e('Advanced Settings', 'autoblogger'); ?></h3>
-                <p class="description"><?php _e('Configure additional settings for your draft. Click on each section to expand.', 'autoblogger'); ?></p>
+                <h3><?php esc_html_e('Advanced Settings', 'autoblogger'); ?></h3>
+                <p class="description"><?php esc_html_e('Configure additional settings for your draft. Click on each section to expand.', 'autoblogger'); ?></p>
 
                 <!-- Accordion: Images -->
                 <div class="settings-accordion">
                     <div class="accordion-header">
-                        <h4><?php _e('Images', 'autoblogger'); ?></h4>
+                        <h4><?php esc_html_e('Images', 'autoblogger'); ?></h4>
                         <span class="accordion-toggle">▼</span>
                     </div>
                     <div class="accordion-content">
                         <table class="form-table">
                             <tr>
                                 <th scope="row">
-                                    <label for="ai-images-mode"><?php _e('AI Images', 'autoblogger'); ?></label>
+                                    <label for="ai-images-mode"><?php esc_html_e('AI Images', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <select id="ai-images-mode" name="aiImagesMode">
-                                        <option value="disabled"><?php _e('Disabled', 'autoblogger'); ?></option>
-                                        <option value="auto" selected><?php _e('Auto', 'autoblogger'); ?></option>
-                                        <option value="custom"><?php _e('Custom', 'autoblogger'); ?></option>
+                                        <option value="disabled"><?php esc_html_e('Disabled', 'autoblogger'); ?></option>
+                                        <option value="auto" selected><?php esc_html_e('Auto', 'autoblogger'); ?></option>
+                                        <option value="custom"><?php esc_html_e('Custom', 'autoblogger'); ?></option>
                                     </select>
-                                    <p class="description"><?php _e('Select how AI images should be generated', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('Select how AI images should be generated', 'autoblogger'); ?></p>
                                 </td>
                             </tr>
                             <tr id="ai-images-custom-count-row" style="display: none;">
                                 <th scope="row">
-                                    <label for="ai-images-count"><?php _e('Number of Images', 'autoblogger'); ?></label>
+                                    <label for="ai-images-count"><?php esc_html_e('Number of Images', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <input type="number" id="ai-images-count" name="aiImagesCount"
                                            value="5" min="1" class="small-text" />
-                                    <p class="description"><?php _e('Number of AI-generated images to create', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('Number of AI-generated images to create', 'autoblogger'); ?></p>
                                 </td>
                             </tr>
                             <tr id="ai-images-custom-descriptions-row" style="display: none;">
                                 <th scope="row">
-                                    <label for="use-custom-ai-descriptions"><?php _e('Custom AI Descriptions', 'autoblogger'); ?></label>
+                                    <label for="use-custom-ai-descriptions"><?php esc_html_e('Custom AI Descriptions', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <input type="checkbox" id="use-custom-ai-descriptions" name="useCustomAiDescriptions" value="1" />
-                                    <label for="use-custom-ai-descriptions"><?php _e('Provide custom descriptions for each AI image', 'autoblogger'); ?></label>
+                                    <label for="use-custom-ai-descriptions"><?php esc_html_e('Provide custom descriptions for each AI image', 'autoblogger'); ?></label>
                                 </td>
                             </tr>
                             <tr id="ai-images-descriptions-container" style="display: none;">
@@ -114,13 +114,13 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label><?php _e('User Images', 'autoblogger'); ?></label>
+                                    <label><?php esc_html_e('User Images', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <button type="button" id="add-user-image" class="button button-secondary">
-                                        <?php _e('+ Add User Image', 'autoblogger'); ?>
+                                        <?php esc_html_e('+ Add User Image', 'autoblogger'); ?>
                                     </button>
-                                    <p class="description"><?php _e('Add your own images to be used in the post', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('Add your own images to be used in the post', 'autoblogger'); ?></p>
                                     <div id="user-images-list" style="margin-top: 15px;"></div>
                                 </td>
                             </tr>
@@ -131,14 +131,14 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                 <!-- Accordion: Style and Audience -->
                 <div class="settings-accordion">
                     <div class="accordion-header">
-                        <h4><?php _e('Style and Audience', 'autoblogger'); ?></h4>
+                        <h4><?php esc_html_e('Style and Audience', 'autoblogger'); ?></h4>
                         <span class="accordion-toggle">▼</span>
                     </div>
                     <div class="accordion-content">
                         <table class="form-table">
                             <tr>
                                 <th scope="row">
-                                    <label for="language"><?php _e('Language', 'autoblogger'); ?></label>
+                                    <label for="language"><?php esc_html_e('Language', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <select id="language" name="language">
@@ -153,7 +153,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="search-intent"><?php _e('Search Intent Type', 'autoblogger'); ?></label>
+                                    <label for="search-intent"><?php esc_html_e('Search Intent Type', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <select id="search-intent" name="searchIntent">
@@ -162,22 +162,22 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                                         <option value="commercial">Commercial</option>
                                         <option value="navigational">Navigational</option>
                                     </select>
-                                    <p class="description"><?php _e('User\'s search intent type', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('User\'s search intent type', 'autoblogger'); ?></p>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="target-audience"><?php _e('Target Audience', 'autoblogger'); ?></label>
+                                    <label for="target-audience"><?php esc_html_e('Target Audience', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <input type="text" id="target-audience" name="targetAudience"
                                            class="regular-text" value="General audience" />
-                                    <p class="description"><?php _e('Describe your target audience', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('Describe your target audience', 'autoblogger'); ?></p>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="tone-of-voice"><?php _e('Tone of Voice', 'autoblogger'); ?></label>
+                                    <label for="tone-of-voice"><?php esc_html_e('Tone of Voice', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <select id="tone-of-voice" name="toneOfVoice">
@@ -192,7 +192,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="min-word-count"><?php _e('Minimum Word Count', 'autoblogger'); ?></label>
+                                    <label for="min-word-count"><?php esc_html_e('Minimum Word Count', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <input type="number" id="min-word-count" name="minWordCount"
@@ -201,7 +201,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="max-word-count"><?php _e('Maximum Word Count', 'autoblogger'); ?></label>
+                                    <label for="max-word-count"><?php esc_html_e('Maximum Word Count', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <input type="number" id="max-word-count" name="maxWordCount"
@@ -210,21 +210,21 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="needs-faq"><?php _e('Include FAQ Section', 'autoblogger'); ?></label>
+                                    <label for="needs-faq"><?php esc_html_e('Include FAQ Section', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <input type="checkbox" id="needs-faq" name="needsFaqSection" value="1" checked />
-                                    <label for="needs-faq"><?php _e('Add FAQ section at the end', 'autoblogger'); ?></label>
+                                    <label for="needs-faq"><?php esc_html_e('Add FAQ section at the end', 'autoblogger'); ?></label>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="notes-for-writer"><?php _e('Additional Instructions', 'autoblogger'); ?></label>
+                                    <label for="notes-for-writer"><?php esc_html_e('Additional Instructions', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <textarea id="notes-for-writer" name="notesForWriter" rows="3"
                                               class="large-text"></textarea>
-                                    <p class="description"><?php _e('Any additional instructions or requirements', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('Any additional instructions or requirements', 'autoblogger'); ?></p>
                                 </td>
                             </tr>
                         </table>
@@ -234,28 +234,28 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                 <!-- Accordion: Keywords -->
                 <div class="settings-accordion">
                     <div class="accordion-header">
-                        <h4><?php _e('Keywords', 'autoblogger'); ?></h4>
+                        <h4><?php esc_html_e('Keywords', 'autoblogger'); ?></h4>
                         <span class="accordion-toggle">▼</span>
                     </div>
                     <div class="accordion-content">
                         <table class="form-table">
                             <tr>
                                 <th scope="row">
-                                    <label for="secondary-keywords"><?php _e('Secondary Keywords', 'autoblogger'); ?></label>
+                                    <label for="secondary-keywords"><?php esc_html_e('Secondary Keywords', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <input type="text" id="secondary-keywords" name="secondaryKeywords" class="large-text" />
-                                    <p class="description"><?php _e('Comma-separated list of secondary keywords', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('Comma-separated list of secondary keywords', 'autoblogger'); ?></p>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="keyword-density"><?php _e('Keyword Density Target', 'autoblogger'); ?></label>
+                                    <label for="keyword-density"><?php esc_html_e('Keyword Density Target', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <input type="number" id="keyword-density" name="keywordDensityTarget"
                                            value="0.015" min="0" max="1" step="0.001" class="small-text" />
-                                    <p class="description"><?php _e('Target keyword density (0-1, default: 0.015)', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('Target keyword density (0-1, default: 0.015)', 'autoblogger'); ?></p>
                                 </td>
                             </tr>
                         </table>
@@ -265,64 +265,64 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                 <!-- Accordion: Link Mentions -->
                 <div class="settings-accordion">
                     <div class="accordion-header">
-                        <h4><?php _e('Link Mentions', 'autoblogger'); ?></h4>
+                        <h4><?php esc_html_e('Link Mentions', 'autoblogger'); ?></h4>
                         <span class="accordion-toggle">▼</span>
                     </div>
                     <div class="accordion-content">
                         <table class="form-table">
                             <tr>
                                 <th scope="row">
-                                    <label for="internal-links-mode"><?php _e('Internal Links', 'autoblogger'); ?></label>
+                                    <label for="internal-links-mode"><?php esc_html_e('Internal Links', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <select id="internal-links-mode" name="internalLinksMode">
-                                        <option value="auto" selected><?php _e('Auto', 'autoblogger'); ?></option>
-                                        <option value="disabled"><?php _e('Disabled', 'autoblogger'); ?></option>
-                                        <option value="custom"><?php _e('Custom', 'autoblogger'); ?></option>
+                                        <option value="auto" selected><?php esc_html_e('Auto', 'autoblogger'); ?></option>
+                                        <option value="disabled"><?php esc_html_e('Disabled', 'autoblogger'); ?></option>
+                                        <option value="custom"><?php esc_html_e('Custom', 'autoblogger'); ?></option>
                                     </select>
-                                    <p class="description"><?php _e('Select how internal links should be handled', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('Select how internal links should be handled', 'autoblogger'); ?></p>
                                 </td>
                             </tr>
                             <tr class="internal-links-custom-fields" style="display: none;">
                                 <th scope="row">
-                                    <label for="internal-links-to-use"><?php _e('Internal Links URLs', 'autoblogger'); ?></label>
+                                    <label for="internal-links-to-use"><?php esc_html_e('Internal Links URLs', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <textarea id="internal-links-to-use" name="internalLinksToUse" rows="3"
                                               class="large-text" placeholder="One URL per line"></textarea>
-                                    <p class="description"><?php _e('Specific internal links to include (one per line)', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('Specific internal links to include (one per line)', 'autoblogger'); ?></p>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="external-links-research-mode"><?php _e('External Link Research', 'autoblogger'); ?></label>
+                                    <label for="external-links-research-mode"><?php esc_html_e('External Link Research', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <select id="external-links-research-mode" name="externalLinksResearchMode">
-                                        <option value="auto" selected><?php _e('Auto', 'autoblogger'); ?></option>
-                                        <option value="disabled"><?php _e('Disabled', 'autoblogger'); ?></option>
+                                        <option value="auto" selected><?php esc_html_e('Auto', 'autoblogger'); ?></option>
+                                        <option value="disabled"><?php esc_html_e('Disabled', 'autoblogger'); ?></option>
                                     </select>
-                                    <p class="description"><?php _e('Automatically research and include external links', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('Automatically research and include external links', 'autoblogger'); ?></p>
                                 </td>
                             </tr>
                             <tr>
                                 <th scope="row">
-                                    <label for="use-custom-external-links"><?php _e('Use Custom External Links', 'autoblogger'); ?></label>
+                                    <label for="use-custom-external-links"><?php esc_html_e('Use Custom External Links', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <input type="checkbox" id="use-custom-external-links"
                                            name="useCustomExternalLinks" value="1" />
-                                    <label for="use-custom-external-links"><?php _e('Provide specific external links to include', 'autoblogger'); ?></label>
+                                    <label for="use-custom-external-links"><?php esc_html_e('Provide specific external links to include', 'autoblogger'); ?></label>
                                 </td>
                             </tr>
                             <tr class="external-links-custom-fields" style="display: none;">
                                 <th scope="row">
-                                    <label for="external-links-to-use"><?php _e('External Links URLs', 'autoblogger'); ?></label>
+                                    <label for="external-links-to-use"><?php esc_html_e('External Links URLs', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <textarea id="external-links-to-use" name="externalLinksToUse" rows="3"
                                               class="large-text" placeholder="One URL per line"></textarea>
-                                    <p class="description"><?php _e('Specific external links to include (one per line)', 'autoblogger'); ?></p>
+                                    <p class="description"><?php esc_html_e('Specific external links to include (one per line)', 'autoblogger'); ?></p>
                                 </td>
                             </tr>
                         </table>
@@ -332,23 +332,23 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                 <!-- Accordion: Brand Mentions -->
                 <div class="settings-accordion">
                     <div class="accordion-header">
-                        <h4><?php _e('Brand Mentions', 'autoblogger'); ?></h4>
+                        <h4><?php esc_html_e('Brand Mentions', 'autoblogger'); ?></h4>
                         <span class="accordion-toggle">▼</span>
                     </div>
                     <div class="accordion-content">
                         <table class="form-table">
                             <tr>
                                 <th scope="row">
-                                    <label for="mentions-brand"><?php _e('Mention Brand', 'autoblogger'); ?></label>
+                                    <label for="mentions-brand"><?php esc_html_e('Mention Brand', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <input type="checkbox" id="mentions-brand" name="mentionsBrand" value="1" />
-                                    <label for="mentions-brand"><?php _e('Include brand mentions', 'autoblogger'); ?></label>
+                                    <label for="mentions-brand"><?php esc_html_e('Include brand mentions', 'autoblogger'); ?></label>
                                 </td>
                             </tr>
                             <tr class="brand-fields" style="display: none;">
                                 <th scope="row">
-                                    <label for="brand-name"><?php _e('Brand Name', 'autoblogger'); ?></label>
+                                    <label for="brand-name"><?php esc_html_e('Brand Name', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <input type="text" id="brand-name" name="brandName" class="regular-text" />
@@ -356,7 +356,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                             </tr>
                             <tr class="brand-fields" style="display: none;">
                                 <th scope="row">
-                                    <label for="brand-description"><?php _e('Brand Description', 'autoblogger'); ?></label>
+                                    <label for="brand-description"><?php esc_html_e('Brand Description', 'autoblogger'); ?></label>
                                 </th>
                                 <td>
                                     <textarea id="brand-description" name="brandDescription" rows="2"
@@ -370,10 +370,10 @@ $mode = $is_edit_mode ? 'edit' : 'create';
 
             <p class="submit">
                 <button type="button" class="button button-primary button-large" id="submit-button">
-                    <?php echo $is_edit_mode ? __('Update & Generate Post', 'autoblogger') : __('Create & Generate Post', 'autoblogger'); ?>
+                    <?php echo esc_html($is_edit_mode ? __('Update & Generate Post', 'autoblogger') : __('Create & Generate Post', 'autoblogger')); ?>
                 </button>
                 <a href="?page=autoblogger&tab=scripts" class="button button-secondary">
-                    <?php _e('Cancel', 'autoblogger'); ?>
+                    <?php esc_html_e('Cancel', 'autoblogger'); ?>
                 </a>
             </p>
 
@@ -383,14 +383,14 @@ $mode = $is_edit_mode ? 'edit' : 'create';
         <!-- Suggestions Step Container -->
         <div id="suggestions-step-container" style="display: none; margin-top: 30px;">
             <div class="card">
-                <h2><?php _e('Select Post Architecture', 'autoblogger'); ?></h2>
-                <p><?php _e('Choose a post structure suggestion or let AI decide automatically', 'autoblogger'); ?></p>
+                <h2><?php esc_html_e('Select Post Architecture', 'autoblogger'); ?></h2>
+                <p><?php esc_html_e('Choose a post structure suggestion or let AI decide automatically', 'autoblogger'); ?></p>
                 
                 <!-- Loading State -->
                 <div id="suggestions-loading" class="autoblogger-fancy-loader" style="display: block;">
                     <div class="loader-spinner"></div>
-                    <h3><?php _e('Generating Suggestions...', 'autoblogger'); ?></h3>
-                    <p><?php _e('AI is analyzing your search intent and creating architecture options', 'autoblogger'); ?></p>
+                    <h3><?php esc_html_e('Generating Suggestions...', 'autoblogger'); ?></h3>
+                    <p><?php esc_html_e('AI is analyzing your search intent and creating architecture options', 'autoblogger'); ?></p>
                 </div>
                 
                 <!-- Suggestions List -->
@@ -399,11 +399,11 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                     
                     <p class="submit" style="margin-top: 30px;">
                         <button type="button" class="button button-secondary" id="back-to-form-button">
-                            <?php _e('← Back to Edit', 'autoblogger'); ?>
+                            <?php esc_html_e('← Back to Edit', 'autoblogger'); ?>
                         </button>
                         <button type="button" class="button button-secondary" id="reload-suggestions-button" style="margin-left: 10px;">
                             <span class="dashicons dashicons-update" style="margin-top: 3px;"></span>
-                            <?php _e('Reload Suggestions', 'autoblogger'); ?>
+                            <?php esc_html_e('Reload Suggestions', 'autoblogger'); ?>
                         </button>
                     </p>
                 </div>
@@ -413,7 +413,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
         <!-- Generation Progress Container -->
         <div id="generation-progress-container" style="display: none; margin-top: 30px;">
             <div class="card">
-                <h2><?php _e('Generating Your Post', 'autoblogger'); ?></h2>
+                <h2><?php esc_html_e('Generating Your Post', 'autoblogger'); ?></h2>
                 
                 <div class="autoblogger-progress-steps">
                     <div class="progress-step" id="step-script-text">
@@ -421,9 +421,9 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                             <span class="dashicons dashicons-admin-page"></span>
                         </div>
                         <div class="step-content">
-                            <h3><?php _e('Generating Script Text', 'autoblogger'); ?></h3>
-                            <p class="step-description"><?php _e('Creating the structured content outline', 'autoblogger'); ?></p>
-                            <div class="step-status"><?php _e('Pending...', 'autoblogger'); ?></div>
+                            <h3><?php esc_html_e('Generating Script Text', 'autoblogger'); ?></h3>
+                            <p class="step-description"><?php esc_html_e('Creating the structured content outline', 'autoblogger'); ?></p>
+                            <div class="step-status"><?php esc_html_e('Pending...', 'autoblogger'); ?></div>
                         </div>
                     </div>
                     
@@ -432,9 +432,9 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                             <span class="dashicons dashicons-editor-table"></span>
                         </div>
                         <div class="step-content">
-                            <h3><?php _e('Generating Script Definition', 'autoblogger'); ?></h3>
-                            <p class="step-description"><?php _e('Defining sections and structure', 'autoblogger'); ?></p>
-                            <div class="step-status"><?php _e('Pending...', 'autoblogger'); ?></div>
+                            <h3><?php esc_html_e('Generating Script Definition', 'autoblogger'); ?></h3>
+                            <p class="step-description"><?php esc_html_e('Defining sections and structure', 'autoblogger'); ?></p>
+                            <div class="step-status"><?php esc_html_e('Pending...', 'autoblogger'); ?></div>
                         </div>
                     </div>
                     
@@ -443,9 +443,9 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                             <span class="dashicons dashicons-edit-large"></span>
                         </div>
                         <div class="step-content">
-                            <h3><?php _e('Generating Post Content', 'autoblogger'); ?></h3>
-                            <p class="step-description"><?php _e('Writing the complete post with AI', 'autoblogger'); ?></p>
-                            <div class="step-status"><?php _e('Pending...', 'autoblogger'); ?></div>
+                            <h3><?php esc_html_e('Generating Post Content', 'autoblogger'); ?></h3>
+                            <p class="step-description"><?php esc_html_e('Writing the complete post with AI', 'autoblogger'); ?></p>
+                            <div class="step-status"><?php esc_html_e('Pending...', 'autoblogger'); ?></div>
                         </div>
                     </div>
                     
@@ -454,9 +454,9 @@ $mode = $is_edit_mode ? 'edit' : 'create';
                             <span class="dashicons dashicons-wordpress"></span>
                         </div>
                         <div class="step-content">
-                            <h3><?php _e('Creating WordPress Draft', 'autoblogger'); ?></h3>
-                            <p class="step-description"><?php _e('Publishing to WordPress editor', 'autoblogger'); ?></p>
-                            <div class="step-status"><?php _e('Pending...', 'autoblogger'); ?></div>
+                            <h3><?php esc_html_e('Creating WordPress Draft', 'autoblogger'); ?></h3>
+                            <p class="step-description"><?php esc_html_e('Publishing to WordPress editor', 'autoblogger'); ?></p>
+                            <div class="step-status"><?php esc_html_e('Pending...', 'autoblogger'); ?></div>
                         </div>
                     </div>
                 </div>
@@ -474,7 +474,7 @@ jQuery(document).ready(function($) {
     
     const mode = $('#create-script-form').data('mode');
     const interviewId = $('#create-script-form').data('interview-id');
-    const originalButtonText = '<?php echo $is_edit_mode ? __('Update & Generate Post', 'autoblogger') : __('Create & Generate Post', 'autoblogger'); ?>';
+    const originalButtonText = '<?php echo esc_js($is_edit_mode ? __('Update & Generate Post', 'autoblogger') : __('Create & Generate Post', 'autoblogger')); ?>';
     
     console.log('Mode:', mode);
     console.log('Interview ID:', interviewId);
@@ -573,9 +573,9 @@ jQuery(document).ready(function($) {
         for (let i = 0; i < count; i++) {
             const item = $('<div class="ai-image-description-item" style="margin-bottom: 15px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
             item.append('<label style="display: block; font-weight: 600; margin-bottom: 5px;">' + 
-                '<?php _e('Image', 'autoblogger'); ?> ' + (i + 1) + ':</label>');
+                '<?php esc_html_e('Image', 'autoblogger'); ?> ' + (i + 1) + ':</label>');
             item.append('<textarea class="large-text ai-image-description" data-index="' + i + '" ' +
-                'placeholder="<?php _e('Describe what this image should show...', 'autoblogger'); ?>" ' +
+                'placeholder="<?php esc_html_e('Describe what this image should show...', 'autoblogger'); ?>" ' +
                 'rows="2" style="width: 100%;"></textarea>');
             container.append(item);
         }
@@ -588,45 +588,45 @@ jQuery(document).ready(function($) {
         const item = $('<div class="user-image-item" data-id="' + imageId + '" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; background: #f9f9f9;"></div>');
         
         item.append('<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">' +
-            '<strong><?php _e('User Image', 'autoblogger'); ?> #' + (userImageCounter) + '</strong>' +
+            '<strong><?php esc_html_e('User Image', 'autoblogger'); ?> #' + (userImageCounter) + '</strong>' +
             '<button type="button" class="button button-link-delete remove-user-image" style="color: #b32d2e;">' +
-            '<?php _e('Remove', 'autoblogger'); ?></button></div>');
+            '<?php esc_html_e('Remove', 'autoblogger'); ?></button></div>');
         
         item.append('<table class="form-table" style="margin: 0;"><tbody>');
         
         // Source Type
         item.find('tbody').append('<tr>' +
-            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Source Type', 'autoblogger'); ?></label></th>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php esc_html_e('Source Type', 'autoblogger'); ?></label></th>' +
             '<td style="padding: 10px 0;"><input type="text" class="regular-text user-image-source-type" ' +
-            'placeholder="<?php _e('e.g., url, wordpress_id', 'autoblogger'); ?>" /></td>' +
+            'placeholder="<?php esc_html_e('e.g., url, wordpress_id', 'autoblogger'); ?>" /></td>' +
             '</tr>');
         
         // Source Value (Link)
         item.find('tbody').append('<tr>' +
-            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Link/URL', 'autoblogger'); ?> *</label></th>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php esc_html_e('Link/URL', 'autoblogger'); ?> *</label></th>' +
             '<td style="padding: 10px 0;"><input type="text" class="regular-text user-image-source-value" ' +
-            'placeholder="<?php _e('Image URL or WordPress ID', 'autoblogger'); ?>" required /></td>' +
+            'placeholder="<?php esc_html_e('Image URL or WordPress ID', 'autoblogger'); ?>" required /></td>' +
             '</tr>');
         
         // Suggested Alt
         item.find('tbody').append('<tr>' +
-            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Alt Text', 'autoblogger'); ?></label></th>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php esc_html_e('Alt Text', 'autoblogger'); ?></label></th>' +
             '<td style="padding: 10px 0;"><input type="text" class="regular-text user-image-alt" ' +
-            'placeholder="<?php _e('Suggested alt text for the image', 'autoblogger'); ?>" /></td>' +
+            'placeholder="<?php esc_html_e('Suggested alt text for the image', 'autoblogger'); ?>" /></td>' +
             '</tr>');
         
         // Image Description
         item.find('tbody').append('<tr>' +
-            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Image Description', 'autoblogger'); ?></label></th>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php esc_html_e('Image Description', 'autoblogger'); ?></label></th>' +
             '<td style="padding: 10px 0;"><textarea class="large-text user-image-description" rows="2" ' +
-            'placeholder="<?php _e('Describe the image and what it shows', 'autoblogger'); ?>"></textarea></td>' +
+            'placeholder="<?php esc_html_e('Describe the image and what it shows', 'autoblogger'); ?>"></textarea></td>' +
             '</tr>');
         
         // Usage Notes
         item.find('tbody').append('<tr>' +
-            '<th style="width: 150px; padding: 10px 0;"><label><?php _e('Usage Notes', 'autoblogger'); ?></label></th>' +
+            '<th style="width: 150px; padding: 10px 0;"><label><?php esc_html_e('Usage Notes', 'autoblogger'); ?></label></th>' +
             '<td style="padding: 10px 0;"><textarea class="large-text user-image-notes" rows="2" ' +
-            'placeholder="<?php _e('How should this image be used in the post?', 'autoblogger'); ?>"></textarea></td>' +
+            'placeholder="<?php esc_html_e('How should this image be used in the post?', 'autoblogger'); ?>"></textarea></td>' +
             '</tr>');
         
         item.find('tbody').append('</tbody></table>');
@@ -674,7 +674,7 @@ jQuery(document).ready(function($) {
         // Verify that required data is available
         if (typeof autobloggerData === 'undefined') {
             console.error('autobloggerData is not available');
-            alert('<?php _e('Error: Plugin data not loaded. Please refresh the page.', 'autoblogger'); ?>');
+            alert('<?php esc_html_e('Error: Plugin data not loaded. Please refresh the page.', 'autoblogger'); ?>');
             return false;
         }
 
@@ -855,11 +855,11 @@ jQuery(document).ready(function($) {
                             proceedWithFullCreation(formData, tempInterviewId);
                         });
                     } else {
-                        $('#suggestions-loading').html('<div class="notice notice-error inline"><p>' + (response.data.message || '<?php _e('Failed to start process', 'autoblogger'); ?>') + '</p></div>');
+                        $('#suggestions-loading').html('<div class="notice notice-error inline"><p>' + (response.data.message || '<?php echo esc_js(__('Failed to start process', 'autoblogger')); ?>') + '</p></div>');
                     }
                 },
                 error: function() {
-                    $('#suggestions-loading').html('<div class="notice notice-error inline"><p><?php _e('Failed to start process. Please try again.', 'autoblogger'); ?></p></div>');
+                    $('#suggestions-loading').html('<div class="notice notice-error inline"><p><?php echo esc_js(__('Failed to start process. Please try again.', 'autoblogger')); ?></p></div>');
                 }
             });
         } else {
@@ -875,7 +875,7 @@ jQuery(document).ready(function($) {
         }
         
         function proceedWithFullCreation(formData, interviewId) {
-            $button.prop('disabled', true).text('<?php _e('Processing...', 'autoblogger'); ?>');
+            $button.prop('disabled', true).text('<?php echo esc_js(__('Processing...', 'autoblogger')); ?>');
             
             // If internal links mode is auto, fetch blog links
             if (internalLinksMode === 'auto') {
@@ -916,12 +916,12 @@ jQuery(document).ready(function($) {
                     if (response.success) {
                         continueWithGeneration(interviewId);
                     } else {
-                        $status.html('<div class="notice notice-error inline"><p>' + (response.data.message || '<?php _e('Failed to save draft', 'autoblogger'); ?>') + '</p></div>');
+                        $status.html('<div class="notice notice-error inline"><p>' + (response.data.message || '<?php echo esc_js(__('Failed to save draft', 'autoblogger')); ?>') + '</p></div>');
                         $button.prop('disabled', false).text(originalText);
                     }
                 },
                 error: function() {
-                    $status.html('<div class="notice notice-error inline"><p><?php _e('Failed to save draft. Please try again.', 'autoblogger'); ?></p></div>');
+                    $status.html('<div class="notice notice-error inline"><p><?php echo esc_js(__('Failed to save draft. Please try again.', 'autoblogger')); ?></p></div>');
                     $button.prop('disabled', false).text(originalText);
                 }
             });
@@ -1003,11 +1003,11 @@ jQuery(document).ready(function($) {
                         suggestionsHtml += `
                             <div class="autoblogger-suggestion-card auto" data-suggestion="auto">
                                 <h3 class="autoblogger-suggestion-title">
-                                    <span class="autoblogger-suggestion-badge"><?php _e('Recommended', 'autoblogger'); ?></span>
-                                    <?php _e('Auto', 'autoblogger'); ?>
+                                    <span class="autoblogger-suggestion-badge"><?php esc_html_e('Recommended', 'autoblogger'); ?></span>
+                                    <?php esc_html_e('Auto', 'autoblogger'); ?>
                                 </h3>
                                 <p class="autoblogger-suggestion-description">
-                                    <?php _e('Let AI automatically determine the best structure for your post', 'autoblogger'); ?>
+                                    <?php esc_html_e('Let AI automatically determine the best structure for your post', 'autoblogger'); ?>
                                 </p>
                             </div>
                         `;
@@ -1071,18 +1071,18 @@ jQuery(document).ready(function($) {
                         const errorHtml = `
                             <div class="autoblogger-suggestion-card auto" data-suggestion="auto">
                                 <h3 class="autoblogger-suggestion-title">
-                                    <span class="autoblogger-suggestion-badge"><?php _e('Recommended', 'autoblogger'); ?></span>
-                                    <?php _e('Auto', 'autoblogger'); ?>
+                                    <span class="autoblogger-suggestion-badge"><?php esc_html_e('Recommended', 'autoblogger'); ?></span>
+                                    <?php esc_html_e('Auto', 'autoblogger'); ?>
                                 </h3>
                                 <p class="autoblogger-suggestion-description">
-                                    <?php _e('Let AI automatically determine the best structure for your post', 'autoblogger'); ?>
+                                    <?php esc_html_e('Let AI automatically determine the best structure for your post', 'autoblogger'); ?>
                                 </p>
                             </div>
                         `;
                         
                         $('#suggestions-list').html(errorHtml + 
                             '<p style="color: #856404; padding: 10px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; margin-top: 15px;">' +
-                            '<?php _e('Unable to generate suggestions. You can proceed with Auto mode.', 'autoblogger'); ?></p>');
+                            '<?php esc_html_e('Unable to generate suggestions. You can proceed with Auto mode.', 'autoblogger'); ?></p>');
                         
                         $('.autoblogger-suggestion-card').on('click', function() {
                             onSelectCallback('auto');
@@ -1101,18 +1101,18 @@ jQuery(document).ready(function($) {
                     const errorHtml = `
                         <div class="autoblogger-suggestion-card auto" data-suggestion="auto">
                             <h3 class="autoblogger-suggestion-title">
-                                <span class="autoblogger-suggestion-badge"><?php _e('Recommended', 'autoblogger'); ?></span>
-                                <?php _e('Auto', 'autoblogger'); ?>
+                                <span class="autoblogger-suggestion-badge"><?php esc_html_e('Recommended', 'autoblogger'); ?></span>
+                                <?php esc_html_e('Auto', 'autoblogger'); ?>
                             </h3>
                             <p class="autoblogger-suggestion-description">
-                                <?php _e('Let AI automatically determine the best structure for your post', 'autoblogger'); ?>
+                                <?php esc_html_e('Let AI automatically determine the best structure for your post', 'autoblogger'); ?>
                             </p>
                         </div>
                     `;
                     
                     $('#suggestions-list').html(errorHtml + 
                         '<p style="color: #856404; padding: 10px; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 4px; margin-top: 15px;">' +
-                        '<?php _e('Unable to generate suggestions. You can proceed with Auto mode.', 'autoblogger'); ?></p>');
+                        '<?php esc_html_e('Unable to generate suggestions. You can proceed with Auto mode.', 'autoblogger'); ?></p>');
                     
                     $('.autoblogger-suggestion-card').on('click', function() {
                         onSelectCallback('auto');
@@ -1126,7 +1126,7 @@ jQuery(document).ready(function($) {
             
             // Update progress: Step 1 - Script Text
             $('#step-script-text').addClass('active');
-            $('#step-script-text .step-status').text('<?php _e('In Progress...', 'autoblogger'); ?>');
+            $('#step-script-text .step-status').text('<?php esc_html_e('In Progress...', 'autoblogger'); ?>');
             
             // Step 1: Generate script text
                     $.ajax({
@@ -1144,11 +1144,11 @@ jQuery(document).ready(function($) {
                                             
                                             // Complete step 1
                                             $('#step-script-text').removeClass('active').addClass('completed');
-                                            $('#step-script-text .step-status').html('<?php _e('✓ Completed', 'autoblogger'); ?>');
+                                            $('#step-script-text .step-status').html('<?php esc_html_e('✓ Completed', 'autoblogger'); ?>');
                                             
                                             // Start step 2
                                             $('#step-script-definition').addClass('active');
-                                            $('#step-script-definition .step-status').text('<?php _e('In Progress...', 'autoblogger'); ?>');
+                                            $('#step-script-definition .step-status').text('<?php esc_html_e('In Progress...', 'autoblogger'); ?>');
                                             
                                             // Step 2: Generate script definition
                                 $.ajax({
@@ -1166,11 +1166,11 @@ jQuery(document).ready(function($) {
                                                             
                                                             // Complete step 2
                                                             $('#step-script-definition').removeClass('active').addClass('completed');
-                                                            $('#step-script-definition .step-status').html('<?php _e('✓ Completed', 'autoblogger'); ?>');
+                                                            $('#step-script-definition .step-status').html('<?php esc_html_e('✓ Completed', 'autoblogger'); ?>');
                                                             
                                                             // Start step 3
                                                             $('#step-post').addClass('active');
-                                                            $('#step-post .step-status').text('<?php _e('In Progress...', 'autoblogger'); ?>');
+                                                            $('#step-post .step-status').text('<?php esc_html_e('In Progress...', 'autoblogger'); ?>');
                                                             
                                                             // Step 3: Generate post
                                             $.ajax({
@@ -1189,11 +1189,11 @@ jQuery(document).ready(function($) {
                                                                         
                                                                         // Complete step 3
                                                                         $('#step-post').removeClass('active').addClass('completed');
-                                                                        $('#step-post .step-status').html('<?php _e('✓ Completed', 'autoblogger'); ?>');
+                                                                        $('#step-post .step-status').html('<?php esc_html_e('✓ Completed', 'autoblogger'); ?>');
                                                                         
                                                                         // Start step 4
                                                                         $('#step-wordpress').addClass('active');
-                                                                        $('#step-wordpress .step-status').text('<?php _e('In Progress...', 'autoblogger'); ?>');
+                                                                        $('#step-wordpress .step-status').text('<?php esc_html_e('In Progress...', 'autoblogger'); ?>');
                                                                         
                                                                         // Step 4: Create WordPress draft
                                                         $.ajax({
@@ -1210,74 +1210,74 @@ jQuery(document).ready(function($) {
                                                                                     
                                                                                     // Complete step 4
                                                                                     $('#step-wordpress').removeClass('active').addClass('completed');
-                                                                                    $('#step-wordpress .step-status').html('<?php _e('✓ Completed', 'autoblogger'); ?>');
+                                                                                    $('#step-wordpress .step-status').html('<?php esc_html_e('✓ Completed', 'autoblogger'); ?>');
                                                                                     
                                                                                     // Add success message
                                                                                     $('#generation-progress-container .card').append(
                                                                                         '<div class="notice notice-success inline" style="margin-top: 30px;"><p>' +
-                                                                                        '<?php _e('WordPress draft created successfully! Redirecting to editor...', 'autoblogger'); ?></p></div>'
+                                                                                        '<?php esc_html_e('WordPress draft created successfully! Redirecting to editor...', 'autoblogger'); ?></p></div>'
                                                                                     );
                                                                                     
                                                                                     setTimeout(function() {
                                                                                         window.location.href = draftResponse.data.edit_url;
                                                                                     }, 1500);
                                                                                 } else {
-                                                                                    $('#step-wordpress .step-status').html('<?php _e('✗ Failed', 'autoblogger'); ?>');
+                                                                                    $('#step-wordpress .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
                                                                                     $('#generation-progress-container .card').append(
-                                                                                        '<div class="notice notice-warning inline" style="margin-top: 30px;"><p><?php _e('Post generated but draft creation failed: ', 'autoblogger'); ?>' + 
-                                                                                        (draftResponse.data.message || '<?php _e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
+                                                                                        '<div class="notice notice-warning inline" style="margin-top: 30px;"><p><?php esc_html_e('Post generated but draft creation failed: ', 'autoblogger'); ?>' + 
+                                                                                        (draftResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
                                                                                     );
                                                                                 }
                                                                             },
                                                                             error: function() {
-                                                                                $('#step-wordpress .step-status').html('<?php _e('✗ Failed', 'autoblogger'); ?>');
+                                                                                $('#step-wordpress .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
                                                                                 $('#generation-progress-container .card').append(
-                                                                                    '<div class="notice notice-warning inline" style="margin-top: 30px;"><p><?php _e('Post generated but draft creation failed. Please try creating manually.', 'autoblogger'); ?></p></div>'
+                                                                                    '<div class="notice notice-warning inline" style="margin-top: 30px;"><p><?php esc_html_e('Post generated but draft creation failed. Please try creating manually.', 'autoblogger'); ?></p></div>'
                                                                                 );
                                                                             }
                                                                         });
                                                                     } else {
-                                                                        $('#step-post .step-status').html('<?php _e('✗ Failed', 'autoblogger'); ?>');
+                                                                        $('#step-post .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
                                                                         $('#generation-progress-container .card').append(
-                                                                            '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php _e('Failed to generate post: ', 'autoblogger'); ?>' + 
-                                                                            (postResponse.data.message || '<?php _e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
+                                                                            '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate post: ', 'autoblogger'); ?>' + 
+                                                                            (postResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
                                                                         );
                                                                     }
                                                                 },
                                                                 error: function() {
-                                                                    $('#step-post .step-status').html('<?php _e('✗ Failed', 'autoblogger'); ?>');
+                                                                    $('#step-post .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
                                                                     $('#generation-progress-container .card').append(
-                                                                        '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php _e('Failed to generate post. Please try again.', 'autoblogger'); ?></p></div>'
+                                                                        '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate post. Please try again.', 'autoblogger'); ?></p></div>'
                                                                     );
                                                                 }
                                                             });
                                                         } else {
-                                                            $('#step-script-definition .step-status').html('<?php _e('✗ Failed', 'autoblogger'); ?>');
+                                                            $('#step-script-definition .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
                                                             $('#generation-progress-container .card').append(
-                                                                '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php _e('Failed to generate script definition: ', 'autoblogger'); ?>' + 
-                                                                (defResponse.data.message || '<?php _e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
+                                                                '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate script definition: ', 'autoblogger'); ?>' + 
+                                                                (defResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
                                                             );
                                                         }
                                                     },
                                                     error: function() {
-                                                        $('#step-script-definition .step-status').html('<?php _e('✗ Failed', 'autoblogger'); ?>');
+                                                        $('#step-script-definition .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
                                                         $('#generation-progress-container .card').append(
-                                                            '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php _e('Failed to generate script definition. Please try again.', 'autoblogger'); ?></p></div>'
+                                                            '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate script definition. Please try again.', 'autoblogger'); ?></p></div>'
                                                         );
                                                     }
                                                 });
                                             } else {
-                                                $('#step-script-text .step-status').html('<?php _e('✗ Failed', 'autoblogger'); ?>');
+                                                $('#step-script-text .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
                                                 $('#generation-progress-container .card').append(
-                                                    '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php _e('Failed to generate script text: ', 'autoblogger'); ?>' + 
-                                                    (genResponse.data.message || '<?php _e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
+                                                    '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate script text: ', 'autoblogger'); ?>' + 
+                                                    (genResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
                                                 );
                                             }
                                         },
                                         error: function() {
-                                            $('#step-script-text .step-status').html('<?php _e('✗ Failed', 'autoblogger'); ?>');
+                                            $('#step-script-text .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
                                             $('#generation-progress-container .card').append(
-                                                '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php _e('Failed to generate script text. Please try again.', 'autoblogger'); ?></p></div>'
+                                                '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate script text. Please try again.', 'autoblogger'); ?></p></div>'
                                             );
                                         }
                     });
@@ -1355,7 +1355,7 @@ jQuery(document).ready(function($) {
         console.log('Reload suggestions button clicked');
         
         if (!currentInterviewIdForSuggestions) {
-            alert('<?php _e('Cannot reload suggestions. Please try again from the beginning.', 'autoblogger'); ?>');
+            alert('<?php esc_html_e('Cannot reload suggestions. Please try again from the beginning.', 'autoblogger'); ?>');
             return;
         }
         

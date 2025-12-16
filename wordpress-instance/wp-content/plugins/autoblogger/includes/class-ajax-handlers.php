@@ -47,8 +47,8 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
-        $license_key = isset($_POST['license_key']) ? sanitize_text_field($_POST['license_key']) : '';
-        $backend_url = isset($_POST['backend_url']) ? esc_url_raw($_POST['backend_url']) : '';
+        $license_key = isset($_POST['license_key']) ? sanitize_text_field(wp_unslash($_POST['license_key'])) : '';
+        $backend_url = isset($_POST['backend_url']) ? esc_url_raw(wp_unslash($_POST['backend_url'])) : '';
 
         $settings = array();
         if (!empty($license_key)) {
@@ -77,8 +77,8 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
-        $license_key = isset($_POST['license_key']) ? sanitize_text_field($_POST['license_key']) : '';
-        $site_url = isset($_POST['site_url']) ? esc_url_raw($_POST['site_url']) : get_site_url();
+        $license_key = isset($_POST['license_key']) ? sanitize_text_field(wp_unslash($_POST['license_key'])) : '';
+        $site_url = isset($_POST['site_url']) ? esc_url_raw(wp_unslash($_POST['site_url'])) : get_site_url();
 
         if (empty($license_key)) {
             wp_send_json_error(array('message' => 'Please enter a license key'));
@@ -152,7 +152,7 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
-        $license_key = isset($_POST['license_key']) ? sanitize_text_field($_POST['license_key']) : Autoblogger_Settings::get_license_key();
+        $license_key = isset($_POST['license_key']) ? sanitize_text_field(wp_unslash($_POST['license_key'])) : Autoblogger_Settings::get_license_key();
 
         if (empty($license_key)) {
             wp_send_json_error(array('message' => 'Please enter a license key first'));
@@ -276,8 +276,11 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
-        $interview_data = isset($_POST['interview_data']) ? $_POST['interview_data'] : array();
+        $interview_data = isset($_POST['interview_data']) ? wp_unslash($_POST['interview_data']) : array();
+        // Sanitize interview_data array recursively
+        $interview_data = self::sanitize_array($interview_data);
 
+        // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged
         set_time_limit(60);
 
         $response = Autoblogger_API_Client::create_interview($interview_data);
@@ -301,7 +304,8 @@ class Autoblogger_AJAX_Handlers {
     public static function update_interview() {
         try {
             // Verify nonce
-            if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'autoblogger_nonce')) {
+            $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+            if (empty($nonce) || !wp_verify_nonce($nonce, 'autoblogger_nonce')) {
                 wp_send_json_error(array('message' => 'Security check failed. Please refresh the page and try again.'));
                 return;
             }
@@ -316,13 +320,16 @@ class Autoblogger_AJAX_Handlers {
                 return;
             }
 
-            $interview_data = isset($_POST['interview_data']) ? $_POST['interview_data'] : array();
+            $interview_data = isset($_POST['interview_data']) ? wp_unslash($_POST['interview_data']) : array();
+            // Sanitize interview_data array recursively
+            $interview_data = self::sanitize_array($interview_data);
 
             if (empty($interview_data['interviewId'])) {
                 wp_send_json_error(array('message' => 'Interview ID is required'));
                 return;
             }
 
+            // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged
             set_time_limit(60);
 
             $response = Autoblogger_API_Client::update_interview($interview_data);
@@ -344,9 +351,10 @@ class Autoblogger_AJAX_Handlers {
                 wp_send_json_error(array('message' => $error_message));
             }
         } catch (Exception $e) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             error_log('Autoblogger Error in update_interview: ' . $e->getMessage());
             wp_send_json_error(array(
-                'message' => 'An error occurred: ' . $e->getMessage()
+                'message' => 'An error occurred: ' . esc_html($e->getMessage())
             ));
         }
     }
@@ -398,7 +406,7 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
-        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field($_POST['interview_id']) : '';
+        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field(wp_unslash($_POST['interview_id'])) : '';
 
         if (empty($interview_id)) {
             wp_send_json_error(array('message' => 'Interview ID is required'));
@@ -426,7 +434,8 @@ class Autoblogger_AJAX_Handlers {
     public static function generate_script_text() {
         try {
             // Verify nonce
-            if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'autoblogger_nonce')) {
+            $nonce = isset($_POST['nonce']) ? sanitize_text_field(wp_unslash($_POST['nonce'])) : '';
+            if (empty($nonce) || !wp_verify_nonce($nonce, 'autoblogger_nonce')) {
                 wp_send_json_error(array('message' => 'Security check failed. Please refresh the page and try again.'));
                 return;
             }
@@ -441,13 +450,14 @@ class Autoblogger_AJAX_Handlers {
                 return;
             }
 
-            $interview_id = isset($_POST['interview_id']) ? sanitize_text_field($_POST['interview_id']) : '';
+            $interview_id = isset($_POST['interview_id']) ? sanitize_text_field(wp_unslash($_POST['interview_id'])) : '';
 
             if (empty($interview_id)) {
                 wp_send_json_error(array('message' => 'Interview ID is required'));
                 return;
             }
 
+            // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged
             set_time_limit(180);
 
             $response = Autoblogger_API_Client::generate_script_text($interview_id);
@@ -469,9 +479,10 @@ class Autoblogger_AJAX_Handlers {
                 wp_send_json_error(array('message' => $error_message));
             }
         } catch (Exception $e) {
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
             error_log('Autoblogger Error in generate_script_text: ' . $e->getMessage());
             wp_send_json_error(array(
-                'message' => 'An error occurred: ' . $e->getMessage()
+                'message' => 'An error occurred: ' . esc_html($e->getMessage())
             ));
         }
     }
@@ -492,7 +503,7 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
-        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field($_POST['interview_id']) : '';
+        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field(wp_unslash($_POST['interview_id'])) : '';
 
         if (empty($interview_id)) {
             wp_send_json_error(array('message' => 'Interview ID is required'));
@@ -532,13 +543,14 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
-        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field($_POST['interview_id']) : '';
+        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field(wp_unslash($_POST['interview_id'])) : '';
 
         if (empty($interview_id)) {
             wp_send_json_error(array('message' => 'Interview ID is required'));
             return;
         }
 
+        // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged
         set_time_limit(120);
 
         $response = Autoblogger_API_Client::generate_suggestions($interview_id);
@@ -572,13 +584,14 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
-        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field($_POST['interview_id']) : '';
+        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field(wp_unslash($_POST['interview_id'])) : '';
 
         if (empty($interview_id)) {
             wp_send_json_error(array('message' => 'Interview ID is required'));
             return;
         }
 
+        // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged
         set_time_limit(300);
 
         $response = Autoblogger_API_Client::generate_post($interview_id);
@@ -612,7 +625,7 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
-        $post_id = isset($_POST['post_id']) ? sanitize_text_field($_POST['post_id']) : '';
+        $post_id = isset($_POST['post_id']) ? sanitize_text_field(wp_unslash($_POST['post_id'])) : '';
 
         if (empty($post_id)) {
             wp_send_json_error(array('message' => 'Post ID is required'));
@@ -650,7 +663,7 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
-        $post_id = isset($_POST['post_id']) ? sanitize_text_field($_POST['post_id']) : '';
+        $post_id = isset($_POST['post_id']) ? sanitize_text_field(wp_unslash($_POST['post_id'])) : '';
 
         if (empty($post_id)) {
             wp_send_json_error(array('message' => 'Post ID is required'));
@@ -704,7 +717,7 @@ class Autoblogger_AJAX_Handlers {
             // Try to extract excerpt from first paragraph block
             foreach ($post_data['blocks'] as $block) {
                 if (isset($block['type']) && $block['type'] === 'paragraph' && !empty($block['content'])) {
-                    $excerpt = wp_trim_words(strip_tags($block['content']), 30, '...');
+                    $excerpt = wp_trim_words(wp_strip_all_tags($block['content']), 30, '...');
                     if (!empty($excerpt)) {
                         $wp_post_data['post_excerpt'] = sanitize_textarea_field($excerpt);
                         break;
@@ -1181,7 +1194,7 @@ class Autoblogger_AJAX_Handlers {
             
             // Fallback to first 155 characters of content if no excerpt
             if (empty($meta_description)) {
-                $meta_description = wp_trim_words(strip_tags($post->post_content), 25, '...');
+                $meta_description = wp_trim_words(wp_strip_all_tags($post->post_content), 25, '...');
             }
             
             // Clean and sanitize meta description
@@ -1197,6 +1210,27 @@ class Autoblogger_AJAX_Handlers {
             'links' => $formatted_links,
             'formatted' => implode("\n", $formatted_links)
         ));
+    }
+
+    /**
+     * Recursively sanitize array data
+     * 
+     * @param mixed $data Data to sanitize
+     * @return mixed Sanitized data
+     */
+    private static function sanitize_array($data) {
+        if (is_array($data)) {
+            $sanitized = array();
+            foreach ($data as $key => $value) {
+                $sanitized_key = sanitize_key($key);
+                $sanitized[$sanitized_key] = self::sanitize_array($value);
+            }
+            return $sanitized;
+        } elseif (is_string($data)) {
+            return sanitize_text_field($data);
+        } else {
+            return $data;
+        }
     }
 
 }

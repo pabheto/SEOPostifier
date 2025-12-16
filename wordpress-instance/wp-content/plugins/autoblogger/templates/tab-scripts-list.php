@@ -11,17 +11,17 @@ if (!defined('ABSPATH')) {
 
 <div class="autoblogger-drafts-list">
     <div class="card">
-        <h2><?php _e('My Drafts', 'autoblogger'); ?></h2>
-        <p><?php _e('View and manage your post drafts.', 'autoblogger'); ?></p>
+        <h2><?php esc_html_e('My Drafts', 'autoblogger'); ?></h2>
+        <p><?php esc_html_e('View and manage your post drafts.', 'autoblogger'); ?></p>
 
         <p class="submit" style="margin: 15px 0;">
             <a href="?page=autoblogger&tab=create-script" class="button button-primary button-large">
-                <?php _e('+ Create New Draft', 'autoblogger'); ?>
+                <?php esc_html_e('+ Create New Draft', 'autoblogger'); ?>
             </a>
         </p>
 
         <div id="scripts-loading" style="margin: 20px 0;">
-            <p><?php _e('Loading drafts...', 'autoblogger'); ?></p>
+            <p><?php esc_html_e('Loading drafts...', 'autoblogger'); ?></p>
         </div>
 
         <div id="scripts-list-container" style="display: none; margin-top: 20px;">
@@ -58,30 +58,30 @@ jQuery(document).ready(function($) {
                     const interviews = response.data.interviews || [];
                     
                     if (interviews.length === 0) {
-                        $container.html('<p><?php _e('No drafts yet. Create your first draft to get started!', 'autoblogger'); ?></p>');
+                        $container.html('<p><?php echo esc_js(__('No drafts yet. Create your first draft to get started!', 'autoblogger')); ?></p>');
                     } else {
                         let html = '<table class="wp-list-table widefat fixed striped">';
                         html += '<thead><tr>';
-                        html += '<th><?php _e('Created', 'autoblogger'); ?></th>';
-                        html += '<th><?php _e('Main Keyword', 'autoblogger'); ?></th>';
-                        html += '<th><?php _e('Language', 'autoblogger'); ?></th>';
-                        html += '<th><?php _e('Status', 'autoblogger'); ?></th>';
-                        html += '<th><?php _e('Actions', 'autoblogger'); ?></th>';
+                        html += '<th><?php echo esc_js(__('Created', 'autoblogger')); ?></th>';
+                        html += '<th><?php echo esc_js(__('Main Keyword', 'autoblogger')); ?></th>';
+                        html += '<th><?php echo esc_js(__('Language', 'autoblogger')); ?></th>';
+                        html += '<th><?php echo esc_js(__('Status', 'autoblogger')); ?></th>';
+                        html += '<th><?php echo esc_js(__('Actions', 'autoblogger')); ?></th>';
                         html += '</tr></thead><tbody>';
                         
                         interviews.forEach(function(interview) {
                             const date = new Date(interview.createdAt);
                             const dateStr = date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
                             
-                            let status = '<?php _e('Draft', 'autoblogger'); ?>';
+                            let status = '<?php echo esc_js(__('Draft', 'autoblogger')); ?>';
                             if (interview.scriptText) {
-                                status = '<?php _e('Script Generated', 'autoblogger'); ?>';
+                                status = '<?php echo esc_js(__('Script Generated', 'autoblogger')); ?>';
                             }
                             if (interview.scriptDefinition) {
-                                status = '<?php _e('Definition Ready', 'autoblogger'); ?>';
+                                status = '<?php echo esc_js(__('Definition Ready', 'autoblogger')); ?>';
                             }
                             if (interview.associatedPostId) {
-                                status = '<?php _e('Post Generated', 'autoblogger'); ?>';
+                                status = '<?php echo esc_js(__('Post Generated', 'autoblogger')); ?>';
                             }
                             
                             // Get post ID - could be _id, id, or associatedPostId
@@ -94,9 +94,9 @@ jQuery(document).ready(function($) {
                             html += '<td>' + (interview.language || '-') + '</td>';
                             html += '<td>' + status + '</td>';
                             html += '<td>';
-                            html += '<a href="?page=autoblogger&tab=view-script&interviewId=' + interview.interviewId + '" class="button button-small"><?php _e('View', 'autoblogger'); ?></a>';
+                            html += '<a href="?page=autoblogger&tab=view-script&interviewId=' + interview.interviewId + '" class="button button-small"><?php echo esc_js(__('View', 'autoblogger')); ?></a>';
                             if (hasPost) {
-                                html += ' <button type="button" class="button button-small button-primary create-wp-draft-btn" data-post-id="' + postId + '" style="margin-left: 5px;"><?php _e('Create WP Draft', 'autoblogger'); ?></button>';
+                                html += ' <button type="button" class="button button-small button-primary create-wp-draft-btn" data-post-id="' + postId + '" style="margin-left: 5px;"><?php echo esc_js(__('Create WP Draft', 'autoblogger')); ?></button>';
                             }
                             html += '</td>';
                             html += '</tr>';
@@ -114,7 +114,7 @@ jQuery(document).ready(function($) {
             },
             error: function() {
                 $loading.hide();
-                $error.html('<div class="notice notice-error"><p><?php _e('Failed to load drafts. Please try again.', 'autoblogger'); ?></p></div>');
+                $error.html('<div class="notice notice-error"><p><?php echo esc_js(__('Failed to load drafts. Please try again.', 'autoblogger')); ?></p></div>');
                 $error.show();
             }
         });
@@ -127,11 +127,11 @@ jQuery(document).ready(function($) {
         const originalText = $button.text();
         
         if (!postId) {
-            alert('<?php _e('Post ID not found', 'autoblogger'); ?>');
+            alert('<?php echo esc_js(__('Post ID not found', 'autoblogger')); ?>');
             return;
         }
         
-        $button.prop('disabled', true).text('<?php _e('Creating...', 'autoblogger'); ?>');
+        $button.prop('disabled', true).text('<?php echo esc_js(__('Creating...', 'autoblogger')); ?>');
         
         $.ajax({
             url: autobloggerData.ajaxUrl,
@@ -143,17 +143,17 @@ jQuery(document).ready(function($) {
             },
             success: function(response) {
                 if (response.success) {
-                    alert('<?php _e('WordPress draft created successfully!', 'autoblogger'); ?>');
+                    alert('<?php echo esc_js(__('WordPress draft created successfully!', 'autoblogger')); ?>');
                     if (response.data.edit_url) {
                         window.location.href = response.data.edit_url;
                     }
                 } else {
-                    alert('<?php _e('Failed to create WordPress draft: ', 'autoblogger'); ?>' + (response.data.message || '<?php _e('Unknown error', 'autoblogger'); ?>'));
+                    alert('<?php echo esc_js(__('Failed to create WordPress draft: ', 'autoblogger')); ?>' + (response.data.message || '<?php echo esc_js(__('Unknown error', 'autoblogger')); ?>'));
                     $button.prop('disabled', false).text(originalText);
                 }
             },
             error: function() {
-                alert('<?php _e('Failed to create WordPress draft. Please try again.', 'autoblogger'); ?>');
+                alert('<?php echo esc_js(__('Failed to create WordPress draft. Please try again.', 'autoblogger')); ?>');
                 $button.prop('disabled', false).text(originalText);
             }
         });
