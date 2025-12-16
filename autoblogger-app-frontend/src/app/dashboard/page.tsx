@@ -5,10 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSubscription } from "@/queries/subscriptions";
+import { useCurrentUser } from "@/queries/users";
 import { FileText, Image } from "lucide-react";
 
 export default function DashboardPage() {
   const { data, isLoading, error } = useSubscription();
+  const { data: userData, isLoading: isUserLoading } = useCurrentUser();
 
   if (error) {
     return (
@@ -20,15 +22,13 @@ export default function DashboardPage() {
 
   const subscription = data?.subscription;
   const usage = data?.usage;
+  const plan = userData?.plan;
 
-  const planLimits: Record<string, { images: number; words: number }> = {
-    free: { images: 16, words: 10000 },
-    basic: { images: 64, words: 50000 },
-    premium: { images: 128, words: 100000 },
-    agency: { images: 256, words: 100000 },
+  // Get limits from the backend plan definition
+  const limits = {
+    images: plan?.aiImageGenerationPerMonth || 0,
+    words: plan?.generatedWordsPerMonth || 0,
   };
-
-  const limits = planLimits[subscription?.plan || "free"] || planLimits.free;
   const imagesUsagePercent = Math.min(
     ((usage?.aiGeneratedImages || 0) / limits.images) * 100,
     100
@@ -54,7 +54,7 @@ export default function DashboardPage() {
         <div className="mb-2">
           <div className="flex items-center gap-3 mb-3">
             <h1 className="text-4xl font-semibold tracking-tight">Dashboard</h1>
-            {!isLoading && subscription?.plan && (
+            {!isLoading && !isUserLoading && subscription?.plan && (
               <Badge
                 variant={getPlanColor(subscription.plan) as any}
                 className="text-xs font-semibold px-3 py-1"
@@ -68,7 +68,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        {isLoading ? (
+        {isLoading || isUserLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="border-border/50">

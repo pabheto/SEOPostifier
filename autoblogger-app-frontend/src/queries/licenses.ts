@@ -31,5 +31,17 @@ export const useCreateLicense = () => {
   });
 };
 
+export const useDeleteLicense = () => {
+  const queryClient = useQueryClient();
 
-
+  return useMutation<
+    { message: string; deletedLicenseId: string },
+    Error,
+    string
+  >({
+    mutationFn: (licenseId) => apiClient.delete(`/licenses/${licenseId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["licenses"] });
+    },
+  });
+};

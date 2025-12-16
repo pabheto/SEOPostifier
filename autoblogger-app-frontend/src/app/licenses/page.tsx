@@ -21,7 +21,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { useCreateLicense, useLicenses } from "@/queries/licenses";
+import {
+  useCreateLicense,
+  useDeleteLicense,
+  useLicenses,
+} from "@/queries/licenses";
 import { useCurrentUser } from "@/queries/users";
 import {
   CheckCircle2,
@@ -31,6 +35,7 @@ import {
   EyeOff,
   Key,
   Plus,
+  Trash2,
   XCircle,
 } from "lucide-react";
 import { useState } from "react";
@@ -40,7 +45,10 @@ export default function LicensesPage() {
   const { data: licenses, isLoading, error } = useLicenses();
   const { data: currentUser, isLoading: isLoadingUser } = useCurrentUser();
   const createLicense = useCreateLicense();
+  const deleteLicense = useDeleteLicense();
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [licenseToDelete, setLicenseToDelete] = useState<string | null>(null);
   const [licenseName, setLicenseName] = useState<string>("");
   const [showLicenseKeys, setShowLicenseKeys] = useState(false);
   const [visibleLicenses, setVisibleLicenses] = useState<Set<string>>(
@@ -89,6 +97,24 @@ export default function LicensesPage() {
 
   const maskLicenseKey = (key: string) => {
     return "*".repeat(key.length);
+  };
+
+  const confirmDeleteLicense = (licenseId: string) => {
+    setLicenseToDelete(licenseId);
+    setIsDeleteModalVisible(true);
+  };
+
+  const handleDeleteLicense = async () => {
+    if (!licenseToDelete) return;
+
+    try {
+      await deleteLicense.mutateAsync(licenseToDelete);
+      toast.success("License deleted successfully!");
+      setIsDeleteModalVisible(false);
+      setLicenseToDelete(null);
+    } catch (error: any) {
+      toast.error(error?.message || "Failed to delete license");
+    }
   };
 
   if (error) {
@@ -182,6 +208,7 @@ export default function LicensesPage() {
                   <TableHead>Status</TableHead>
                   <TableHead>Activated Site</TableHead>
                   <TableHead>Created At</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -271,6 +298,15 @@ export default function LicensesPage() {
                           )}
                         </div>
                       </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => confirmDeleteLicense(license.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })}
@@ -331,6 +367,52 @@ export default function LicensesPage() {
               disabled={createLicense.isPending}
             >
               Create License
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={isDeleteModalVisible}
+        onOpenChange={setIsDeleteModalVisible}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Trash2 className="h-5 w-5 text-destructive" />
+              Delete License
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this license? This action cannot
+              be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="p-3 bg-destructive/10 rounded-md text-sm text-destructive">
+            <strong>Warning:</strong> Deleting this license will permanently
+            remove it from your account.
+            {licenses?.find((l) => l.id === licenseToDelete)?.activated && (
+              <span>
+                {" "}
+                The license is currently activated and may disrupt your service.
+              </span>
+            )}
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setIsDeleteModalVisible(false);
+                setLicenseToDelete(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleDeleteLicense}
+              disabled={deleteLicense.isPending}
+            >
+              Delete License
             </Button>
           </DialogFooter>
         </DialogContent>

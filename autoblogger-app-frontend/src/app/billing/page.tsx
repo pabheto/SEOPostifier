@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
+  useAvailablePlans,
   useCancelSubscription,
   useCreateCheckout,
   useCustomerPortal,
   useSubscription,
   type BillingPeriod,
 } from "@/queries/subscriptions";
+import { useCurrentUser, type PlanDefinition } from "@/queries/users";
 import { Calendar, CheckCircle2, CreditCard, DollarSign } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -19,6 +21,8 @@ import { toast } from "sonner";
 export default function BillingPage() {
   const searchParams = useSearchParams();
   const { data, isLoading, error, refetch } = useSubscription();
+  const { data: userData, isLoading: isUserLoading } = useCurrentUser();
+  const { data: plansData, isLoading: isPlansLoading } = useAvailablePlans();
   const createCheckout = useCreateCheckout();
   const customerPortal = useCustomerPortal();
   const cancelSubscription = useCancelSubscription();
@@ -52,54 +56,49 @@ export default function BillingPage() {
 
   const subscription = data?.subscription;
   const billingPeriod = data?.billingPeriod;
+  const currentUserPlan = userData?.plan;
+  const availablePlans = plansData?.plans || [];
 
-  const planPricing: Record<
-    string,
-    {
-      monthly: number;
-      annual: number;
-      name: string;
-      color: string;
-      identifier: "free" | "basic" | "premium" | "agency";
-      features: string[];
-    }
-  > = {
-    free: {
-      monthly: 0,
-      annual: 0,
-      name: "Free",
-      color: "secondary",
-      identifier: "free",
-      features: ["16 AI images/month", "10,000 words/month", "1 license"],
-    },
-    basic: {
-      monthly: 10,
-      annual: 99,
-      name: "Basic",
-      color: "default",
-      identifier: "basic",
-      features: ["64 AI images/month", "50,000 words/month", "1 license"],
-    },
-    premium: {
-      monthly: 20,
-      annual: 199,
-      name: "Premium",
-      color: "default",
-      identifier: "premium",
-      features: ["128 AI images/month", "100,000 words/month", "1 license"],
-    },
-    agency: {
-      monthly: 50,
-      annual: 499,
-      name: "Agency",
-      color: "default",
-      identifier: "agency",
-      features: ["256 AI images/month", "100,000 words/month", "1 license"],
-    },
+  // Helper function to get plan color
+  const getPlanColor = (identifier: string) => {
+    if (identifier === "free") return "secondary";
+    return "default";
   };
 
-  const currentPlan =
-    planPricing[subscription?.plan || "free"] || planPricing.free;
+  // Helper function to format plan features
+  const formatPlanFeatures = (plan: PlanDefinition | undefined) => {
+    if (!plan) return [];
+    return [
+      `${plan.aiImageGenerationPerMonth.toLocaleString()} AI images/month`,
+      `${plan.generatedWordsPerMonth.toLocaleString()} words/month`,
+      `${plan.maximumActiveLicenses} license${
+        plan.maximumActiveLicenses !== 1 ? "s" : ""
+      }`,
+    ];
+  };
+
+  // Get current plan from available plans or user data
+  const currentPlan = currentUserPlan
+    ? {
+        monthly: currentUserPlan.monthlyPrice,
+        annual: currentUserPlan.anualPrice,
+        name: currentUserPlan.name,
+        color: getPlanColor(currentUserPlan.identifier),
+        identifier: currentUserPlan.identifier as
+          | "free"
+          | "basic"
+          | "premium"
+          | "agency",
+        features: formatPlanFeatures(currentUserPlan),
+      }
+    : {
+        monthly: 0,
+        annual: 0,
+        name: "Free",
+        color: "secondary",
+        identifier: "free" as const,
+        features: [],
+      };
 
   const handleSubscribe = async (
     planIdentifier: "basic" | "premium" | "agency",
@@ -131,9 +130,17 @@ export default function BillingPage() {
     }
   };
 
-  const plansToShow = Object.values(planPricing).filter(
-    (plan) => plan.identifier !== "free"
-  );
+  // Get plans to show (exclude free and partner plans)
+  const plansToShow = availablePlans
+    .filter((plan) => plan.identifier !== "free")
+    .map((plan) => ({
+      monthly: plan.monthlyPrice,
+      annual: plan.anualPrice,
+      name: plan.name,
+      color: getPlanColor(plan.identifier),
+      identifier: plan.identifier as "basic" | "premium" | "agency",
+      features: formatPlanFeatures(plan),
+    }));
 
   return (
     <div className="min-h-screen p-6 md:p-8 lg:p-10 bg-background">
@@ -147,7 +154,7 @@ export default function BillingPage() {
           </p>
         </div>
 
-        {isLoading ? (
+        {isLoading || isUserLoading || isPlansLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3].map((i) => (
               <Card key={i} className="border-border/50">
@@ -163,81 +170,84 @@ export default function BillingPage() {
           </div>
         ) : (
           <div className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="border-border/50 hover:border-border transition-colors shadow-sm hover:shadow-md bg-gradient-to-br from-primary/5 to-background">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-primary/10">
-                      <DollarSign className="h-4 w-4 text-primary" />
+            {/* Current Plan Overview - Modern SaaS Style */}
+            <Card className="border-border/50 shadow-sm overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                  {/* Plan Info */}
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 rounded-lg bg-primary/10 shrink-0">
+                      <DollarSign className="h-5 w-5 text-primary" />
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                      Current Plan
-                    </p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-2xl font-semibold tracking-tight">
+                          {currentPlan.name}
+                        </h3>
+                        <Badge variant="secondary" className="h-5">
+                          <CheckCircle2 className="h-3 w-3 mr-1" />
+                          Active
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        Current subscription plan
+                      </p>
+                    </div>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Badge variant={currentPlan.color as any}>
-                      {currentPlan.name.toUpperCase()}
-                    </Badge>
-                    <Badge variant="secondary">
-                      <CheckCircle2 className="h-3 w-3 mr-1" />
-                      Active
-                    </Badge>
-                  </div>
-                  <div className="text-2xl font-semibold text-primary tracking-tight">
-                    {currentPlan.monthly > 0
-                      ? `$${currentPlan.monthly}/month`
-                      : "Free"}
-                  </div>
-                </CardContent>
-              </Card>
 
-              <Card className="border-border/50 hover:border-border transition-colors shadow-sm hover:shadow-md">
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-md bg-muted">
-                      <Calendar className="h-4 w-4 text-muted-foreground" />
+                  {/* Billing Period */}
+                  {billingPeriod && (
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-lg bg-muted/50 border border-border/50">
+                      <Calendar className="h-4 w-4 text-muted-foreground shrink-0" />
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-sm">
+                        <span className="font-medium">
+                          {billingPeriod.start
+                            ? new Date(billingPeriod.start).toLocaleDateString(
+                                "en-US",
+                                { month: "short", day: "numeric" }
+                              )
+                            : "-"}
+                        </span>
+                        <span className="text-muted-foreground hidden sm:inline">
+                          →
+                        </span>
+                        <span className="font-medium">
+                          {billingPeriod.end
+                            ? new Date(billingPeriod.end).toLocaleDateString(
+                                "en-US",
+                                {
+                                  month: "short",
+                                  day: "numeric",
+                                  year: "numeric",
+                                }
+                              )
+                            : "-"}
+                        </span>
+                      </div>
                     </div>
-                    <p className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                      Billing Period
-                    </p>
+                  )}
+                </div>
+
+                {/* Plan Features Summary */}
+                {currentPlan.features.length > 0 && (
+                  <div className="mt-6 pt-6 border-t border-border/50">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {currentPlan.features.map((feature, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center gap-2 text-sm"
+                        >
+                          <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
+                          <span className="text-muted-foreground">
+                            {feature}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                      Start Date
-                    </p>
-                    <p className="text-xl font-semibold tracking-tight">
-                      {billingPeriod?.start
-                        ? new Date(billingPeriod.start).toLocaleDateString(
-                            "en-US",
-                            { month: "short", day: "numeric", year: "numeric" }
-                          )
-                        : "-"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                      End Date
-                    </p>
-                    <p className="text-xl font-semibold tracking-tight">
-                      {billingPeriod?.end
-                        ? new Date(billingPeriod.end).toLocaleDateString(
-                            "en-US",
-                            {
-                              month: "short",
-                              day: "numeric",
-                              year: "numeric",
-                            }
-                          )
-                        : "-"}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                )}
+              </CardContent>
+            </Card>
 
             {/* Billing Period Toggle */}
             <Card className="border-border/50 shadow-sm">

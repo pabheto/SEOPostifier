@@ -2,6 +2,7 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiClient } from "../lib/api-client";
+import type { PlanDefinition } from "./users";
 
 export interface Subscription {
   plan: string;
@@ -31,6 +32,18 @@ export const useSubscription = () => {
     queryKey: ["subscription", "current"],
     queryFn: () =>
       apiClient.get<SubscriptionAndUsage>("/subscriptions/current"),
+  });
+};
+
+export interface AvailablePlansResponse {
+  plans: PlanDefinition[];
+}
+
+export const useAvailablePlans = () => {
+  return useQuery<AvailablePlansResponse>({
+    queryKey: ["subscriptions", "plans"],
+    queryFn: () =>
+      apiClient.get<AvailablePlansResponse>("/subscriptions/plans"),
   });
 };
 

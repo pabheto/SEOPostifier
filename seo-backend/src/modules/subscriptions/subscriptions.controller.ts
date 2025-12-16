@@ -22,6 +22,7 @@ import {
   RequireLicense,
 } from 'src/modules/users/auth';
 import { CreateCheckoutDto } from './dto/create-checkout.dto';
+import { AVAILABLE_PLANS, PlanIdentifier } from './plans/plans.definition';
 import { StripeService } from './stripe/stripe.service';
 import { SubscriptionService } from './subscription.service';
 import { UsageService } from './usage.service';
@@ -35,6 +36,28 @@ export class SubscriptionsController {
     private readonly stripeService: StripeService,
     private readonly configService: ConfigService,
   ) {}
+
+  @Get('plans')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Get all available subscription plans',
+    description:
+      'Returns all available subscription plans with their features and pricing.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Plans retrieved successfully',
+  })
+  getAvailablePlans() {
+    return {
+      plans: [
+        AVAILABLE_PLANS[PlanIdentifier.FREE],
+        AVAILABLE_PLANS[PlanIdentifier.BASIC],
+        AVAILABLE_PLANS[PlanIdentifier.PREMIUM],
+        AVAILABLE_PLANS[PlanIdentifier.AGENCY],
+      ],
+    };
+  }
 
   @Get('current')
   @HttpCode(200)
