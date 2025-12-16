@@ -24,6 +24,10 @@ class Autoblogger_API_Client {
         
         $url = rtrim($backend_url, '/') . $endpoint;
 
+        // Print backend URL when requesting
+        error_log('Autoblogger Backend URL: ' . $backend_url);
+        error_log('Autoblogger Request URL: ' . $url . ' [' . $method . ']');
+
         $args = array(
             'method'  => $method,
             'timeout' => $timeout,

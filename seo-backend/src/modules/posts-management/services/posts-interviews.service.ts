@@ -49,7 +49,7 @@ export class PostInterviewsService {
     if (userId) {
       query.userId = userId;
     }
-    
+
     const postInterview = await this.postInterviewModel.findOne(query);
     if (!postInterview) {
       throw new NotFoundException(

@@ -93,8 +93,16 @@ class Autoblogger_Settings {
 
     /**
      * Get backend URL
+     * Priority: 1. Environment variable, 2. Database value, 3. Constant default
      */
     public static function get_backend_url() {
+        // Check environment variable first (highest priority)
+        $env_url = getenv('SEO_BACKEND_URL');
+        if (!empty($env_url)) {
+            return $env_url;
+        }
+        
+        // Fall back to database value, then constant
         return self::get('backend_url', AUTOBLOGGER_BACKEND_URL);
     }
 

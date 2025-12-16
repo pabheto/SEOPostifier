@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 define('AUTOBLOGGER_VERSION', '2.0.1');
 define('AUTOBLOGGER_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('AUTOBLOGGER_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('AUTOBLOGGER_BACKEND_URL', getenv('SEO_BACKEND_URL') ?: 'https://seo-postifier-backend-nmb9f.ondigitalocean.app/');
+define('AUTOBLOGGER_BACKEND_URL', getenv('SEO_BACKEND_URL') ?: 'https://api.autoblogger.es/');
 
 // Development mode flag - set to true to show backend URL configuration
 define('AUTOBLOGGER_DEV_MODE', false);
