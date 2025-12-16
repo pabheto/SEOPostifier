@@ -31,18 +31,18 @@ if (!defined('ABSPATH')) {
         <?php
         switch ($current_tab) {
             case 'settings':
-                include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-settings.php';
+                include AUTOBLOGGER_PLUGIN_DIR . 'templates/tab-settings.php';
                 break;
             case 'create-script':
             case 'edit-script':
-                include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-create-script.php';
+                include AUTOBLOGGER_PLUGIN_DIR . 'templates/tab-create-script.php';
                 break;
             case 'view-script':
-                include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-view-script.php';
+                include AUTOBLOGGER_PLUGIN_DIR . 'templates/tab-view-script.php';
                 break;
             case 'scripts':
             default:
-                include SEO_POSTIFIER_PLUGIN_DIR . 'templates/tab-scripts-list.php';
+                include AUTOBLOGGER_PLUGIN_DIR . 'templates/tab-scripts-list.php';
                 break;
         }
         ?>

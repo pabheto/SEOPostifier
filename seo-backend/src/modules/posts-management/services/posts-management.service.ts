@@ -253,7 +253,7 @@ export class PostsManagementService {
       ];
       // Insert images after first paragraph, rest at end
       let imageIndex = 0;
-      for (let i = 0; i < sectionContentBlocks.blocks.length; i++) {
+      for (let i = 0; i < sectionContentBlocks.blocks?.length; i++) {
         blocksForSection.push(sectionContentBlocks.blocks[i]);
         if (
           i === 0 &&

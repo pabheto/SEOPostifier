@@ -20,7 +20,7 @@ Autoblogger is a powerful WordPress plugin that automates the creation of SEO-op
 - **SEO Optimization**: Automatically generates content optimized for search engines
 - **SEO Plugin Integration**: Automatically fills meta keywords for Yoast SEO, RankMath, and All in One SEO
 - **Post Architecture Suggestions**: AI-generated post structure suggestions with reload capability
-- **Backend Integration**: Seamlessly connects to your SEO Postifier backend API
+- **Backend Integration**: Seamlessly connects to your Autoblogger backend API
 - **User-Friendly Interface**: Clean, intuitive admin interface for managing all features
 - **Settings Management**: Easy configuration of license keys and backend URLs
 
@@ -124,31 +124,6 @@ Supported SEO plugins:
 
 Yes! After viewing the AI-generated suggestions for your post structure, you can click the "Reload Suggestions" button to generate new suggestions if you're not satisfied with the initial options.
 
-## File Structure
-
-```
-autoblogger/
-├── assets/
-│   ├── css/
-│   │   └── admin.css
-│   └── js/
-│       └── modules/
-├── includes/
-│   ├── class-admin-page.php
-│   ├── class-ajax-handlers.php
-│   ├── class-api-client.php
-│   └── class-settings.php
-├── templates/
-│   ├── admin-page-wrapper.php
-│   ├── tab-create-script.php
-│   ├── tab-scripts-list.php
-│   ├── tab-settings.php
-│   └── tab-view-script.php
-├── autoblogger.php
-├── README.txt
-└── README.md
-```
-
 ## Changelog
 
 ### 2.0.1
@@ -170,18 +145,6 @@ autoblogger/
 ## Support
 
 For support, feature requests, or bug reports, please visit https://autoblogger.es or contact the development team.
-
-## Development
-
-### Environment Variables
-
-The plugin uses the following environment variable:
-
-- `SEO_BACKEND_URL`: Custom backend URL (optional, defaults to official server)
-
-### Hooks and Filters
-
-The plugin follows WordPress coding standards and uses standard WordPress hooks and filters for extensibility.
 
 ## Credits
 

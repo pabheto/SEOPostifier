@@ -22,11 +22,11 @@ if (!defined('ABSPATH')) {
         <div class="activation-divider"></div>
         
         <p class="activation-info">
-            <?php _e('To get started, you need a license key.', 'autoblogger'); ?>
+            <?php esc_html_e('To get started, you need a license key.', 'autoblogger'); ?>
         </p>
         
         <p class="activation-get-license">
-            <?php _e('To get a license, visit', 'autoblogger'); ?> 
+            <?php esc_html_e('To get a license, visit', 'autoblogger'); ?> 
             <a href="https://autoblogger.es/" target="_blank" rel="noopener noreferrer">
                 <strong>https://autoblogger.es/</strong>
             </a>
@@ -37,7 +37,7 @@ if (!defined('ABSPATH')) {
         <form id="autoblogger-activation-form">
             <div class="form-group">
                 <label for="activation-license-key">
-                    <?php _e('Enter your license key:', 'autoblogger'); ?>
+                    <?php esc_html_e('Enter your license key:', 'autoblogger'); ?>
                 </label>
                 <input type="text" 
                        id="activation-license-key" 
@@ -49,7 +49,7 @@ if (!defined('ABSPATH')) {
             
             <p class="submit">
                 <button type="submit" class="button button-primary button-hero">
-                    <?php _e('Activate License', 'autoblogger'); ?>
+                    <?php esc_html_e('Activate License', 'autoblogger'); ?>
                 </button>
             </p>
             
@@ -73,11 +73,11 @@ jQuery(document).ready(function($) {
         const licenseKey = $licenseInput.val().trim();
 
         if (!licenseKey) {
-            $status.html('<div class="notice notice-error inline"><p><?php _e('Please enter a license key', 'autoblogger'); ?></p></div>');
+            $status.html('<div class="notice notice-error inline"><p><?php echo esc_js(__('Please enter a license key', 'autoblogger')); ?></p></div>');
             return;
         }
 
-        $button.prop('disabled', true).text('<?php _e('Activating...', 'autoblogger'); ?>');
+        $button.prop('disabled', true).text('<?php echo esc_js(__('Activating...', 'autoblogger')); ?>');
         $status.html('');
 
         $.ajax({
@@ -103,7 +103,7 @@ jQuery(document).ready(function($) {
                 }
             },
             error: function(xhr) {
-                let errorMsg = '<?php _e('Failed to connect to activation server', 'autoblogger'); ?>';
+                let errorMsg = '<?php echo esc_js(__('Failed to connect to activation server', 'autoblogger')); ?>';
                 if (xhr.responseJSON && xhr.responseJSON.data && xhr.responseJSON.data.message) {
                     errorMsg = xhr.responseJSON.data.message;
                 }
