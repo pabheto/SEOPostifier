@@ -817,7 +817,9 @@ class Autoblogger_AJAX_Handlers {
             
             // Trigger RankMath's meta update hooks to ensure proper detection
             // These hooks tell RankMath that meta data has been updated
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
             do_action('rank_math/save_post', $wp_post_id);
+            // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound
             do_action('rank_math/post/update', $wp_post_id);
             
             // Clear object cache to ensure RankMath reads fresh meta data

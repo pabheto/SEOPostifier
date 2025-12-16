@@ -2,7 +2,7 @@
 Contributors: autoblogger
 Tags: seo, content generation, ai, automation, posts, wordpress, yoast, rankmath, autoblogger
 Requires at least: 5.0
-Tested up to: 6.4
+Tested up to: 6.9
 Stable tag: 2.0.1
 Requires PHP: 7.4
 License: GPLv2 or later
