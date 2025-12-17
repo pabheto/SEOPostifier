@@ -1,6 +1,6 @@
 === Autoblogger ===
 Contributors: autoblogger
-Tags: seo, content generation, ai, automation, posts, wordpress, yoast, rankmath, autoblogger
+Tags: seo, content generation, ai, automation, posts
 Requires at least: 5.0
 Tested up to: 6.9
 Stable tag: 2.0.1

@@ -9,9 +9,10 @@ if (!defined('ABSPATH')) {
 }
 
 // Get interview ID from URL parameter
-$interview_id = isset($_GET['interviewId']) ? sanitize_text_field($_GET['interviewId']) : '';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter for navigation, not form processing
+$autoblogger_interview_id = isset($_GET['interviewId']) ? sanitize_text_field(wp_unslash($_GET['interviewId'])) : '';
 
-if (empty($interview_id)) {
+if (empty($autoblogger_interview_id)) {
     echo '<div class="notice notice-error"><p>' . esc_html(__('No interview ID provided.', 'autoblogger')) . '</p></div>';
     return;
 }
@@ -398,7 +399,7 @@ if (empty($interview_id)) {
 jQuery(document).ready(function($) {
     'use strict';
 
-    const interviewId = '<?php echo esc_js($interview_id); ?>';
+    const interviewId = '<?php echo esc_js($autoblogger_interview_id); ?>';
     const $loading = $('#loading-interview');
     const $container = $('#interview-container');
     const $error = $('#interview-error');

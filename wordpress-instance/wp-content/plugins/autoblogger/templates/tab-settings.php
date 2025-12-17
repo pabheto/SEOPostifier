@@ -8,7 +8,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-$settings = Autoblogger_Settings::get_all();
+$autoblogger_settings = Autoblogger_Settings::get_all();
 ?>
 
 <div class="autoblogger-settings">
@@ -27,7 +27,7 @@ $settings = Autoblogger_Settings::get_all();
                                id="license-key" 
                                name="license_key" 
                                class="large-text code" 
-                               value="<?php echo esc_attr($settings['license_key']); ?>" 
+                               value="<?php echo esc_attr($autoblogger_settings['license_key']); ?>" 
                                placeholder="Enter your license key" 
                                readonly />
                         <p class="description">
@@ -55,7 +55,7 @@ $settings = Autoblogger_Settings::get_all();
                                id="backend-url" 
                                name="backend_url" 
                                class="large-text code" 
-                               value="<?php echo esc_attr($settings['backend_url']); ?>" 
+                               value="<?php echo esc_attr($autoblogger_settings['backend_url']); ?>" 
                                placeholder="https://autoblogger-backend-nmb9f.ondigitalocean.app/" />
                         <p class="description">
                             <?php esc_html_e('The URL of your Autoblogger backend server. Leave default unless you have a custom setup.', 'autoblogger'); ?>

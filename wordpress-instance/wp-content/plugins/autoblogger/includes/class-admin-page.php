@@ -67,7 +67,8 @@ class Autoblogger_Admin_Page {
         }
 
         // Get current tab
-        $current_tab = isset($_GET['tab']) ? sanitize_text_field($_GET['tab']) : 'scripts';
+        // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter for tab navigation, not form processing
+        $current_tab = isset($_GET['tab']) ? sanitize_text_field(wp_unslash($_GET['tab'])) : 'scripts';
 
         // Get settings
         $settings = Autoblogger_Settings::get_all();

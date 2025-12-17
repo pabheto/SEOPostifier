@@ -24,9 +24,12 @@ class Autoblogger_API_Client {
         
         $url = rtrim($backend_url, '/') . $endpoint;
 
-        // Print backend URL when requesting
-        error_log('Autoblogger Backend URL: ' . $backend_url);
-        error_log('Autoblogger Request URL: ' . $url . ' [' . $method . ']');
+        // Print backend URL when requesting (only in debug mode)
+        // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            error_log('Autoblogger Backend URL: ' . $backend_url);
+            error_log('Autoblogger Request URL: ' . $url . ' [' . $method . ']');
+        }
 
         $args = array(
             'method'  => $method,
@@ -158,8 +161,11 @@ class Autoblogger_API_Client {
             $error_message = $response->get_error_message();
             $error_code = $response->get_error_code();
             
-            // Log the error for debugging
-            error_log('Autoblogger API Error: ' . $error_code . ' - ' . $error_message);
+            // Log the error for debugging (only in debug mode)
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Autoblogger API Error: ' . $error_code . ' - ' . $error_message);
+            }
             
             return array(
                 'success' => false,
@@ -172,10 +178,13 @@ class Autoblogger_API_Client {
         $code = wp_remote_retrieve_response_code($response);
         $data = json_decode($body, true);
 
-        // Log response for debugging if there's an error
+        // Log response for debugging if there's an error (only in debug mode)
         if ($code < 200 || $code >= 300) {
-            error_log('Autoblogger API HTTP Error: ' . $code);
-            error_log('Response body: ' . substr($body, 0, 500));
+            // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+            if (defined('WP_DEBUG') && WP_DEBUG) {
+                error_log('Autoblogger API HTTP Error: ' . $code);
+                error_log('Response body: ' . substr($body, 0, 500));
+            }
         }
 
         if ($code >= 200 && $code < 300) {

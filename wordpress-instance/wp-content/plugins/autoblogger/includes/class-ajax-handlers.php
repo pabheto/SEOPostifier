@@ -276,6 +276,7 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
+        // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Will be sanitized recursively below
         $interview_data = isset($_POST['interview_data']) ? wp_unslash($_POST['interview_data']) : array();
         // Sanitize interview_data array recursively
         $interview_data = self::sanitize_array($interview_data);
@@ -510,6 +511,7 @@ class Autoblogger_AJAX_Handlers {
             return;
         }
 
+        // phpcs:ignore Squiz.PHP.DiscouragedFunctions.Discouraged
         set_time_limit(180);
 
         $response = Autoblogger_API_Client::generate_script_definition($interview_id);

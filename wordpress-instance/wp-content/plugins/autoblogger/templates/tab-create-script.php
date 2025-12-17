@@ -9,15 +9,16 @@ if (!defined('ABSPATH')) {
 }
 
 // Determine if we're in create or edit mode
-$interview_id = isset($_GET['interviewId']) ? sanitize_text_field($_GET['interviewId']) : '';
-$is_edit_mode = !empty($interview_id);
-$mode = $is_edit_mode ? 'edit' : 'create';
+// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter for navigation, not form processing
+$autoblogger_interview_id = isset($_GET['interviewId']) ? sanitize_text_field(wp_unslash($_GET['interviewId'])) : '';
+$autoblogger_is_edit_mode = !empty($autoblogger_interview_id);
+$mode = $autoblogger_is_edit_mode ? 'edit' : 'create';
 ?>
 
 <div class="autoblogger-create-script">
     <div class="card">
-        <h2><?php echo esc_html($is_edit_mode ? __('Edit Draft', 'autoblogger') : __('Create New Draft', 'autoblogger')); ?></h2>
-        <p><?php echo esc_html($is_edit_mode ? __('Update your draft parameters and settings.', 'autoblogger') : __('Define the SEO specifications for your new draft.', 'autoblogger')); ?></p>
+        <h2><?php echo esc_html($autoblogger_is_edit_mode ? __('Edit Draft', 'autoblogger') : __('Create New Draft', 'autoblogger')); ?></h2>
+        <p><?php echo esc_html($autoblogger_is_edit_mode ? __('Update your draft parameters and settings.', 'autoblogger') : __('Define the SEO specifications for your new draft.', 'autoblogger')); ?></p>
 
         <p>
             <a href="?page=autoblogger&tab=scripts" class="button button-secondary">
@@ -25,7 +26,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
             </a>
         </p>
 
-        <form id="create-script-form" data-mode="<?php echo esc_attr($mode); ?>" data-interview-id="<?php echo esc_attr($interview_id); ?>" style="margin-top: 20px;" onsubmit="return false;">
+        <form id="create-script-form" data-mode="<?php echo esc_attr($mode); ?>" data-interview-id="<?php echo esc_attr($autoblogger_interview_id); ?>" style="margin-top: 20px;" onsubmit="return false;">
             
             <!-- Tab Navigation -->
             <div class="autoblogger-form-tabs">
@@ -370,7 +371,7 @@ $mode = $is_edit_mode ? 'edit' : 'create';
 
             <p class="submit">
                 <button type="button" class="button button-primary button-large" id="submit-button">
-                    <?php echo esc_html($is_edit_mode ? __('Update & Generate Post', 'autoblogger') : __('Create & Generate Post', 'autoblogger')); ?>
+                    <?php echo esc_html($autoblogger_is_edit_mode ? __('Update & Generate Post', 'autoblogger') : __('Create & Generate Post', 'autoblogger')); ?>
                 </button>
                 <a href="?page=autoblogger&tab=scripts" class="button button-secondary">
                     <?php esc_html_e('Cancel', 'autoblogger'); ?>
@@ -474,7 +475,7 @@ jQuery(document).ready(function($) {
     
     const mode = $('#create-script-form').data('mode');
     const interviewId = $('#create-script-form').data('interview-id');
-    const originalButtonText = '<?php echo esc_js($is_edit_mode ? __('Update & Generate Post', 'autoblogger') : __('Create & Generate Post', 'autoblogger')); ?>';
+    const originalButtonText = '<?php echo esc_js($autoblogger_is_edit_mode ? __('Update & Generate Post', 'autoblogger') : __('Create & Generate Post', 'autoblogger')); ?>';
     
     console.log('Mode:', mode);
     console.log('Interview ID:', interviewId);
