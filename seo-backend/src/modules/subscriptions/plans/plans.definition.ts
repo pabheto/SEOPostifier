@@ -36,7 +36,7 @@ export const BASIC_PLAN: PlanDefinition = {
   description: 'Basic plan',
   monthlyPrice: 19,
   anualPrice: 197,
-  aiImageGenerationPerMonth: 6,
+  aiImageGenerationPerMonth: 48,
   generatedWordsPerMonth: 24000,
   maximumActiveLicenses: 1,
 };
