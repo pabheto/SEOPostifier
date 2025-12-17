@@ -1226,7 +1226,8 @@ class Autoblogger_AJAX_Handlers {
         if (is_array($data)) {
             $sanitized = array();
             foreach ($data as $key => $value) {
-                $sanitized_key = sanitize_key($key);
+                // Use sanitize_text_field instead of sanitize_key to preserve camelCase
+                $sanitized_key = sanitize_text_field($key);
                 $sanitized[$sanitized_key] = self::sanitize_array($value);
             }
             return $sanitized;

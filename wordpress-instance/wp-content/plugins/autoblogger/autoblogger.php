@@ -1,11 +1,10 @@
 <?php
 /**
- * Plugin Name: Autoblogger
+ * Plugin Name: autoblogger AI
  * Plugin URI: https://autoblogger.es
  * Description: Automatically generates WordPress posts with SEO optimizations using AI-powered backend. Includes automatic SEO meta integration for Yoast SEO, RankMath, and All in One SEO.
  * Version: 2.0.1
  * Author: Autoblogger
- * Author URI: https://autoblogger.es
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: autoblogger

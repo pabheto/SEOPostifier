@@ -1,4 +1,4 @@
-# Autoblogger
+# autoblogger AI
 
 **Version:** 2.0.1  
 **Requires:** WordPress 5.0+ | PHP 7.4+  
