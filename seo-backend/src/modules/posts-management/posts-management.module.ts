@@ -6,6 +6,8 @@ import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { UsersModule } from '../users/users.module';
 import { PostsInterviewsController } from './controllers/post-interviews.controller';
 import { PostsManagementController } from './controllers/posts-management.controller';
+import { PostInterviewsRepository } from './repositories/post-interviews.repository';
+import { PostsRepository } from './repositories/posts.repository';
 import {
   PostInterview,
   PostInterviewSchema,
@@ -32,7 +34,17 @@ import { PostsManagementService } from './services/posts-management.service';
     SubscriptionsModule, // Import SubscriptionsModule to use UsageService and SubscriptionService
   ],
   controllers: [PostsManagementController, PostsInterviewsController],
-  providers: [PostInterviewsService, PostsManagementService],
-  exports: [PostInterviewsService, PostsManagementService],
+  providers: [
+    PostInterviewsService,
+    PostsManagementService,
+    PostInterviewsRepository,
+    PostsRepository,
+  ],
+  exports: [
+    PostInterviewsService,
+    PostsManagementService,
+    PostInterviewsRepository,
+    PostsRepository,
+  ],
 })
 export class PostsManagementModule {}

@@ -222,6 +222,12 @@ export class PostInterview {
 
   @Prop({ type: Object })
   generatedScriptDefinition?: ScriptFormatDefinition;
+
+  @Prop({ type: Date })
+  createdAt?: Date;
+
+  @Prop({ type: Date })
+  updatedAt?: Date;
 }
 
 const PostInterviewSchema = SchemaFactory.createForClass(PostInterview);

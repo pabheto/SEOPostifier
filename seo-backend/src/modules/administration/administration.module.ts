@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PostsManagementModule } from '../posts-management/posts-management.module';
 import { User, UserSchema } from '../users/schemas/user.schema';
 import { UsersModule } from '../users/users.module';
 import { AdministrationController } from './administration.controller';
@@ -9,6 +10,7 @@ import { AdministrationService } from './administration.service';
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     UsersModule,
+    PostsManagementModule,
   ],
   controllers: [AdministrationController],
   providers: [AdministrationService],

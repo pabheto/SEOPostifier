@@ -30,10 +30,12 @@ import {
 import {
   ChevronRight,
   CreditCard,
+  FileText,
   Key,
   LayoutDashboard,
   ListIcon,
   Shield,
+  Users,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { usePathname } from "next/navigation";
@@ -82,8 +84,29 @@ function getCustomMenuItems(isAdmin: boolean = false): TreeMenuItem[] {
       name: "administration",
       key: "administration",
       label: "Administration",
-      route: "/administration",
-      children: [],
+      route: "/administration/users",
+      children: [
+        {
+          name: "administration-users",
+          key: "administration-users",
+          label: "Users",
+          route: "/administration/users",
+          children: [],
+          meta: {
+            icon: <Users className="h-4 w-4" />,
+          },
+        },
+        {
+          name: "administration-review",
+          key: "administration-review",
+          label: "Review Content",
+          route: "/administration/review-content",
+          children: [],
+          meta: {
+            icon: <FileText className="h-4 w-4" />,
+          },
+        },
+      ],
       meta: {
         icon: <Shield className="h-4 w-4" />,
       },
@@ -160,6 +183,10 @@ export function Sidebar() {
         ? "billing"
         : pathname?.startsWith("/licenses")
         ? "licenses"
+        : pathname?.startsWith("/administration/users")
+        ? "administration-users"
+        : pathname?.startsWith("/administration/review-content")
+        ? "administration-review"
         : pathname?.startsWith("/administration")
         ? "administration"
         : undefined),

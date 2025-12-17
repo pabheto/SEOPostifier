@@ -58,6 +58,12 @@ export class Post {
   /** Array ordenado de bloques que componen el post */
   @Prop({ default: [] })
   blocks?: PostBlock[];
+
+  @Prop({ type: Date })
+  createdAt?: Date;
+
+  @Prop({ type: Date })
+  updatedAt?: Date;
 }
 export const PostSchema = SchemaFactory.createForClass(Post);
 
