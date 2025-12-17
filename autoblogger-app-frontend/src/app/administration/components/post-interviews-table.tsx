@@ -10,6 +10,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -19,18 +25,25 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { usePostInterviews } from "@/queries/administration";
-import { Eye, FileText } from "lucide-react";
+import {
+  usePostInterviews,
+  type PostInterview,
+} from "@/queries/administration";
+import { ChevronDown, Eye, FileCode, FileText, FileType } from "lucide-react";
 import { useState } from "react";
 import { PostContentDialog } from "./post-content-dialog";
+import { ScriptDefinitionDialog } from "./script-definition-dialog";
+import { ScriptTextDialog } from "./script-text-dialog";
+
+type DialogType = "post" | "scriptDefinition" | "scriptText" | null;
 
 export function PostInterviewsTable() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const { data, isLoading, error } = usePostInterviews(page, pageSize);
-  const [selectedInterviewId, setSelectedInterviewId] = useState<string | null>(
-    null
-  );
+  const [selectedInterview, setSelectedInterview] =
+    useState<PostInterview | null>(null);
+  const [openDialog, setOpenDialog] = useState<DialogType>(null);
 
   if (error) {
     return (
@@ -101,18 +114,57 @@ export function PostInterviewsTable() {
                         )}
                       </TableCell>
                       <TableCell className="text-right">
-                        {interview.hasGeneratedContent ? (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() =>
-                              setSelectedInterviewId(interview.interviewId)
-                            }
-                            className="flex items-center gap-2"
-                          >
-                            <Eye className="h-4 w-4" />
-                            Read Content
-                          </Button>
+                        {interview.associatedPostId ||
+                        interview.generatedScriptDefinition ||
+                        interview.generatedScriptText ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="flex items-center gap-2"
+                              >
+                                <Eye className="h-4 w-4" />
+                                View
+                                <ChevronDown className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {interview.associatedPostId && (
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedInterview(interview);
+                                    setOpenDialog("post");
+                                  }}
+                                >
+                                  <FileText className="h-4 w-4 mr-2" />
+                                  Read Post
+                                </DropdownMenuItem>
+                              )}
+                              {interview.generatedScriptDefinition && (
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedInterview(interview);
+                                    setOpenDialog("scriptDefinition");
+                                  }}
+                                >
+                                  <FileCode className="h-4 w-4 mr-2" />
+                                  Read Script Definition
+                                </DropdownMenuItem>
+                              )}
+                              {interview.generatedScriptText && (
+                                <DropdownMenuItem
+                                  onClick={() => {
+                                    setSelectedInterview(interview);
+                                    setOpenDialog("scriptText");
+                                  }}
+                                >
+                                  <FileType className="h-4 w-4 mr-2" />
+                                  Read Script Text
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         ) : (
                           <span className="text-muted-foreground text-sm">
                             No content
@@ -151,16 +203,47 @@ export function PostInterviewsTable() {
         </CardContent>
       </Card>
 
-      {selectedInterviewId && (
-        <PostContentDialog
-          interviewId={selectedInterviewId}
-          open={!!selectedInterviewId}
-          onOpenChange={(open) => {
-            if (!open) {
-              setSelectedInterviewId(null);
-            }
-          }}
-        />
+      {selectedInterview && (
+        <>
+          {openDialog === "post" && (
+            <PostContentDialog
+              interviewId={selectedInterview.interviewId}
+              open={openDialog === "post"}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setSelectedInterview(null);
+                  setOpenDialog(null);
+                }
+              }}
+            />
+          )}
+          {openDialog === "scriptDefinition" && (
+            <ScriptDefinitionDialog
+              interviewId={selectedInterview.interviewId}
+              scriptDefinition={selectedInterview.generatedScriptDefinition}
+              open={openDialog === "scriptDefinition"}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setSelectedInterview(null);
+                  setOpenDialog(null);
+                }
+              }}
+            />
+          )}
+          {openDialog === "scriptText" && (
+            <ScriptTextDialog
+              interviewId={selectedInterview.interviewId}
+              scriptText={selectedInterview.generatedScriptText}
+              open={openDialog === "scriptText"}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setSelectedInterview(null);
+                  setOpenDialog(null);
+                }
+              }}
+            />
+          )}
+        </>
       )}
     </>
   );

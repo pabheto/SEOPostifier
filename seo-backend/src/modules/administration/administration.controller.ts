@@ -82,4 +82,20 @@ export class AdministrationController {
   getPostContentByInterviewId(@Param('interviewId') interviewId: string) {
     return this.administrationService.getPostContentByInterviewId(interviewId);
   }
+
+  @Get('post-interviews/:interviewId/script-text')
+  @ApiOperation({ summary: 'Get script text by interview ID (Admin only)' })
+  getScriptTextByInterviewId(@Param('interviewId') interviewId: string) {
+    return this.administrationService.getScriptTextByInterviewId(interviewId);
+  }
+
+  @Get('post-interviews/:interviewId/script-definition')
+  @ApiOperation({
+    summary: 'Get script definition by interview ID (Admin only)',
+  })
+  getScriptDefinitionByInterviewId(@Param('interviewId') interviewId: string) {
+    return this.administrationService.getScriptDefinitionByInterviewId(
+      interviewId,
+    );
+  }
 }

@@ -70,6 +70,44 @@ export function useUpdateUserRole() {
   });
 }
 
+export interface ScriptSection {
+  id: string;
+  level: "h1" | "h2" | "h3" | "h4";
+  title: string;
+  lengthRange: [number, number];
+  description: string;
+  images?: Array<{
+    sourceType: string;
+    sourceValue?: string;
+    title?: string;
+    description?: string;
+    alt?: string;
+  }>;
+  requiresDeepResearch?: boolean;
+  links: {
+    internal: string[];
+    external: string[];
+  };
+}
+
+export interface ScriptFormatDefinition {
+  indexSummary: string;
+  head: {
+    h1: string;
+    introductionDescription: string;
+    slug: string;
+    tags: string[];
+    introductionLengthRange?: [number, number];
+  };
+  body: {
+    sections: ScriptSection[];
+  };
+  faq?: {
+    description: string;
+    lengthRange?: [number, number];
+  };
+}
+
 export interface PostInterview {
   interviewId: string;
   mainKeyword: string;
@@ -80,6 +118,8 @@ export interface PostInterview {
   updatedAt: string;
   hasGeneratedContent: boolean;
   associatedPostId: string | null;
+  generatedScriptText?: string;
+  generatedScriptDefinition?: ScriptFormatDefinition;
 }
 
 export interface PostBlock {
