@@ -39,6 +39,9 @@ export type ScriptSection = {
   description: string;
   images?: IUserImage[];
   requiresDeepResearch?: boolean;
+  researchPlan?: {
+    serpQueries?: string[];
+  };
   links: {
     internal: string[];
     external: string[];

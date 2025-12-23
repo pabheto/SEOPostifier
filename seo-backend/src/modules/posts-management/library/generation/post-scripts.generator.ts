@@ -6,10 +6,25 @@ import {
   GroqService,
 } from 'src/modules/llm-manager';
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
+import { SerpPrompting } from 'src/modules/llm-manager/library/prompts/serp.prompting';
 import { PostInterview } from '../../schemas/post-interview.schema';
 import { ScriptFormatDefinition } from '../interfaces/post-interview.interface';
 
 export class PostScriptsGenerator {
+  static async createSerpQueries(
+    postInterview: PostInterview,
+    groqService: GroqService,
+  ) {
+    const createSerpQueriesPrompt =
+      SerpPrompting.CREATE_SERP_QUERIES_FROM_INTERVIEW(postInterview);
+    const createSerpQueriesResult = await groqService.generate('', {
+      model: GROQ_COMPOUND,
+      maxTokens: 8192,
+      systemPrompt: createSerpQueriesPrompt.systemPrompts,
+      userPrompt: createSerpQueriesPrompt.userPrompts,
+    });
+  }
+
   static async createSugerencesFromInterview(
     groqService: GroqService,
     mainKeyword: string,

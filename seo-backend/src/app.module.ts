@@ -12,6 +12,7 @@ import { PostsManagementModule } from './modules/posts-management/posts-manageme
 import { StorageModule } from './modules/storage';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { UsersModule } from './modules/users/users.module';
+import { PostsGenerationModule } from './modules/posts-generation/posts-generation.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { UsersModule } from './modules/users/users.module';
     LicensesModule,
     SubscriptionsModule,
     AdministrationModule,
+    PostsGenerationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

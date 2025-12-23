@@ -3,11 +3,7 @@ import {
   ScriptSection,
 } from 'src/modules/posts-management/library/interfaces/post-interview.interface';
 import { PostInterview } from '../../../posts-management/schemas/post-interview.schema';
-
-interface LLMPrompt {
-  systemPrompts: string[];
-  userPrompts: string[];
-}
+import { LLMPrompt } from 'src/library/types/llm-prompts.types';
 
 export class ScriptsPrompting {
   static readonly GENERATE_SCRIPT_ARCHITECTURE_SUGGESTION = (

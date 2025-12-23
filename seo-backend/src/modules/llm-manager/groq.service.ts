@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
 import type { ChatCompletionMessageParam } from 'groq-sdk/resources/chat/completions';
-import { MEDIUM_GENERATION_MODEL, type LLMModel } from './llm.constants';
+import { MEDIUM_GENERATION_MODEL, type GroqLLMModel } from './llm.constants';
 
 /**
  * Request options for LLM generation
  */
 export interface LLMRequestOptions {
-  model?: LLMModel;
+  model?: GroqLLMModel;
   temperature?: number;
   maxTokens?: number;
   topP?: number;

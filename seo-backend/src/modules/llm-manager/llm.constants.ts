@@ -5,7 +5,7 @@ export const MEDIUM_GENERATION_MODEL = 'llama-3.3-70b-versatile';
 
 export const CHEAP_GENERATION_MODEL = 'meta-llama/llama-guard-4-12b';
 
-export type LLMModel =
+export type GroqLLMModel =
   | typeof GROQ_COMPOUND
   | typeof GPT_OSS_120B_MODEL
   | typeof MEDIUM_GENERATION_MODEL
