@@ -3,8 +3,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {
   GROQ_COMPOUND,
+  GROQ_MEDIUM_GENERATION_MODEL,
   GroqService,
-  MEDIUM_GENERATION_MODEL,
 } from 'src/modules/llm-manager';
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
 import {
@@ -120,7 +120,7 @@ async function bootstrap() {
     );
 
   const introduction = await groqService.generate('', {
-    model: MEDIUM_GENERATION_MODEL,
+    model: GROQ_MEDIUM_GENERATION_MODEL,
     maxTokens: 8096,
     systemPrompt: introSystemPrompts,
     userPrompt: introUserPrompts,
@@ -146,7 +146,7 @@ async function bootstrap() {
       );
 
     const paragraph = await groqService.generate('', {
-      model: MEDIUM_GENERATION_MODEL,
+      model: GROQ_MEDIUM_GENERATION_MODEL,
       maxTokens: 8096,
       systemPrompt: paraSystemPrompts,
       userPrompt: paraUserPrompts,
@@ -171,7 +171,7 @@ async function bootstrap() {
       );
 
     const faq = await groqService.generate('', {
-      model: MEDIUM_GENERATION_MODEL,
+      model: GROQ_MEDIUM_GENERATION_MODEL,
       maxTokens: 8096,
       systemPrompt: faqSystemPrompts,
       userPrompt: faqUserPrompts,

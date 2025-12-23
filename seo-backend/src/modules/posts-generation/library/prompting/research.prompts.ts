@@ -78,5 +78,10 @@ OUTPUT JSON STRUCTURE:
   ]
 }
 `;
+
+    return {
+      systemPrompts: [systemPrompt],
+      userPrompts: [userPrompt],
+    };
   };
 }

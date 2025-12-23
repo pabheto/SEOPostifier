@@ -13,7 +13,7 @@ import {
 } from 'src/modules/image-generation/services/nano-banana-image-generation.service';
 import {
   GROQ_COMPOUND,
-  MEDIUM_GENERATION_MODEL,
+  GROQ_MEDIUM_GENERATION_MODEL,
 } from 'src/modules/llm-manager';
 import { GroqService } from 'src/modules/llm-manager/groq.service';
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
@@ -109,7 +109,7 @@ export class PostsManagementService {
       );
 
     const introductionPromise = this.groqService.generate('', {
-      model: MEDIUM_GENERATION_MODEL,
+      model: GROQ_MEDIUM_GENERATION_MODEL,
       maxTokens: 8096,
       systemPrompt: introSystemPrompts,
       userPrompt: introUserPrompts,
@@ -195,7 +195,7 @@ export class PostsManagementService {
       const sectionContentPromise = this.groqService.generate('', {
         model: section.requiresDeepResearch
           ? GROQ_COMPOUND
-          : MEDIUM_GENERATION_MODEL,
+          : GROQ_MEDIUM_GENERATION_MODEL,
         maxTokens: section.requiresDeepResearch ? 8096 : 8096,
         systemPrompt: sectionSystemPrompts,
         userPrompt: sectionUserPrompts,
@@ -227,7 +227,7 @@ export class PostsManagementService {
         const fixedJsonResult = await this.groqService.generate('', {
           model: section.requiresDeepResearch
             ? GROQ_COMPOUND
-            : MEDIUM_GENERATION_MODEL,
+            : GROQ_MEDIUM_GENERATION_MODEL,
           maxTokens: 8096,
           systemPrompt: fixSystemPrompts,
           userPrompt: fixUserPrompts,
@@ -289,7 +289,7 @@ export class PostsManagementService {
           );
 
         const faqResult = await this.groqService.generate('', {
-          model: MEDIUM_GENERATION_MODEL,
+          model: GROQ_MEDIUM_GENERATION_MODEL,
           maxTokens: 8096,
           systemPrompt: faqSystemPrompts,
           userPrompt: faqUserPrompts,
@@ -314,7 +314,7 @@ export class PostsManagementService {
           );
 
           const fixedJsonResult = await this.groqService.generate('', {
-            model: MEDIUM_GENERATION_MODEL,
+            model: GROQ_MEDIUM_GENERATION_MODEL,
             maxTokens: 8096,
             systemPrompt: fixSystemPrompts,
             userPrompt: fixUserPrompts,
@@ -354,7 +354,7 @@ export class PostsManagementService {
         );
 
       const fixedJsonResult = await this.groqService.generate('', {
-        model: MEDIUM_GENERATION_MODEL,
+        model: GROQ_MEDIUM_GENERATION_MODEL,
         maxTokens: 8096,
         systemPrompt: fixSystemPrompts,
         userPrompt: fixUserPrompts,

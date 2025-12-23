@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { GroqService } from './groq.service';
-import { LlmManagerController } from './llm-manager.controller';
 
 @Module({
-  controllers: [LlmManagerController],
+  controllers: [],
   providers: [GroqService],
   exports: [GroqService],
 })

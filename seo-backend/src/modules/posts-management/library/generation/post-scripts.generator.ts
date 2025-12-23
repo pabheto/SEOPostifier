@@ -1,8 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 import console from 'console';
 import {
-  GPT_OSS_120B_MODEL,
   GROQ_COMPOUND,
+  GROQ_GPT_OSS_120B_MODEL,
   GroqService,
 } from 'src/modules/llm-manager';
 import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
@@ -129,7 +129,7 @@ export class PostScriptsGenerator {
       );
 
     const scriptDefinitionResult = await groqService.generate('', {
-      model: GPT_OSS_120B_MODEL,
+      model: GROQ_GPT_OSS_120B_MODEL,
       maxTokens: 20000,
       systemPrompt: systemPrompts,
       userPrompt: userPrompts,
@@ -149,7 +149,7 @@ export class PostScriptsGenerator {
         );
 
       const fixedJsonResult = await groqService.generate('', {
-        model: GPT_OSS_120B_MODEL,
+        model: GROQ_GPT_OSS_120B_MODEL,
         maxTokens: 20000,
         systemPrompt: fixSystemPrompts,
         userPrompt: fixUserPrompts,

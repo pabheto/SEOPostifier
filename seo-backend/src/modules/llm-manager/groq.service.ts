@@ -2,33 +2,10 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
 import type { ChatCompletionMessageParam } from 'groq-sdk/resources/chat/completions';
-import { MEDIUM_GENERATION_MODEL, type GroqLLMModel } from './llm.constants';
 
-/**
- * Request options for LLM generation
- */
-export interface LLMRequestOptions {
-  model?: GroqLLMModel;
-  temperature?: number;
-  maxTokens?: number;
-  topP?: number;
-  systemPrompt?: string | string[];
-  userPrompt?: string | string[];
-}
-
-/**
- * Response from LLM generation
- */
-export interface LLMResponse {
-  content: string;
-  model: string;
-  usage: {
-    promptTokens: number;
-    completionTokens: number;
-    totalTokens: number;
-  };
-  finishReason: string;
-}
+import { GROQ_MEDIUM_GENERATION_MODEL } from './llm.constants';
+import { LLMRequestOptions, LLMResponse } from './types/llm.types';
+import { debug } from 'console';
 
 @Injectable()
 export class GroqService {
@@ -65,7 +42,7 @@ export class GroqService {
     options: LLMRequestOptions = {},
   ): Promise<LLMResponse> {
     const {
-      model = MEDIUM_GENERATION_MODEL,
+      model = GROQ_MEDIUM_GENERATION_MODEL,
       temperature = 0.7,
       maxTokens = 1024,
       topP = 1,
