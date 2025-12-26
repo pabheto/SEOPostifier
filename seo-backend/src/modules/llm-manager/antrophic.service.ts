@@ -19,10 +19,10 @@ export class AntrophicService {
   private readonly logger = new Logger(AntrophicService.name);
   private readonly anthropic: Anthropic;
   constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>('ANTHROPIC_API_KEY');
+    const apiKey = this.configService.get<string>('ANTROPHIC_API_KEY');
 
     if (!apiKey) {
-      throw new Error('ANTHROPIC_API_KEY not found in environment variables');
+      throw new Error('ANTROPHIC_API_KEY not found in environment variables');
     }
 
     this.anthropic = new Anthropic({ apiKey });

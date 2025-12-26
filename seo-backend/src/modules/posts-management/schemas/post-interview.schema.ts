@@ -165,7 +165,7 @@ export class PostInterview {
 
   /** Enlaces internos a usar */
   @Prop({ type: [String], default: [] })
-  internalLinksToUse?: string[];
+  internalLinksToUse?: string[]; // We have to deprecate and add descriptions
 
   /** Enlaces externos a usar */
   @Prop({ type: [String], default: [] })

@@ -37,6 +37,7 @@
     "class-validator": "^0.14.2",
     "exa-js": "^2.0.11",
     "groq-sdk": "^0.35.0",
+    "ioredis": "^5.8.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.20.0",
     "openai": "^6.15.0",

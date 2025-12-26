@@ -31,6 +31,12 @@ export type IUserImage = {
 
 export type HeadingLevel = 'h1' | 'h2' | 'h3' | 'h4';
 
+export type LinkMention = {
+  url: string;
+  description: string;
+  type: 'internal' | 'external';
+};
+
 export type ScriptSection = {
   id: string;
   level: HeadingLevel;
@@ -38,14 +44,7 @@ export type ScriptSection = {
   lengthRange: [number, number];
   description: string;
   images?: IUserImage[];
-  requiresDeepResearch?: boolean;
-  researchPlan?: {
-    serpQueries?: string[];
-  };
-  links: {
-    internal: string[];
-    external: string[];
-  };
+  links: LinkMention[];
 };
 
 export type ScriptFAQ = {

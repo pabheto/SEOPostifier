@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { LlmManagerModule } from '../llm-manager';
-import { PostScriptsGenerator } from './library/generation/post-scripts.generator';
+import { GeneratePostScript_Pipeline } from './pipelines/generate-post-script.pipeline';
 
 @Module({
   imports: [LlmManagerModule],
-  providers: [PostScriptsGenerator],
-  exports: [PostScriptsGenerator],
+  providers: [GeneratePostScript_Pipeline],
+  exports: [GeneratePostScript_Pipeline],
 })
 export class PostsGenerationModule {}

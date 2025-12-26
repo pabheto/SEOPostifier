@@ -1,32 +1,10 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  forwardRef,
-} from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { UsageExceededException } from 'src/library/exceptions/usage.exceptions';
-import {
-  AspectRatio,
-  NanoBananaImageGenerationService,
-} from 'src/modules/image-generation/services/nano-banana-image-generation.service';
-import {
-  GROQ_COMPOUND,
-  GROQ_MEDIUM_GENERATION_MODEL,
-} from 'src/modules/llm-manager';
+import { NanoBananaImageGenerationService } from 'src/modules/image-generation/services/nano-banana-image-generation.service';
 import { GroqService } from 'src/modules/llm-manager/groq.service';
-import { ScriptsPrompting } from 'src/modules/llm-manager/library/prompts/scripts.prompting';
-import { AVAILABLE_PLANS } from 'src/modules/subscriptions/plans/plans.definition';
 import { SubscriptionService } from 'src/modules/subscriptions/subscription.service';
 import { UsageService } from 'src/modules/subscriptions/usage.service';
-import { countPostUsage } from '../library/accounting/post-accounting';
-import { InterviewStatus } from '../library/interfaces/post-interview.interface';
-import {
-  PostBlock,
-  PostBlockType,
-  PostStatus,
-} from '../library/interfaces/posts.interface';
 import { PostInterviewDocument } from '../schemas/post-interview.schema';
 import { Post, PostDocument } from '../schemas/posts.schema';
 import { PostInterviewsService } from './posts-interviews.service';
@@ -46,7 +24,7 @@ export class PostsManagementService {
 
   async createPostDraftFromInterview(postInterview: PostInterviewDocument) {
     // Usage checks
-    const currentCycleUserUsage =
+    /* const currentCycleUserUsage =
       await this.usageService.getUsageForCurrentBillingPeriod(
         postInterview.userId as string,
       );
@@ -401,6 +379,7 @@ export class PostsManagementService {
     );
 
     return post;
+    */
   }
 
   async listPostsForUser(userId: string) {

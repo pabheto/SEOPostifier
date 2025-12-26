@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import * as fs from 'fs';
 import * as path from 'path';
 import { AppModule } from 'src/app.module';
-import { PostScriptsGenerator } from 'src/modules/posts-generation/library/generation/post-scripts.generator';
+import { GeneratePostScript_Pipeline } from 'src/modules/posts-generation/pipelines/generate-post-script.pipeline';
 import {
   InterviewStatus,
   SearchIntent,
@@ -13,24 +13,78 @@ import { PostInterview } from 'src/modules/posts-management/schemas/post-intervi
 const logFilePath = path.join(process.cwd(), 'logs', 'test-pipelines.log');
 fs.mkdirSync(path.dirname(logFilePath), { recursive: true });
 
-function logStep(message: string, data?: unknown) {
+function safeSerialize(data: unknown) {
+  try {
+    return JSON.stringify(data, null, 2);
+  } catch (error) {
+    return `"__unserializable__:${(error as Error)?.message ?? 'unknown'}"`;
+  }
+}
+
+function writeLog(message: string, data?: unknown, durationMs?: number) {
   const timestamp = new Date().toISOString();
-  const payload =
-    data !== undefined
-      ? `${message} | data=${JSON.stringify(data, null, 2)}`
-      : message;
-  const line = `[${timestamp}] ${payload}\n`;
+  const payloadParts = [message];
+
+  if (typeof durationMs === 'number') {
+    payloadParts.push(`durationMs=${durationMs.toFixed(2)}`);
+  }
+
+  if (data !== undefined) {
+    payloadParts.push(`data=${safeSerialize(data)}`);
+  }
+
+  const line = `[${timestamp}] ${payloadParts.join(' | ')}\n`;
   fs.appendFileSync(logFilePath, line, { encoding: 'utf8' });
   console.log(line.trim()); // keep console visibility while debugging
 }
 
-async function testPipelineScript() {
-  logStep('Bootstrapping Nest application');
-  const app = await NestFactory.create(AppModule);
-  await app.init();
-  logStep('Nest application initialized');
+async function logStep<T>(
+  message: string,
+  action: () => Promise<T> | T,
+  dataSelector?: (result: T) => unknown,
+): Promise<T>;
+async function logStep(message: string): Promise<void>;
+async function logStep<T>(
+  message: string,
+  action?: () => Promise<T> | T,
+  dataSelector?: (result: T) => unknown,
+): Promise<T | void> {
+  if (!action) {
+    writeLog(message);
+    return;
+  }
 
-  const pipelineScriptGenerator = app.get(PostScriptsGenerator);
+  const start = Date.now();
+
+  try {
+    const result = await action();
+    const dataToLog =
+      typeof dataSelector === 'function' ? dataSelector(result) : result;
+
+    writeLog(message, dataToLog, Date.now() - start);
+    return result;
+  } catch (error) {
+    writeLog(
+      `${message} (failed)`,
+      (error as Error)?.message ?? error,
+      Date.now() - start,
+    );
+    throw error;
+  }
+}
+
+async function testPipelineScript() {
+  const app = await logStep(
+    'Bootstrapping Nest application',
+    async () => {
+      const appInstance = await NestFactory.create(AppModule);
+      await appInstance.init();
+      return appInstance;
+    },
+    () => undefined, // avoid serializing the Nest app
+  );
+
+  const pipelineScriptGenerator = app.get(GeneratePostScript_Pipeline);
 
   const testPostInterview: PostInterview = {
     interviewId: 'testInterviewId',
@@ -64,35 +118,52 @@ async function testPipelineScript() {
     userId: 'testUserId',
   };
 
-  logStep('Using test post interview payload', testPostInterview);
+  await logStep('Using test post interview payload', () => testPostInterview);
 
-  const exaResearchPlan =
-    await pipelineScriptGenerator.STEP_generateResearchPlanForSerpQueries(
+  const exaResearchPlan = await logStep('Generated Exa research plan', () => {
+    return pipelineScriptGenerator.STEP_generateResearchPlanForSerpQueries(
       testPostInterview,
     );
+  });
 
-  logStep('Generated Exa research plan', exaResearchPlan);
+  const exaResearchResults = await logStep(
+    'Gathered Exa research results',
+    () =>
+      pipelineScriptGenerator.STEP_gatherExaResearchResults(exaResearchPlan),
+  );
 
-  const exaResearchResults =
-    await pipelineScriptGenerator.STEP_gatherExaResearchResults(
-      exaResearchPlan,
+  const summarizedSERPResults = await logStep(
+    'Summarized Exa research results',
+    () =>
+      pipelineScriptGenerator.STEP_summarizeExaResearchResults(
+        exaResearchResults,
+      ),
+  );
+
+  const optimizedSERPResults = await logStep(
+    'Optimized Exa research results',
+    () =>
+      pipelineScriptGenerator.STEP_optimizeSERP_SearchResults(
+        summarizedSERPResults,
+      ),
+  );
+
+  const scriptDraft = await logStep('Created script draft', () => {
+    return pipelineScriptGenerator.STEP_createScriptDraft(
+      testPostInterview,
+      optimizedSERPResults,
     );
+  });
 
-  logStep('Gathered Exa research results', exaResearchResults);
+  await logStep('Optimized script', () =>
+    pipelineScriptGenerator.STEP_optimizeScriptDraft(
+      testPostInterview,
+      optimizedSERPResults,
+      scriptDraft,
+    ),
+  );
 
-  const summarizedSERPResults =
-    await pipelineScriptGenerator.STEP_summarizeExaResearchResults(
-      exaResearchResults,
-    );
-
-  logStep('Summarized Exa research results', summarizedSERPResults);
-
-  const optimizedSERPResults =
-    await pipelineScriptGenerator.STEP_optimizeSERP_SearchResults(
-      summarizedSERPResults,
-    );
-
-  logStep('Optimized Exa research results', optimizedSERPResults);
+  await logStep('Script generated successfully');
 }
 
 void testPipelineScript().catch((error) => {

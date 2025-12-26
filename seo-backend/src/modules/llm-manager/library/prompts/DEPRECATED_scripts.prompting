@@ -1,9 +1,9 @@
+import { LLMPrompt } from 'src/library/types/llm-prompts.types';
 import {
   ScriptFAQ,
   ScriptSection,
 } from 'src/modules/posts-management/library/interfaces/post-interview.interface';
 import { PostInterview } from '../../../posts-management/schemas/post-interview.schema';
-import { LLMPrompt } from 'src/library/types/llm-prompts.types';
 
 export class ScriptsPrompting {
   static readonly GENERATE_SCRIPT_ARCHITECTURE_SUGGESTION = (
@@ -261,22 +261,7 @@ DONT REFERENCE BRANDS THAT DOESNT EXIST
         : `- You have to find in search engines up to ${postInterview.externalLinksToIncludeAutomatically} external links to include in the article. Find them with purpose when creating the script. Distribute them in the different sections. Format each link as \`[link text](full-url) - description\`.`
       : ''
   }
-  ${
-    postInterview.externalLinksToUse &&
-    `
-    CUSTOM EXTERNAL LINKS USAGE:
-  - You have to use the following external links: ${postInterview.externalLinksToUse.join(', ')}. Distribute them in the sections during the script creation.
-  - When including these links in the script, format each as: \`[descriptive link text](url)\` - description of the source and usage.
-  `
-  }
-  ${
-    postInterview.internalLinksToUse &&
-    `
-  CUSTOM INTERNAL LINKS USAGE:
-  - You have to use the following internal links: ${postInterview.internalLinksToUse.join(', ')}. Distribute them in the sections during the script creation.
-  - When including these links in the script, format each as: \`[descriptive link text](slug-or-url)\` - description of the source and usage.
-  `
-  }
+
 
   ${
     postInterview.includeInternalLinksAutomatically &&

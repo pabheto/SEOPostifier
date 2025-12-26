@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import cleanWebContent from 'src/library/parsing/clean-webpage-text.util';
 import { executeWithRateLimit } from 'src/library/rate-limit.util';
+import {
+  AnthropicModel,
+  AntrophicService,
+} from 'src/modules/llm-manager/antrophic.service';
 import { ExaService } from 'src/modules/llm-manager/exa.service';
 import {
   OpenaiModel,
@@ -11,17 +15,19 @@ import {
   SERP_ResearchPlan,
   SERP_ResearchSearchResults,
   SERP_SearchResult,
-} from '../interfaces/serp.interfaces';
+} from '../library/interfaces/serp.interfaces';
 import {
   ResearchPrompts,
   RESPONSE_SummarizeSERP_SearchResults,
-} from '../prompting/research.prompts';
+} from '../library/prompting/research.prompts';
+import { ScriptGenerationPrompts } from '../library/prompting/script-generation.prompts';
 
 @Injectable()
-export class PostScriptsGenerator {
+export class GeneratePostScript_Pipeline {
   constructor(
     private readonly openaiService: OpenaiService,
     private readonly exaService: ExaService,
+    private readonly antrophicService: AntrophicService,
   ) {}
 
   async STEP_generateResearchPlanForSerpQueries(
@@ -170,6 +176,50 @@ export class PostScriptsGenerator {
       optimizeSERP_SearchResultsResult.content,
     ) as RESPONSE_SummarizeSERP_SearchResults;
     return parsedOptimizeSERP_SearchResultsResult;
+  }
+
+  async STEP_createScriptDraft(
+    postInterview: PostInterview,
+    serpKnowledgeBase: RESPONSE_SummarizeSERP_SearchResults,
+  ): Promise<string> {
+    const createScriptDraftPrompt =
+      ScriptGenerationPrompts.GENERATE_SEO_POST_SCRIPT_BASE_PROMPT({
+        postInterview,
+        summarizedSERPKnowledgeBase: serpKnowledgeBase,
+      });
+    const createScriptDraftResult = await this.antrophicService.generate(
+      createScriptDraftPrompt,
+      {
+        model: AnthropicModel.CLAUDE_SONNET_4_5,
+        maxTokens: 20480,
+      },
+    );
+
+    return createScriptDraftResult.content;
+  }
+
+  async STEP_optimizeScriptDraft(
+    postInterview: PostInterview,
+    serpKnowledgeBase: RESPONSE_SummarizeSERP_SearchResults,
+    scriptText: string,
+  ): Promise<string> {
+    const optimizeScriptDraftPrompt =
+      ScriptGenerationPrompts.OPTIMIZE_SEO_SCRIPT_WORD_LENGTH_LINKS_AND_IMAGES_PROMPT(
+        {
+          postInterview,
+          serpKnowledgeBase,
+          scriptText,
+        },
+      );
+    const optimizeScriptDraftResult = await this.antrophicService.generate(
+      optimizeScriptDraftPrompt,
+      {
+        model: AnthropicModel.CLAUDE_SONNET_4_5,
+        maxTokens: 20480,
+      },
+    );
+
+    return optimizeScriptDraftResult.content;
   }
 
   /**
