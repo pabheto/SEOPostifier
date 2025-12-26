@@ -1,15 +1,11 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
+import { GeneratePostSuggestions_Util } from 'src/modules/posts-generation/pipelines/generate-post-suggestions.util';
 import { GroqService } from '../../llm-manager';
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';
 import { UpdatePostInterviewDto } from '../dto/update-post-interview.dto';
-import { PostScriptsGenerator } from '../library/generation/post-scripts.generator';
 import { InterviewStatus } from '../library/interfaces/post-interview.interface';
 import {
   PostInterview,
@@ -62,14 +58,14 @@ export class PostInterviewsService {
   async generateAndUpdateScriptText(
     postInterview: PostInterviewDocument,
   ): Promise<PostInterviewDocument> {
-    const scriptText = await PostScriptsGenerator.createScriptTextFromInterview(
+    /* const scriptText = await PostScriptsGenerator.createScriptTextFromInterview(
       postInterview,
       this.groqService,
     );
 
     postInterview.generatedScriptText = scriptText;
     postInterview.status = InterviewStatus.SCRIPT_TEXT_GENERATED;
-    await postInterview.save();
+    await postInterview.save(); */
 
     return postInterview;
   }
@@ -77,7 +73,7 @@ export class PostInterviewsService {
   async generateAndUpdateScriptDefinition(
     postInterview: PostInterviewDocument,
   ): Promise<PostInterviewDocument> {
-    if (
+    /* if (
       !postInterview.generatedScriptText ||
       (postInterview.status !== InterviewStatus.SCRIPT_TEXT_GENERATED &&
         postInterview.status !== InterviewStatus.SCRIPT_DEFINITION_GENERATED)
@@ -98,6 +94,7 @@ export class PostInterviewsService {
     postInterview.status = InterviewStatus.SCRIPT_DEFINITION_GENERATED;
     await postInterview.save();
 
+    return postInterview; */
     return postInterview;
   }
 
@@ -165,7 +162,7 @@ export class PostInterviewsService {
 
   async generateSuggestionsFromInterview(postInterview: PostInterviewDocument) {
     const suggestions =
-      await PostScriptsGenerator.createSugerencesFromInterview(
+      await GeneratePostSuggestions_Util.createSugerencesFromInterview(
         this.groqService,
         postInterview.mainKeyword,
         postInterview.secondaryKeywords ?? [],
