@@ -23,6 +23,8 @@ export class PostScriptsGenerator {
       systemPrompt: createSerpQueriesPrompt.systemPrompts,
       userPrompt: createSerpQueriesPrompt.userPrompts,
     });
+
+    return createSerpQueriesResult.content;
   }
 
   static async createSugerencesFromInterview(

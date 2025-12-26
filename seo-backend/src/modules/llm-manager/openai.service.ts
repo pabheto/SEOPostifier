@@ -5,7 +5,7 @@ import { LLMPrompt } from 'src/library/types/llm-prompts.types';
 import { LLMRequestOptions, LLMResponse } from './types/llm.types';
 
 export enum OpenaiModel {
-  GPT_52_MINI = 'gpt-5-mini',
+  GPT_52_MINI = 'gpt-5-mini-2025-08-07',
 }
 
 @Injectable()
@@ -51,7 +51,7 @@ export class OpenaiService {
       model: model,
       messages: allMessages,
       // temperature: temperature,
-      max_tokens: maxTokens,
+      max_completion_tokens: maxTokens,
     });
 
     const choice = completion.choices?.[0];

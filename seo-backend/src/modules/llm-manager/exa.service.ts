@@ -27,6 +27,10 @@ export class ExaService {
   }) {
     const results = await this.exa.search(query, {
       numResults,
+      contents: {
+        text: true,
+        context: { maxCharacters: 10000, maxSnippets: 10 },
+      },
     });
     return results;
   }

@@ -1,12 +1,15 @@
+import { LLMPrompt } from 'src/library/types/llm-prompts.types';
 import { PostInterview } from 'src/modules/posts-management/schemas/post-interview.schema';
 
 export class SerpPrompting {
   static readonly CREATE_SERP_QUERIES_FROM_INTERVIEW = (
     postInterview: PostInterview,
-  ) => {
+  ): LLMPrompt => {
     return {
-      systemPrompt: `SYSTEM:
+      systemPrompts: [
+        `SYSTEM:
 You are a technical SEO researcher.
+Your goal is to create a research plan to obtain useful information for a professional SEO optimized article about the given topic.
 Your task is to generate search queries for an API like Exa.
 DO NOT write content.
 DO NOT provide explanations.
@@ -20,14 +23,28 @@ RULES:
 - Return ONLY a JSON array of strings.
 - Max 15 queries.
 
-USER INPUT (POST INTERVIEW):
+OUTPUT FORMAT:
+SERP_ResearchQuery = {
+  intent: 'definition | official_docs | best_practices | how_to | statistics | comparisons | common_mistakes | use_cases | case_studies';
+  query: string;
+  priority: 1 | 2 | 3;
+};
+
+Return only a valid JSON object with the following structure:
+{
+  researchQueries: SERP_ResearchQuery[];
+}
+`,
+      ],
+      userPrompts: [
+        `USER INPUT (POST INTERVIEW):
 - Main keyword: ${postInterview.mainKeyword}
 ${postInterview.secondaryKeywords && postInterview.secondaryKeywords.length > 0 ? `- Secondary keywords: ${postInterview.secondaryKeywords.join(', ')}` : ''}
 - Post description: ${postInterview.userDescription}
 ${postInterview.mentionsBrand ? `- Brand to mention: ${postInterview.brandName}` : ''}
 - Language: ${postInterview.language}
-
 `,
+      ],
     };
   };
 }

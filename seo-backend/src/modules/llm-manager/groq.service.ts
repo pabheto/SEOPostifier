@@ -5,7 +5,6 @@ import type { ChatCompletionMessageParam } from 'groq-sdk/resources/chat/complet
 
 import { GROQ_MEDIUM_GENERATION_MODEL } from './llm.constants';
 import { LLMRequestOptions, LLMResponse } from './types/llm.types';
-import { debug } from 'console';
 
 @Injectable()
 export class GroqService {
