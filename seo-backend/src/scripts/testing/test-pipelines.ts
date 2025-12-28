@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import * as fs from 'fs';
 import * as path from 'path';
 import { AppModule } from 'src/app.module';
-import { GeneratePostScript_Pipeline } from 'src/modules/posts-generation/pipelines/generate-post-script.pipeline';
+import { GeneratePost_Pipeline } from 'src/modules/posts-generation/pipelines/generate-post.pipeline';
 import {
   InterviewStatus,
   SearchIntent,
@@ -84,7 +84,7 @@ async function testPipelineScript() {
     () => undefined, // avoid serializing the Nest app
   );
 
-  const pipelineScriptGenerator = app.get(GeneratePostScript_Pipeline);
+  const pipelineScriptGenerator = app.get(GeneratePost_Pipeline);
 
   const testPostInterview: PostInterview = {
     interviewId: 'testInterviewId',

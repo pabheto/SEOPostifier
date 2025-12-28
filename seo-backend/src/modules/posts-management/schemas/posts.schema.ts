@@ -8,6 +8,10 @@ export class Post {
   // Vínculos externos
   // ============================================
 
+  // Id del post
+  @Prop({ required: true, unique: true, index: true })
+  postId: string;
+
   /** ID de la entrevista de origen (string, no ObjectId) */
   @Prop({
     type: String,
@@ -64,6 +68,10 @@ export class Post {
 
   @Prop({ type: Date })
   updatedAt?: Date;
+
+  constructor(postId: string) {
+    this.postId = postId;
+  }
 }
 export const PostSchema = SchemaFactory.createForClass(Post);
 

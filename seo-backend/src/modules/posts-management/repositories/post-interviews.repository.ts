@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
 import {
   PostInterview,
@@ -25,6 +26,23 @@ export class PostInterviewsRepository {
     @InjectModel(PostInterview.name)
     private readonly postInterviewModel: Model<PostInterviewDocument>,
   ) {}
+
+  async save(postInterview: PostInterview): Promise<PostInterviewDocument> {
+    const interviewId = postInterview.interviewId ?? randomUUID();
+
+    return this.postInterviewModel
+      .findOneAndUpdate(
+        { interviewId },
+        { $set: { ...postInterview, interviewId } },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+          runValidators: true,
+        },
+      )
+      .exec();
+  }
 
   async findAllPaginated(
     options: PaginationOptions,

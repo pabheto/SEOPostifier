@@ -1,6 +1,6 @@
+import { LLMPrompt } from 'src/library/types/llm-prompts.types';
 import { PostInterview } from 'src/modules/posts-management/schemas/post-interview.schema';
 import { RESPONSE_SummarizeSERP_SearchResults } from './research.prompts';
-import { LLMPrompt } from 'src/library/types/llm-prompts.types';
 
 export class ScriptGenerationPrompts {
   static readonly GENERATE_SCRIPT_ARCHITECTURE_SUGGESTION = (
@@ -186,6 +186,7 @@ export class ScriptGenerationPrompts {
         - Micro-storytelling OR
         - Real-world facts/statistics derived from the knowledge base (if available)
       - Outline what the reader will learn
+      - YOU GIVE THE INSTRUCTIONS FOR THE INTRODUCTION, NOT THE INTRODUCTION ITSELF.
     
     - **Introduction word count**:
       - ${
@@ -193,14 +194,13 @@ export class ScriptGenerationPrompts {
           ? `${Math.round(postInterview.minWordCount * 0.1)} – ${Math.round(postInterview.maxWordCount * 0.1)} words`
           : '200 – 400 words'
       }
-    
-    - **Target article length**:
-      - ${postInterview.minWordCount} – ${postInterview.maxWordCount} words
-    
-    - **Optional**:
+
       - Slug (3–5 words, URL-friendly)
       - Tags (3–8 relevant keywords)
     
+    - **Target article length**:
+      - ${postInterview.minWordCount} – ${postInterview.maxWordCount} words
+        
     ---
     
     ### 2. General Structure of the Article sections
@@ -215,11 +215,10 @@ export class ScriptGenerationPrompts {
     
     \`\`\`markdown
     ## H2 | H3 | H4 – [Heading]
-    
     - **Purpose**
-    - **Estimated word count**: [MIN] – [MAX] words
+    - **Word count**: [MIN] – [MAX] words
     - **Search intent covered**
-    - **Main points**
+    - **Main points**: Description of the points that the post redactor will have to take into account when creating the section
     - **Examples / comparisons**
     - **Keyword usage** (main + secondary if relevant): Specify the number of times the keywords should be used to match the keyword density ${postInterview.keywordDensityTarget}
     - **Tone notes**
@@ -240,7 +239,6 @@ export class ScriptGenerationPrompts {
     ---
     
     ## WORD COUNT ENFORCEMENT RULES
-    
     - **Standard sections (H2/H3/H4)**: 150 – 300 words
     - **Core sections (max 2–3 total)**: 400 – 500 words
     - Sections exceeding 500 words MUST be split into sub-sections
@@ -307,9 +305,9 @@ export class ScriptGenerationPrompts {
         Your goal is to optimize a script to make sure it matches the user requirements.
         You MUST respect the original structure.
         Your tasks:
+        - You are NOT writting the final post, you are optimizing the given script, that will be later given to a writter
         - Make sure that the planification of the script sections is correct to match the word count requirement of ${postInterview.minWordCount} - ${postInterview.maxWordCount} words.
-        - Incorporate external link mentions to support the affirmations.
-        - Incorporate internal link mentions to support the affirmations ONLY if can be done naturally with the current content structure.
+        - Incorporate external and internal link mentions to support the affirmations ONLY if can be done naturally with the current content structure.
         - Make sure that the keyword usage is correct and natural, matching the keyword density target of ${postInterview.keywordDensityTarget}.
         - Remove content redundancies and make sure that the script is clear and concise following EEAT principles.
         - Incorporate image mentions to support the affirmations ONLY if can be done naturally with the current content structure.
@@ -339,7 +337,7 @@ export class ScriptGenerationPrompts {
 
         ## LINK INCORPORATION: This is the format to add link references to the script section
         - **Link Usage**: Integrate links that sound natural with the section. DON'T CREATE INTERNAL LINKS THAT ARE NOT MENTIONED IN THE PARAMETERS.
-  FOR THE LINK USAGE, ALWAYS ALWAYS USE THIS FORMAT: use the format [link content description](slug-or-url)
+      FOR THE LINK USAGE, ALWAYS ALWAYS USE THIS FORMAT: use the format [link content description](slug-or-url) and give an explanation on how to use the link in the section.
 
         This is the user requirements:
         Word count: ${postInterview.minWordCount} - ${postInterview.maxWordCount} words.
@@ -353,6 +351,8 @@ export class ScriptGenerationPrompts {
         Links config: 
         ${postInterview.externalLinksToIncludeAutomatically !== undefined && postInterview.externalLinksToIncludeAutomatically !== null && postInterview.externalLinksToIncludeAutomatically > 0 && `You should include up to ${postInterview.externalLinksToIncludeAutomatically} external links automatically from the knowledge base.`}
         ${postInterview.includeInternalLinksAutomatically && `You can link internal links if the topic is relevant to the current post.`}
+
+
 
         `,
       ],
@@ -368,6 +368,147 @@ export class ScriptGenerationPrompts {
         ${postInterview.blogInternalLinksMeta}
         `,
       ],
+    };
+  };
+
+  static readonly FORMAT_SEO_SCRIPT_TO_JSON_PROMPT = (
+    postInterview: PostInterview,
+    script: string,
+  ): LLMPrompt => {
+    const systemPrompt = `
+Act as a strict converter from unstructured text to structured JSON.
+
+Task:
+I will give you a plain-text outline/script for an SEO article. Your job is to convert it EXACTLY into the following JSON format. You must output ONLY the JSON object, with no explanation, no comments, and no code blocks.
+
+type IUserImage = {
+  sourceType: 'user' | 'ai_generated';
+  sourceValue?: string;
+  title?: string;
+  description?: string;
+  alt?: string;
+  aspectRatio?: '16:9' | '4:3' | '3:2' | '1:1' | '9:16';
+};
+
+type LinkMention = {
+  url: string;
+  description: string;
+  type: 'internal' | 'external';
+};
+
+
+type ScriptSection = {
+  id: string;
+  level: HeadingLevel;
+  title: string;
+  lengthRange: [number, number];
+  description: string;
+  images?: IUserImage[];
+  links: LinkMention[];
+};
+
+type ScriptFormatDefinition = {
+  indexSummary: string;
+  head: {
+    h1: string;
+    introductionDescription: string;
+    slug: string;
+    tags: string[];
+    introductionLengthRange?: [number, number];
+  };
+  body: {
+    sections: ScriptSection[];
+  };
+  faq?: {
+    description: string;
+    lengthRange?: [number, number];
+  };
+};
+
+Important instructions:
+
+1. RESPONSE FORMAT
+   - Output ONLY a valid JSON object that matches ScriptFormatDefinition exactly.
+   - Do NOT include any text before or after the JSON.
+   - Do NOT use code blocks, backticks, or comments.
+
+   - "indexSummary" RULES: Summary of the article structure.
+     - One line per section: [H2|H3|H4] Title: 30-40 word summary + estimated length
+     - Total word count (intro + sections + FAQ) must match user requirements
+
+2. "head" RULES
+   - h1: Main title (extract from outline or create if missing)
+   - introductionDescription: Full introduction description including storytelling and planned points
+   - introductionLengthRange (optional): [minWords, maxWords] - extract from script if specified, otherwise undefined
+   - slug: URL-friendly version of h1 (lowercase, hyphens, no special characters). MUST be 3-5 words and 20-50 characters total. Extract key terms from h1 and create a concise, SEO-friendly slug that captures the main topic.
+   - tags: 3-8 core keywords/topics as array of strings
+
+3. "body.sections" RULES
+   - Each section: logical part of outline (main topics, subtopics, subsections)
+   - level: h2 (main sections), h3/h4 (subsections, nested logically)
+   - title: Clean, descriptive title
+   - id: Unique string "sec-1", "sec-2", etc. (sequential)
+   - **CRITICAL**: DO NOT include FAQ sections (e.g., "Frequently Asked Questions", "Preguntas Frecuentes", "FAQ") in body.sections. FAQ content must ONLY go in the "faq" field, never in body.sections.
+   - lengthRange: [minWords, maxWords] - **EXTRACT EXACTLY from script**
+     - Look for: "Estimated word count: X-Y words", "Word count: X-Y", "X-Y words"
+     - If specified in script: use EXACTLY
+     - If NOT specified: defaults are H2: 200-300, H3/H4: 150-250, Core: 400-500 max
+     - DO NOT recalculate - script designer has planned this, only do it if you see a significant inconsistency between the total sum of the word counts and the user requirements.
+   - description: Clear explanation of section content (guidelines for writer/AI). Include all planned points from script.
+     **IMPORTANT**: If description contains image blocks (\`\`\`user-image or \`\`\`ai-image), extract to images array and remove block syntax from description
+   - images (optional):
+     - Extract image blocks from section description if present
+     - For each \`\`\`user-image or \`\`\`ai-image block:
+       - Extract: sourceType, sourceValue, title, description, alt
+       - Remove block syntax from description
+       - Add to images array
+     - Image structure:
+       - sourceType: "user" or "ai_generated" (from block or inferred from \`\`\`ai-image)
+       - sourceValue (optional): from block or short identifier
+       - title (optional): Short descriptive title for the image (from block or generate from description)
+       - description (optional): AI prompt or user image context (detailed description for caption)
+       - alt (optional): from block or generate SEO-friendly alt text
+     - If no blocks found: leave images undefined/empty
+   - links:
+     Mark links with the type "internal" or "external" and the url and description from the given script.
+     DON'T HALLUCINATE NEW LINKS, ONLY USE THE LINKS THAT ARE SPECIFIED IN THE SCRIPT.
+     - **CRITICAL**: Preserve the complete link format \`[link](url/description)\` exactly as specified in the script. Do NOT extract just the URL or just the description - keep the full markdown link format with description.
+
+4. "faq" RULES
+   - description: Clear explanation of FAQ content (guidelines for writer/AI). Include questions and answers (one line per Q&A)
+   - lengthRange (optional): [minWords, maxWords] - extract from script if specified, otherwise undefined
+   ${postInterview.needsFaqSection ? '- FAQ section MUST be included if present in script' : '- FAQ section is optional'}
+   - **CRITICAL**: If the script contains an FAQ section (e.g., "Frequently Asked Questions", "Preguntas Frecuentes", "FAQ"), extract its content into this "faq" field and REMOVE it from body.sections. FAQ sections should NEVER appear in body.sections.
+
+
+5. STYLE & CONSISTENCY
+   - Preserve original outline language
+   - You may: complete unclear titles, group scattered points, add intro/conclusion if needed
+   - Remove redundancies along sections to make sure every paragraph is unique and adds value to the content.
+   - Ensure consistent hierarchy: h1 → h2 → h3 → h4
+   - Do minor adjustements on word length of all sections to match the user requirement of the total word count of ${postInterview.minWordCount} - ${postInterview.maxWordCount} words.
+
+6. VALIDATION REQUIREMENTS
+   - JSON must be valid: double quotes only, no trailing commas
+   - Required fields: head.h1, head.introductionDescription, head.slug, head.tags, body.sections
+   - Each section: id, level, title, lengthRange, description, links (internal + external)
+
+  THIS IS A PRODUCTION SYSTEM, DO NOT ADD ANY COMMENTS, EXPLANATIONS, OR NOTES.
+  DO NOT ADD MOCK TEXTS, DON'T MENTION FICTITIOUS BRANDS OR PRODUCTS.
+
+`;
+
+    const userPrompt = `
+Convert the outline below to JSON format. Return ONLY the JSON (no code blocks, no comments, no formatting characters).
+
+=== OUTLINE ===
+${script}
+=== END OUTLINE ===
+`;
+
+    return {
+      systemPrompts: [systemPrompt],
+      userPrompts: [userPrompt],
     };
   };
 }

@@ -99,6 +99,7 @@ export class PostInterview {
   language: string;
 
   /** Intención de búsqueda del contenido */
+  // TODO: Probably going to deprecate this
   @Prop({
     type: String,
     enum: SearchIntent,
@@ -108,10 +109,12 @@ export class PostInterview {
   searchIntent: SearchIntent;
 
   /** Descripción del público objetivo */
+  // TODO: Probably going to deprecate this
   @Prop({ required: true })
   targetAudience: string;
 
   /** Tono de voz del contenido */
+  // TODO: Probably going to deprecate this
   @Prop({
     type: String,
     enum: ToneOfVoice,

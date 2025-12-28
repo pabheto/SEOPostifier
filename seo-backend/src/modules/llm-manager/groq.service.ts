@@ -3,8 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
 import type { ChatCompletionMessageParam } from 'groq-sdk/resources/chat/completions';
 
-import { GROQ_MEDIUM_GENERATION_MODEL } from './llm.constants';
 import { LLMRequestOptions, LLMResponse } from './types/llm.types';
+
+export enum GroqModel {
+  GROQ_COMPOUND = 'groq/compound',
+  GPT_OSS_120B_MODEL = 'openai/gpt-oss-120b',
+  LLAMA_3_3_70B_VERSATILE = 'llama-3.3-70b-versatile',
+  LLAMA_GUARD_4_12B = 'meta-llama/llama-guard-4-12b',
+}
 
 @Injectable()
 export class GroqService {
@@ -38,10 +44,10 @@ export class GroqService {
    */
   async generate(
     prompt: string,
-    options: LLMRequestOptions = {},
+    options: LLMRequestOptions<GroqModel> = {},
   ): Promise<LLMResponse> {
     const {
-      model = GROQ_MEDIUM_GENERATION_MODEL,
+      model = GroqModel.LLAMA_3_3_70B_VERSATILE,
       temperature = 0.7,
       maxTokens = 1024,
       topP = 1,
