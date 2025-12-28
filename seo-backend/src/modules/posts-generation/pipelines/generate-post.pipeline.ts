@@ -6,16 +6,7 @@ import {
   AspectRatio,
   NanoBananaImageGenerationService,
 } from 'src/modules/image-generation/services/nano-banana-image-generation.service';
-import { GroqModel, GroqService } from 'src/modules/llm-manager';
-import {
-  AnthropicModel,
-  AntrophicService,
-} from 'src/modules/llm-manager/antrophic.service';
-import { ExaService } from 'src/modules/llm-manager/exa.service';
-import {
-  OpenaiModel,
-  OpenaiService,
-} from 'src/modules/llm-manager/openai.service';
+import { GroqModel, GroqService } from 'src/modules/llm-manager/groq.service';
 import { ScriptFormatDefinition } from 'src/modules/posts-management/library/interfaces/post-interview.interface';
 import {
   PostBlock,
@@ -27,14 +18,16 @@ import { PostsRepository } from 'src/modules/posts-management/repositories/posts
 import { PostInterview } from 'src/modules/posts-management/schemas/post-interview.schema';
 import { Post } from 'src/modules/posts-management/schemas/posts.schema';
 import { RedisStorageService } from 'src/modules/storage';
+import { buildPipelineId } from '../library/interfaces/pipelines/pipeline-ids.util';
 import {
+  AvailablePipelines,
   BasePipelineContext,
   BasePipelineStep,
   Pipeline,
+  PipelineStepOutcome,
 } from '../library/interfaces/pipelines/pipeline.interface';
 import {
   SERP_ResearchPlan,
-  SERP_ResearchSearchResults,
   SERP_SearchResult,
 } from '../library/interfaces/serp.interfaces';
 import { FormattingPrompts } from '../library/prompting/formatting.prompts';
@@ -44,11 +37,19 @@ import {
   RESPONSE_SummarizeSERP_SearchResults,
 } from '../library/prompting/research.prompts';
 import { ScriptGenerationPrompts } from '../library/prompting/script-generation.prompts';
+import {
+  AntrophicService,
+  AnthropicModel,
+} from 'src/modules/llm-manager/antrophic.service';
+import { ExaService } from 'src/modules/llm-manager/exa.service';
+import {
+  OpenaiService,
+  OpenaiModel,
+} from 'src/modules/llm-manager/openai.service';
 
 export enum GeneratePostPipelineStep {
   CREATE_SERP_RESEARCH_PLAN = 'CREATE_SERP_RESEARCH_PLAN',
-  GATHER_EXA_RESEARCH_RESULTS = 'GATHER_EXA_RESEARCH_RESULTS',
-  SUMMARIZE_EXA_RESEARCH_RESULTS = 'SUMMARIZE_EXA_RESEARCH_RESULTS',
+  GATHER_AND_SUMMARIZE_EXA_RESEARCH_RESULTS = 'GATHER_AND_SUMMARIZE_EXA_RESEARCH_RESULTS',
   OPTIMIZE_SERP_SEARCH_RESULTS = 'OPTIMIZE_SERP_SEARCH_RESULTS',
   CREATE_SCRIPT_DRAFT = 'CREATE_SCRIPT_DRAFT',
   OPTIMIZE_SCRIPT_DRAFT = 'OPTIMIZE_SCRIPT_DRAFT',
@@ -68,6 +69,7 @@ export type GeneratePostPipeline_Context =
     serpKnowledgeBase?: RESPONSE_SummarizeSERP_SearchResults;
   };
 
+// Each pipeline step receives context and returns context
 @Injectable()
 export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context> {
   constructor(
@@ -80,21 +82,28 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
     private readonly postsRepository: PostsRepository,
     redisStorageService: RedisStorageService,
   ) {
-    super(redisStorageService);
+    super(redisStorageService, AvailablePipelines.GENERATE_POST_PIPELINE);
   }
 
   async initialize(postInterview: PostInterview) {
+    const pipelineId = buildPipelineId(
+      AvailablePipelines.GENERATE_POST_PIPELINE,
+      postInterview.interviewId,
+    );
     await this.updateContext(postInterview.interviewId, {
-      pipelineId: postInterview.interviewId,
+      pipelineType: AvailablePipelines.GENERATE_POST_PIPELINE,
+      pipelineId,
       startedAt: new Date(),
       step: BasePipelineStep.INIT,
       postInterview,
     });
+
+    return pipelineId;
   }
 
   async STEP_generateResearchPlanForSerpQueries(
     context: GeneratePostPipeline_Context,
-  ): Promise<SERP_ResearchPlan> {
+  ) {
     const { postInterview } = context;
     const researchPlanForSerpQueriesPrompt =
       ResearchPrompts.PROMPT_CreateResearchPlanForSerpQueries(postInterview);
@@ -113,18 +122,25 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       researchPlanForSerpQueriesResult.content,
     ) as SERP_ResearchPlan;
 
-    await this.updateContext(context.pipelineId, {
+    const updatedContext: GeneratePostPipeline_Context = {
       ...context,
       serpResearchPlan: parsedResult,
-    });
-    return parsedResult;
+    };
+
+    return updatedContext;
   }
 
-  async STEP_gatherExaResearchResults(
-    exaResearchPlan: SERP_ResearchPlan,
-  ): Promise<SERP_ResearchSearchResults[]> {
-    return executeWithRateLimit(
-      exaResearchPlan.researchQueries,
+  async STEP_gatherAndSummarizeExaResearchResults(
+    context: GeneratePostPipeline_Context,
+  ) {
+    const { serpResearchPlan } = context;
+
+    if (!serpResearchPlan) {
+      throw new BadRequestException('SERP research plan not found');
+    }
+
+    const exaResearchResults = await executeWithRateLimit(
+      serpResearchPlan.researchQueries,
       async (query) => {
         const exaResults = await this.exaService.search({
           query: query.query,
@@ -148,11 +164,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       },
       3, // Limit to 3 requests per second to stay within EXA rate limits
     );
-  }
 
-  async STEP_summarizeExaResearchResults(
-    exaResearchResults: SERP_ResearchSearchResults[],
-  ) {
     const cleanedExaResearchResults: SERP_SearchResult[] = [];
     // Clean each individual search result so batching uses per-URL content
     for (const { searchResults } of exaResearchResults) {
@@ -222,14 +234,23 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       summarizedSERPResults.push(...batchResult);
     }
 
-    return summarizedSERPResults;
+    const updatedContext: GeneratePostPipeline_Context = {
+      ...context,
+      serpKnowledgeBase: summarizedSERPResults,
+    };
+
+    return updatedContext;
   }
 
-  async STEP_optimizeSERP_SearchResults(
-    summarizedSERPResults: RESPONSE_SummarizeSERP_SearchResults,
-  ) {
+  async STEP_optimizeSERP_SearchResults(context: GeneratePostPipeline_Context) {
+    const { serpKnowledgeBase } = context;
+
+    if (!serpKnowledgeBase) {
+      throw new BadRequestException('SERP knowledge base not found');
+    }
+
     const optimizeSERP_SearchResultsPrompt =
-      ResearchPrompts.PROMPT_OptimizeSERP_SearchResults(summarizedSERPResults);
+      ResearchPrompts.PROMPT_OptimizeSERP_SearchResults(serpKnowledgeBase);
     const optimizeSERP_SearchResultsResult = await this.openaiService.generate(
       optimizeSERP_SearchResultsPrompt,
       {
@@ -242,13 +263,24 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
     const parsedOptimizeSERP_SearchResultsResult = JSON.parse(
       optimizeSERP_SearchResultsResult.content,
     ) as RESPONSE_SummarizeSERP_SearchResults;
-    return parsedOptimizeSERP_SearchResultsResult;
+
+    const updatedContext: GeneratePostPipeline_Context = {
+      ...context,
+      serpKnowledgeBase: parsedOptimizeSERP_SearchResultsResult,
+    };
+
+    return updatedContext;
   }
 
   async STEP_createScriptDraft(
-    postInterview: PostInterview,
-    serpKnowledgeBase: RESPONSE_SummarizeSERP_SearchResults,
-  ): Promise<string> {
+    context: GeneratePostPipeline_Context,
+  ): Promise<GeneratePostPipeline_Context> {
+    const { postInterview, serpKnowledgeBase } = context;
+
+    if (!serpKnowledgeBase) {
+      throw new BadRequestException('SERP knowledge base not found');
+    }
+
     const createScriptDraftPrompt =
       ScriptGenerationPrompts.GENERATE_SEO_POST_SCRIPT_BASE_PROMPT({
         postInterview,
@@ -262,14 +294,30 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       },
     );
 
-    return createScriptDraftResult.content;
+    postInterview.generatedScriptText = createScriptDraftResult.content;
+
+    const updatedContext: GeneratePostPipeline_Context = {
+      ...context,
+      postInterview,
+    };
+
+    return updatedContext;
   }
 
   async STEP_optimizeScriptDraft(
-    postInterview: PostInterview,
-    serpKnowledgeBase: RESPONSE_SummarizeSERP_SearchResults,
-    scriptText: string,
-  ): Promise<string> {
+    context: GeneratePostPipeline_Context,
+  ): Promise<GeneratePostPipeline_Context> {
+    const { postInterview, serpKnowledgeBase } = context;
+    const scriptText = context.postInterview.generatedScriptText;
+
+    if (!serpKnowledgeBase) {
+      throw new BadRequestException('SERP knowledge base not found');
+    }
+
+    if (!scriptText) {
+      throw new BadRequestException('Script text not found');
+    }
+
     const optimizeScriptDraftPrompt =
       ScriptGenerationPrompts.OPTIMIZE_SEO_SCRIPT_WORD_LENGTH_LINKS_AND_IMAGES_PROMPT(
         {
@@ -286,17 +334,29 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       },
     );
 
-    return optimizeScriptDraftResult.content;
+    postInterview.generatedScriptText = optimizeScriptDraftResult.content;
+
+    const updatedContext: GeneratePostPipeline_Context = {
+      ...context,
+      postInterview,
+    };
+
+    return updatedContext;
   }
 
   async STEP_createPostScriptDefinition(
-    postInterview: PostInterview,
-    scriptText: string,
-  ): Promise<ScriptFormatDefinition> {
+    context: GeneratePostPipeline_Context,
+  ): Promise<GeneratePostPipeline_Context> {
+    const { postInterview } = context;
+
+    if (!postInterview.generatedScriptText) {
+      throw new BadRequestException('Script text not found');
+    }
+
     const createPostScriptDefinitionPrompt =
       ScriptGenerationPrompts.FORMAT_SEO_SCRIPT_TO_JSON_PROMPT(
         postInterview,
-        scriptText,
+        postInterview.generatedScriptText,
       );
 
     const createPostScriptDefinitionResult =
@@ -305,14 +365,24 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
         maxTokens: 20480,
       });
 
-    return JSON.parse(
+    const parsedCreatePostScriptDefinitionResult = JSON.parse(
       createPostScriptDefinitionResult.content,
     ) as ScriptFormatDefinition;
+
+    postInterview.generatedScriptDefinition =
+      parsedCreatePostScriptDefinitionResult;
+
+    const updatedContext: GeneratePostPipeline_Context = {
+      ...context,
+      postInterview,
+    };
+
+    return updatedContext;
   }
 
   async STEP_generatePostPartsFromInterview(
     context: GeneratePostPipeline_Context,
-  ) {
+  ): Promise<GeneratePostPipeline_Context> {
     const { postInterview } = context;
     if (!postInterview.generatedScriptDefinition) {
       throw new BadRequestException('Script definition not generated');
@@ -630,23 +700,75 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       postUsage,
     ); */
 
-    return post;
+    const updatedContext: GeneratePostPipeline_Context = {
+      ...context,
+      post,
+    };
+
+    return updatedContext;
   }
 
   /**
    * Pipeline to generate a script from a post interview
    */
-  async generateScriptFromPostInterview(postInterview: PostInterview) {
-    const context: GeneratePostPipeline_Context = {
-      pipelineId: postInterview.interviewId,
-      startedAt: new Date(),
-      step: BasePipelineStep.INIT,
-      postInterview,
-    };
-
-    // 1. Create research plan for SERP queries
-    await this.STEP_generateResearchPlanForSerpQueries(context);
-
-    // 2. Gather EXA research results
+  async runOnce(
+    context: GeneratePostPipeline_Context,
+  ): Promise<PipelineStepOutcome> {
+    let newContext: GeneratePostPipeline_Context;
+    switch (context.step) {
+      case BasePipelineStep.INIT:
+        newContext = context;
+        newContext.step =
+          GeneratePostPipelineStep.GATHER_AND_SUMMARIZE_EXA_RESEARCH_RESULTS;
+        return {
+          type: 'PROGRESSED',
+        };
+      case GeneratePostPipelineStep.GATHER_AND_SUMMARIZE_EXA_RESEARCH_RESULTS:
+        newContext =
+          await this.STEP_gatherAndSummarizeExaResearchResults(context);
+        newContext.step = GeneratePostPipelineStep.OPTIMIZE_SERP_SEARCH_RESULTS;
+        await this.updateContext(context.pipelineId, newContext);
+        return {
+          type: 'PROGRESSED',
+        };
+      case GeneratePostPipelineStep.OPTIMIZE_SERP_SEARCH_RESULTS:
+        newContext = await this.STEP_optimizeSERP_SearchResults(context);
+        newContext.step = GeneratePostPipelineStep.CREATE_SCRIPT_DRAFT;
+        await this.updateContext(context.pipelineId, newContext);
+        return {
+          type: 'PROGRESSED',
+        };
+      case GeneratePostPipelineStep.CREATE_SCRIPT_DRAFT:
+        newContext = await this.STEP_createScriptDraft(context);
+        newContext.step = GeneratePostPipelineStep.OPTIMIZE_SCRIPT_DRAFT;
+        await this.updateContext(context.pipelineId, newContext);
+        return {
+          type: 'PROGRESSED',
+        };
+      case GeneratePostPipelineStep.OPTIMIZE_SCRIPT_DRAFT:
+        newContext = await this.STEP_optimizeScriptDraft(context);
+        newContext.step =
+          GeneratePostPipelineStep.CREATE_POST_SCRIPT_DEFINITION;
+        await this.updateContext(context.pipelineId, newContext);
+        return {
+          type: 'PROGRESSED',
+        };
+      case GeneratePostPipelineStep.CREATE_POST_SCRIPT_DEFINITION:
+        newContext = await this.STEP_createPostScriptDefinition(context);
+        newContext.step = GeneratePostPipelineStep.GENERATE_POST_PARTS;
+        await this.updateContext(context.pipelineId, newContext);
+        return {
+          type: 'PROGRESSED',
+        };
+      case GeneratePostPipelineStep.GENERATE_POST_PARTS:
+        newContext = await this.STEP_generatePostPartsFromInterview(context);
+        newContext.step = BasePipelineStep.COMPLETED;
+        await this.updateContext(context.pipelineId, newContext);
+        return {
+          type: 'TERMINAL',
+        };
+      default:
+        throw new Error(`Unhandled step: ${context.step}`);
+    }
   }
 }

@@ -1,8 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import * as fs from 'fs';
+import { get } from 'http';
 import * as path from 'path';
 import { AppModule } from 'src/app.module';
 import { GeneratePost_Pipeline } from 'src/modules/posts-generation/pipelines/generate-post.pipeline';
+import { PipelineOrchestrator } from 'src/modules/posts-generation/pipelines/pipeline.orchestrator';
 import {
   InterviewStatus,
   SearchIntent,
@@ -85,6 +87,7 @@ async function testPipelineScript() {
   );
 
   const pipelineScriptGenerator = app.get(GeneratePost_Pipeline);
+  const pipelineOrchestrator = app.get(PipelineOrchestrator);
 
   const testPostInterview: PostInterview = {
     interviewId: 'testInterviewId',
@@ -118,52 +121,16 @@ async function testPipelineScript() {
     userId: 'testUserId',
   };
 
-  await logStep('Using test post interview payload', () => testPostInterview);
+  const pipelineId =
+    await pipelineScriptGenerator.initialize(testPostInterview);
 
-  const exaResearchPlan = await logStep('Generated Exa research plan', () => {
-    return pipelineScriptGenerator.STEP_generateResearchPlanForSerpQueries(
-      testPostInterview,
-    );
-  });
-
-  const exaResearchResults = await logStep(
-    'Gathered Exa research results',
-    () =>
-      pipelineScriptGenerator.STEP_gatherExaResearchResults(exaResearchPlan),
-  );
-
-  const summarizedSERPResults = await logStep(
-    'Summarized Exa research results',
-    () =>
-      pipelineScriptGenerator.STEP_summarizeExaResearchResults(
-        exaResearchResults,
-      ),
-  );
-
-  const optimizedSERPResults = await logStep(
-    'Optimized Exa research results',
-    () =>
-      pipelineScriptGenerator.STEP_optimizeSERP_SearchResults(
-        summarizedSERPResults,
-      ),
-  );
-
-  const scriptDraft = await logStep('Created script draft', () => {
-    return pipelineScriptGenerator.STEP_createScriptDraft(
-      testPostInterview,
-      optimizedSERPResults,
-    );
-  });
-
-  await logStep('Optimized script', () =>
-    pipelineScriptGenerator.STEP_optimizeScriptDraft(
-      testPostInterview,
-      optimizedSERPResults,
-      scriptDraft,
-    ),
-  );
-
-  await logStep('Script generated successfully');
+  while (true) {
+    const outcome =
+      await pipelineOrchestrator.executeStepForPipelineId(pipelineId);
+    if (outcome.type === 'TERMINAL') {
+      break;
+    }
+  }
 }
 
 void testPipelineScript().catch((error) => {

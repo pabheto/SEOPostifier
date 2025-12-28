@@ -186,7 +186,7 @@ NEVER ADD BACKTICKS, CODEBLOCK FENCES, OR FORMATTING CHARACTERS
 **VALIDATION:**
 - Total words across all blocks: ${section.lengthRange[0]} - ${section.lengthRange[1]} words
 - Each paragraph: 40-80 words (up to 120 if critical)
-${hasInternalLinks || hasExternalLinks ? `- Suggested links must be included in the content as long as they make sense` : ''}
+${section.links.length > 0 ? `- Suggested links must be included in the content as long as they make sense` : ''}
 - JSON must be valid (double quotes, no trailing commas)
 
 DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS

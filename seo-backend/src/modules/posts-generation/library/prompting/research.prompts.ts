@@ -287,30 +287,30 @@ OUTPUT JSON STRUCTURE:
   - Prefer authoritative and non-generic sources
   
   OUTPUT FORMAT:
-  {
-    "keptSources": [
-      {
-        "url": "string",
-        "searchIntentQuery": "string",
-        "metadata": {
-          "authority": "high | medium",
-          "contentType": "official_docs | blog | research | news | reference",
-          "facts": ["string"],
-          "contextSnippets": ["string"],
-          "usage": {
-            "primary": [
-              "definition | guidelines | statistics | examples | comparisons | how_to"
-            ],
-            "citationRequired": true | false
-          }
+  [
+    {
+      "url": "string",
+      "searchIntentQuery": "string",
+      "metadata": {
+        "authority": "high | medium",
+        "contentType": "official_docs | blog | research | news | reference",
+        "facts": ["string"],
+        "contextSnippets": ["string"],
+        "usage": {
+          "primary": [
+            "definition | guidelines | statistics | examples | comparisons | how_to"
+          ],
+          "citationRequired": true | false
         }
       }
-    ]
-  }
+    }
+  ]
+  
   
   DO NOT INVENT ADDITIONAL FIELDS FOR THE JSON OUTPUT.
   Return ONLY the JSON output.
   DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS.
+  DON'T MENTION THE REMOVED SOURCES, JUST ADD IN THE OUTPUT THE ONES REQUIRED TO BE KEEPED
   `;
 
     return { systemPrompts: [systemPrompt], userPrompts: [userPrompt] };

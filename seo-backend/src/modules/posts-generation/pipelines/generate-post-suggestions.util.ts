@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { GROQ_COMPOUND, GroqService } from 'src/modules/llm-manager';
+import { GroqModel, GroqService } from 'src/modules/llm-manager/groq.service';
 import { FormattingPrompts } from '../library/prompting/formatting.prompts';
 import { ScriptGenerationPrompts } from '../library/prompting/script-generation.prompts';
 
@@ -28,7 +28,7 @@ export class GeneratePostSuggestions_Util {
     const generateArchitectureSuggestionsResult = await groqService.generate(
       '',
       {
-        model: GROQ_COMPOUND,
+        model: GroqModel.GPT_OSS_120B_MODEL,
         maxTokens: 8192,
         systemPrompt: generateArchitectureSuggestionsPrompt.systemPrompts,
         userPrompt: generateArchitectureSuggestionsPrompt.userPrompts,
@@ -55,7 +55,7 @@ export class GeneratePostSuggestions_Util {
         );
 
       const fixedJsonResult = await groqService.generate('', {
-        model: GROQ_COMPOUND,
+        model: GroqModel.GPT_OSS_120B_MODEL,
         maxTokens: 8192,
         systemPrompt: fixSystemPrompts,
         userPrompt: fixUserPrompts,

@@ -1,18 +1,19 @@
+import { BullModule } from '@nestjs/bullmq';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { LlmManagerModule } from 'src/modules/llm-manager/llm-manager.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { AdministrationModule } from './modules/administration/administration.module';
 import { ImageGenerationModule } from './modules/image-generation/image-generation.module';
 import { LicensesModule } from './modules/licenses/licenses.module';
-import { LlmManagerModule } from './modules/llm-manager';
+import { PostsGenerationModule } from './modules/posts-generation/posts-generation.module';
 import { PostsManagementModule } from './modules/posts-management/posts-management.module';
 import { StorageModule } from './modules/storage';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { UsersModule } from './modules/users/users.module';
-import { PostsGenerationModule } from './modules/posts-generation/posts-generation.module';
 
 @Module({
   imports: [
@@ -27,6 +28,15 @@ import { PostsGenerationModule } from './modules/posts-generation/posts-generati
         retryDelay: 1000,
       },
     ),
+    BullModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        connection: {
+          host: configService.get('REDIS_HOST', 'localhost'),
+          port: configService.get('REDIS_PORT', 6379),
+        },
+      }),
+    }),
 
     ImageGenerationModule,
     LlmManagerModule,
