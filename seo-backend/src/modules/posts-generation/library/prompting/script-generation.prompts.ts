@@ -431,6 +431,7 @@ Important instructions:
    - Output ONLY a valid JSON object that matches ScriptFormatDefinition exactly.
    - Do NOT include any text before or after the JSON.
    - Do NOT use code blocks, backticks, or comments.
+   - Do NOT add JSON formatting characters like \`\`\`json or \`\`\` to the JSON object.
 
    - "indexSummary" RULES: Summary of the article structure.
      - One line per section: [H2|H3|H4] Title: 30-40 word summary + estimated length

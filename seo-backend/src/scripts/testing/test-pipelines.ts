@@ -1,9 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import * as fs from 'fs';
-import { get } from 'http';
 import * as path from 'path';
 import { AppModule } from 'src/app.module';
-import { GeneratePost_Pipeline } from 'src/modules/posts-generation/pipelines/generate-post.pipeline';
+import {
+  GeneratePost_Pipeline,
+  GeneratePostPipeline_Context,
+} from 'src/modules/posts-generation/pipelines/generate-post.pipeline';
 import { PipelineOrchestrator } from 'src/modules/posts-generation/pipelines/pipeline.orchestrator';
 import {
   InterviewStatus,
@@ -121,13 +123,37 @@ async function testPipelineScript() {
     userId: 'testUserId',
   };
 
-  const pipelineId =
-    await pipelineScriptGenerator.initialize(testPostInterview);
+  const pipelineId = await logStep(
+    'Initializing pipeline',
+    () => pipelineScriptGenerator.initialize(testPostInterview),
+    (id) => ({ pipelineId: id }),
+  );
 
   while (true) {
-    const outcome =
-      await pipelineOrchestrator.executeStepForPipelineId(pipelineId);
+    const currentContext =
+      await pipelineOrchestrator.getContextForPipeline<GeneratePostPipeline_Context>(
+        pipelineId,
+      );
+    writeLog('Current step ', currentContext.step);
+    const outcome = await logStep(
+      'Executing pipeline step',
+      async () => {
+        const result =
+          await pipelineOrchestrator.executeStepForPipelineId(pipelineId);
+        const newContext =
+          await pipelineOrchestrator.getContextForPipeline<GeneratePostPipeline_Context>(
+            pipelineId,
+          );
+
+        writeLog(`Pipeline step ${result.type}, new context`, newContext);
+
+        return result;
+      },
+      (result) => ({ type: result.type }),
+    );
+
     if (outcome.type === 'TERMINAL') {
+      await logStep('Pipeline completed successfully');
       break;
     }
   }

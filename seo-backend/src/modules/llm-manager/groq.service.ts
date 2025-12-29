@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
 import type { ChatCompletionMessageParam } from 'groq-sdk/resources/chat/completions';
 
+import { LLMPrompt } from 'src/library/types/llm-prompts.types';
 import { LLMRequestOptions, LLMResponse } from './types/llm.types';
 
 export enum GroqModel {
@@ -43,7 +44,7 @@ export class GroqService {
    * @returns LLMResponse with generated content and metadata
    */
   async generate(
-    prompt: string,
+    prompt: LLMPrompt,
     options: LLMRequestOptions<GroqModel> = {},
   ): Promise<LLMResponse> {
     const {
@@ -51,8 +52,6 @@ export class GroqService {
       temperature = 0.7,
       maxTokens = 1024,
       topP = 1,
-      systemPrompt,
-      userPrompt,
     } = options;
 
     this.logger.debug(`Generating completion with model: ${model}`);
@@ -61,35 +60,31 @@ export class GroqService {
       const messages: ChatCompletionMessageParam[] = [];
 
       // Add system prompt(s) if provided
-      if (systemPrompt) {
-        const systemPrompts = Array.isArray(systemPrompt)
-          ? systemPrompt
-          : [systemPrompt];
+      if (prompt.systemPrompts) {
+        const systemPrompts = Array.isArray(prompt.systemPrompts)
+          ? prompt.systemPrompts
+          : [prompt.systemPrompts];
         systemPrompts.forEach((sysPrompt) => {
-          if (sysPrompt.trim()) {
-            messages.push({
-              role: 'system',
-              content: sysPrompt,
-            });
-          }
+          messages.push({
+            role: 'system',
+            content: sysPrompt,
+          });
         });
       }
 
       // Add user prompt(s)
       // If userPrompt is provided in options, use it; otherwise use the prompt parameter
-      const userPrompts = userPrompt
-        ? Array.isArray(userPrompt)
-          ? userPrompt
-          : [userPrompt]
-        : [prompt];
+      const userPrompts = prompt.userPrompts
+        ? Array.isArray(prompt.userPrompts)
+          ? prompt.userPrompts
+          : [prompt.userPrompts]
+        : [prompt.userPrompts];
 
       userPrompts.forEach((usrPrompt) => {
-        if (usrPrompt.trim()) {
-          messages.push({
-            role: 'user',
-            content: usrPrompt,
-          });
-        }
+        messages.push({
+          role: 'user',
+          content: usrPrompt,
+        });
       });
 
       const completion = await this.groq.chat.completions.create({

@@ -6,7 +6,16 @@ import {
   AspectRatio,
   NanoBananaImageGenerationService,
 } from 'src/modules/image-generation/services/nano-banana-image-generation.service';
+import {
+  AnthropicModel,
+  AntrophicService,
+} from 'src/modules/llm-manager/antrophic.service';
+import { ExaService } from 'src/modules/llm-manager/exa.service';
 import { GroqModel, GroqService } from 'src/modules/llm-manager/groq.service';
+import {
+  OpenaiModel,
+  OpenaiService,
+} from 'src/modules/llm-manager/openai.service';
 import { ScriptFormatDefinition } from 'src/modules/posts-management/library/interfaces/post-interview.interface';
 import {
   PostBlock,
@@ -37,15 +46,6 @@ import {
   RESPONSE_SummarizeSERP_SearchResults,
 } from '../library/prompting/research.prompts';
 import { ScriptGenerationPrompts } from '../library/prompting/script-generation.prompts';
-import {
-  AntrophicService,
-  AnthropicModel,
-} from 'src/modules/llm-manager/antrophic.service';
-import { ExaService } from 'src/modules/llm-manager/exa.service';
-import {
-  OpenaiService,
-  OpenaiModel,
-} from 'src/modules/llm-manager/openai.service';
 
 export enum GeneratePostPipelineStep {
   CREATE_SERP_RESEARCH_PLAN = 'CREATE_SERP_RESEARCH_PLAN',
@@ -90,7 +90,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       AvailablePipelines.GENERATE_POST_PIPELINE,
       postInterview.interviewId,
     );
-    await this.updateContext(postInterview.interviewId, {
+    await this.updateContext(pipelineId, {
       pipelineType: AvailablePipelines.GENERATE_POST_PIPELINE,
       pipelineId,
       startedAt: new Date(),
@@ -251,10 +251,10 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
 
     const optimizeSERP_SearchResultsPrompt =
       ResearchPrompts.PROMPT_OptimizeSERP_SearchResults(serpKnowledgeBase);
-    const optimizeSERP_SearchResultsResult = await this.openaiService.generate(
+    const optimizeSERP_SearchResultsResult = await this.groqService.generate(
       optimizeSERP_SearchResultsPrompt,
       {
-        model: OpenaiModel.GPT_52_MINI,
+        model: GroqModel.GPT_OSS_120B_MODEL,
         maxTokens: 8096,
       },
     );
@@ -718,8 +718,17 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
     switch (context.step) {
       case BasePipelineStep.INIT:
         newContext = context;
+        newContext.step = GeneratePostPipelineStep.CREATE_SERP_RESEARCH_PLAN;
+        await this.updateContext(context.pipelineId, newContext);
+        return {
+          type: 'PROGRESSED',
+        };
+      case GeneratePostPipelineStep.CREATE_SERP_RESEARCH_PLAN:
+        newContext =
+          await this.STEP_generateResearchPlanForSerpQueries(context);
         newContext.step =
           GeneratePostPipelineStep.GATHER_AND_SUMMARIZE_EXA_RESEARCH_RESULTS;
+        await this.updateContext(context.pipelineId, newContext);
         return {
           type: 'PROGRESSED',
         };

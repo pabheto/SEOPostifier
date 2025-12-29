@@ -1,6 +1,8 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
+import { ImageGenerationModule } from 'src/modules/image-generation/image-generation.module';
 import { LlmManagerModule } from 'src/modules/llm-manager/llm-manager.module';
+import { PostsManagementModule } from 'src/modules/posts-management/posts-management.module';
 import { StorageModule } from 'src/modules/storage';
 import { PIPELINE_STEP_QUEUE } from './library/constants';
 import { GeneratePost_Pipeline } from './pipelines/generate-post.pipeline';
@@ -10,6 +12,8 @@ import { PipelineProcessor } from './processors/pipeline.processor';
 @Module({
   imports: [
     LlmManagerModule,
+    ImageGenerationModule,
+    PostsManagementModule,
     StorageModule,
     BullModule.registerQueue({
       name: PIPELINE_STEP_QUEUE,

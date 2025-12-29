@@ -1,7 +1,5 @@
 import { AvailablePipelines } from './pipeline.interface';
 
-const POST_GENERATION_PREFIX = 'postGeneration';
-
 export function buildPipelineId(
   pipelineType: AvailablePipelines,
   pipelineId: string,
@@ -10,7 +8,7 @@ export function buildPipelineId(
 }
 
 export const getPipelineFromId = (pipelineId: string) => {
-  if (pipelineId.startsWith(POST_GENERATION_PREFIX)) {
+  if (pipelineId.startsWith(AvailablePipelines.GENERATE_POST_PIPELINE)) {
     return AvailablePipelines.GENERATE_POST_PIPELINE;
   }
 

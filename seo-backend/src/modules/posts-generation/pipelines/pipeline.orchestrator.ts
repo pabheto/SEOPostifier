@@ -7,10 +7,7 @@ import { PIPELINE_STEP_QUEUE } from '../library/constants';
 import { PipelineStepExecutionException } from '../library/exceptions';
 import { getPipelineFromId } from '../library/interfaces/pipelines/pipeline-ids.util';
 import { AvailablePipelines } from '../library/interfaces/pipelines/pipeline.interface';
-import {
-  PipelineProcessor,
-  PipelineStepJobData,
-} from '../processors/pipeline.processor';
+import { PipelineStepJobData } from '../processors/pipeline.processor';
 import {
   GeneratePost_Pipeline,
   GeneratePostPipeline_Context,
@@ -21,7 +18,6 @@ export class PipelineOrchestrator {
   private readonly logger = new Logger(PipelineOrchestrator.name);
   constructor(
     private readonly redisStorageService: RedisStorageService,
-    private readonly pipelineProcessor: PipelineProcessor,
     private readonly generatePostPipeline: GeneratePost_Pipeline,
     @InjectQueue(PIPELINE_STEP_QUEUE)
     private readonly pipelineStepQueue: Queue,

@@ -14,6 +14,7 @@ import { PostsManagementModule } from './modules/posts-management/posts-manageme
 import { StorageModule } from './modules/storage';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { UsersModule } from './modules/users/users.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -30,12 +31,15 @@ import { UsersModule } from './modules/users/users.module';
     ),
     BullModule.forRootAsync({
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        connection: {
-          host: configService.get('REDIS_HOST', 'localhost'),
-          port: configService.get('REDIS_PORT', 6379),
-        },
-      }),
+      useFactory: (configService: ConfigService) => {
+        const redisUrl = configService.getOrThrow<string>('STORAGE_REDIS_URL');
+        return {
+          connection: {
+            url: redisUrl,
+            enableReadyCheck: false,
+          },
+        };
+      },
     }),
 
     ImageGenerationModule,
@@ -47,6 +51,7 @@ import { UsersModule } from './modules/users/users.module';
     SubscriptionsModule,
     AdministrationModule,
     PostsGenerationModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -36,7 +36,6 @@ RULES:
 - Do NOT invent brands, products, or companies
 - Do NOT include URLs
 - Do NOT include years unless strictly necessary
-- Assume the research will be filtered by authoritative domains later
 
 RESEARCH INTENT TYPES (use these exact values):
 - definition
@@ -103,10 +102,8 @@ OUTPUT JSON STRUCTURE:
   - NEVER use information outside the provided content
   - NEVER infer, assume, generalize, or extrapolate
   - NEVER invent facts, statistics, or claims
-  
-  YOU ARE NOT SUMMARIZING.
-  YOU ARE EXTRACTING VERBATIM INFORMATION AND CLASSIFYING IT.
-  
+  - NEVER reference page content directly, we want to extract facts knowledge, not "this page says that"
+    
   FACT EXTRACTION RULES:
   - Extract ONLY facts explicitly stated in the content
   - Each fact must be a standalone, declarative, encyclopedic statement
@@ -116,7 +113,7 @@ OUTPUT JSON STRUCTURE:
   - Do NOT reference the source, page, article, or author
   - Do NOT use phrases such as:
     - "The page says"
-    - "This article explains"
+    - "This article explains | states | mentions"
     - "According to"
   - Facts must read as if they could appear verbatim in an SEO article
   
@@ -269,24 +266,7 @@ OUTPUT JSON STRUCTURE:
   ========================
   
   Return ONLY valid JSON.
-  
-  Include:
-  - keptSources: full source objects kept unchanged
-  - removedSources: list of removed URLs with a short reason
-  `;
 
-    const userPrompt = `
-  Deduplicate and prune the following knowledge base.
-  
-  INPUT:
-  ${JSON.stringify(summarizedSERPResults, null, 2)}
-  
-  Rules reminder:
-  - Do NOT rewrite or summarize
-  - Remove only clearly redundant sources
-  - Prefer authoritative and non-generic sources
-  
-  OUTPUT FORMAT:
   [
     {
       "url": "string",
@@ -311,6 +291,19 @@ OUTPUT JSON STRUCTURE:
   Return ONLY the JSON output.
   DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS.
   DON'T MENTION THE REMOVED SOURCES, JUST ADD IN THE OUTPUT THE ONES REQUIRED TO BE KEEPED
+  
+  `;
+
+    const userPrompt = `
+  Deduplicate and prune the following knowledge base.
+  
+  INPUT:
+  ${JSON.stringify(summarizedSERPResults, null, 2)}
+  
+  Rules reminder:
+  - Do NOT rewrite or summarize
+  - Remove only clearly redundant sources
+  - Prefer authoritative and non-generic sources 
   `;
 
     return { systemPrompts: [systemPrompt], userPrompts: [userPrompt] };
