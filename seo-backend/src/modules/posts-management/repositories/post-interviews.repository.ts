@@ -77,4 +77,16 @@ export class PostInterviewsRepository {
   async findById(interviewId: string): Promise<PostInterviewDocument | null> {
     return this.postInterviewModel.findOne({ interviewId }).exec();
   }
+
+  async findByIdWithUserId(
+    interviewId: string,
+    userId?: string,
+  ): Promise<PostInterviewDocument | null> {
+    const query: { interviewId: string; userId?: string } = { interviewId };
+    if (userId) {
+      query.userId = userId;
+    }
+
+    return this.postInterviewModel.findOne(query).exec();
+  }
 }

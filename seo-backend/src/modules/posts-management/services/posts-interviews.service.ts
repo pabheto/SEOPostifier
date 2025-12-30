@@ -7,6 +7,7 @@ import { GeneratePostSuggestions_Util } from 'src/modules/posts-generation/pipel
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';
 import { UpdatePostInterviewDto } from '../dto/update-post-interview.dto';
 import { InterviewStatus } from '../library/interfaces/post-interview.interface';
+import { PostInterviewsRepository } from '../repositories/post-interviews.repository';
 import {
   PostInterview,
   PostInterviewDocument,
@@ -19,6 +20,7 @@ export class PostInterviewsService {
     private postInterviewModel: Model<PostInterviewDocument>,
 
     private groqService: GroqService,
+    private readonly postInterviewsRepository: PostInterviewsRepository,
   ) {}
 
   async createPostInterview(
@@ -40,13 +42,13 @@ export class PostInterviewsService {
   async getPostInterviewById(
     interviewId: string,
     userId?: string,
-  ): Promise<PostInterview> {
-    const query: { interviewId: string; userId?: string } = { interviewId };
-    if (userId) {
-      query.userId = userId;
-    }
+  ): Promise<PostInterviewDocument> {
+    const postInterview =
+      await this.postInterviewsRepository.findByIdWithUserId(
+        interviewId,
+        userId,
+      );
 
-    const postInterview = await this.postInterviewModel.findOne(query);
     if (!postInterview) {
       throw new NotFoundException(
         `Post interview not found with interviewId: ${interviewId}`,
