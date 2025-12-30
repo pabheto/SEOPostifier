@@ -113,7 +113,7 @@ export class AdministrationService {
 
     return {
       interviewId: interview.interviewId,
-      postId: post._id.toString(),
+      postId: post.postId,
       title: post.title,
       slug: post.slug,
       mainKeyword: post.mainKeyword,

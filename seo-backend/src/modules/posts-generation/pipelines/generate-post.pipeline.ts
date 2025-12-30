@@ -591,6 +591,8 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       post = new Post(randomUUID());
     }
 
+    // Ensure ownership is always stored as a plain string
+    post.userId = postInterview.userId as string;
     post.blocks = blocks;
     post.status = PostStatus.GENERATED;
     post.interviewId = postInterview.interviewId;

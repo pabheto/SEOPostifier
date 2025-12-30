@@ -70,8 +70,8 @@ export class PostsManagementService {
 
   async getPostById(postId: string, userId?: string) {
     if (userId) {
-      return this.postModel.findOne({ _id: postId, userId });
+      return this.postModel.findOne({ postId, userId });
     }
-    return this.postModel.findById(postId);
+    return this.postModel.findOne({ postId });
   }
 }

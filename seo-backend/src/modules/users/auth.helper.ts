@@ -17,13 +17,13 @@ export class AuthHelper {
       throw new UnauthorizedException('Invalid or inactive license');
     }
 
-    const user = await this.userModel.findById(license.userId);
+    const user = await this.userModel.findOne({ appUserId: license.userId });
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
 
     return {
-      user: { id: user._id, email: user.email },
+      user: { id: user.appUserId, email: user.email },
       license: {
         key: license.key,
         name: license.name,

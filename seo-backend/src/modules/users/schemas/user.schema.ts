@@ -4,6 +4,9 @@ import { UserRole } from '../enums/role.enum';
 
 @Schema({ timestamps: true })
 export class User extends Document {
+  @Prop({ required: true, unique: true, index: true })
+  appUserId: string;
+
   @Prop({ required: true, unique: true })
   email: string;
 

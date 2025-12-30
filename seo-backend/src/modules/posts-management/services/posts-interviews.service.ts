@@ -43,6 +43,7 @@ export class PostInterviewsService {
     interviewId: string,
     userId?: string,
   ): Promise<PostInterview> {
+    console.log('getPostInterviewById', interviewId, userId);
     const postInterviewDocument =
       await this.postInterviewsRepository.findByIdWithUserId(
         interviewId,

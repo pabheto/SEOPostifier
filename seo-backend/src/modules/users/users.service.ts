@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as bcrypt from 'bcryptjs';
+import { randomUUID } from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { Model } from 'mongoose';
 import { LicensesService } from '../licenses/licenses.service';
@@ -33,7 +34,9 @@ export class UsersService {
     } */
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
+    const appUserId = randomUUID();
     const user = await this.userModel.create({
+      appUserId,
       email: dto.email,
       password: hashedPassword,
     });
@@ -41,21 +44,21 @@ export class UsersService {
     // Create session
     const sessionToken = this.generateSessionToken();
     const session = await this.sessionModel.create({
-      userId: user._id,
+      userId: appUserId,
       token: sessionToken,
       expiresAt: new Date(Date.now() + this.sessionExpiry),
     });
 
     // JWT contains session reference
     const token = jwt.sign(
-      { userId: user._id, sessionId: session._id },
+      { userId: appUserId, sessionId: session._id.toString() },
       this.jwtSecret,
     );
 
     return {
       token,
       user: {
-        id: user._id,
+        id: appUserId,
         email: user.email,
         role: user.role || 'USER',
       },
@@ -68,24 +71,30 @@ export class UsersService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Backfill appUserId for existing users created before migration
+    if (!user.appUserId) {
+      user.appUserId = randomUUID();
+      await user.save();
+    }
+
     // Create new session
     const sessionToken = this.generateSessionToken();
     const session = await this.sessionModel.create({
-      userId: user._id,
+      userId: user.appUserId,
       token: sessionToken,
       expiresAt: new Date(Date.now() + this.sessionExpiry),
     });
 
     // JWT contains session reference
     const token = jwt.sign(
-      { userId: user._id, sessionId: session._id },
+      { userId: user.appUserId, sessionId: session._id.toString() },
       this.jwtSecret,
     );
 
     return {
       token,
       user: {
-        id: user._id,
+        id: user.appUserId,
         email: user.email,
         role: user.role || 'USER',
       },
@@ -113,14 +122,14 @@ export class UsersService {
       throw new UnauthorizedException('Invalid or expired session');
     }
 
-    const user = await this.userModel.findById(decoded.userId);
+    const user = await this.userModel.findOne({ appUserId: decoded.userId });
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
 
     return {
       user: {
-        id: String(user._id),
+        id: user.appUserId,
         email: user.email,
         role: user.role || 'USER',
       },
