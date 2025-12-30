@@ -1,8 +1,5 @@
 import { BadRequestException, Logger } from '@nestjs/common';
-import {
-  DeepseekModel,
-  DeepseekService,
-} from 'src/modules/llm-manager/deep-seek.service';
+import { GroqModel, GroqService } from 'src/modules/llm-manager/groq.service';
 import { FormattingPrompts } from 'src/modules/posts-generation/library/prompting/formatting.prompts';
 import { safeJsonParse } from './parse-json.util';
 
@@ -48,7 +45,7 @@ export interface ParseJsonWithFallbackOptions {
  */
 export async function parseJsonWithFallback<T>(
   content: string,
-  deepseekService: DeepseekService,
+  groqService: GroqService,
   options: ParseJsonWithFallbackOptions = {},
 ): Promise<T> {
   const {
@@ -78,8 +75,8 @@ export async function parseJsonWithFallback<T>(
       parseError instanceof Error ? parseError.message : String(parseError),
     );
 
-    const fixedJsonResult = await deepseekService.generate(fixPrompt, {
-      model: DeepseekModel.DEEPSEEK_CHAT,
+    const fixedJsonResult = await groqService.generate(fixPrompt, {
+      model: GroqModel.GPT_OSS_120B_MODEL,
       maxTokens,
     });
 

@@ -7,17 +7,8 @@ import {
   AspectRatio,
   NanoBananaImageGenerationService,
 } from 'src/modules/image-generation/services/nano-banana-image-generation.service';
-import {
-  AnthropicModel,
-  AntrophicService,
-} from 'src/modules/llm-manager/antrophic.service';
-import {
-  DeepseekModel,
-  DeepseekService,
-} from 'src/modules/llm-manager/deep-seek.service';
 import { ExaService } from 'src/modules/llm-manager/exa.service';
 import { GroqModel, GroqService } from 'src/modules/llm-manager/groq.service';
-import { OpenaiService } from 'src/modules/llm-manager/openai.service';
 import { countPostUsage } from 'src/modules/posts-management/library/accounting/post-accounting';
 import {
   InterviewStatus,
@@ -54,20 +45,6 @@ import {
 } from '../library/prompting/research.prompts';
 import { ScriptGenerationPrompts } from '../library/prompting/script-generation.prompts';
 
-/**
- * Helper function to sanitize MongoDB documents that have been serialized/deserialized
- * Removes MongoDB-specific fields that can cause CastErrors when saving
- */
-function sanitizeMongoDocument<T>(doc: T): T {
-  if (!doc || typeof doc !== 'object') return doc;
-
-  const sanitized = { ...doc } as any;
-  delete sanitized._id;
-  delete sanitized.__v;
-
-  return sanitized as T;
-}
-
 export enum GeneratePostPipelineStep {
   CREATE_SERP_RESEARCH_PLAN = 'CREATE_SERP_RESEARCH_PLAN',
   GATHER_AND_SUMMARIZE_EXA_RESEARCH_RESULTS = 'GATHER_AND_SUMMARIZE_EXA_RESEARCH_RESULTS',
@@ -97,11 +74,8 @@ export type GeneratePostPipeline_Context =
 export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context> {
   private readonly logger = new Logger(GeneratePost_Pipeline.name);
   constructor(
-    private readonly openaiService: OpenaiService,
     private readonly exaService: ExaService,
-    private readonly antrophicService: AntrophicService,
     private readonly groqService: GroqService,
-    private readonly deepseekService: DeepseekService,
     private readonly imageGenerationService: NanoBananaImageGenerationService,
     private readonly postInterviewsRepository: PostInterviewsRepository,
     private readonly postsRepository: PostsRepository,
@@ -136,15 +110,17 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       ResearchPrompts.PROMPT_CreateResearchPlanForSerpQueries(postInterview);
 
     // Using OpenAI GPT 5.2 mini
-    const researchPlanForSerpQueriesResult =
-      await this.deepseekService.generate(researchPlanForSerpQueriesPrompt, {
-        model: DeepseekModel.DEEPSEEK_CHAT,
+    const researchPlanForSerpQueriesResult = await this.groqService.generate(
+      researchPlanForSerpQueriesPrompt,
+      {
+        model: GroqModel.GPT_OSS_120B_MODEL,
         maxTokens: 8092,
-      });
+      },
+    );
 
     const parsedResult = await parseJsonWithFallback<SERP_ResearchPlan>(
       researchPlanForSerpQueriesResult.content,
-      this.deepseekService,
+      this.groqService,
       {
         errorContext: 'research plan',
         maxTokens: 8092,
@@ -212,17 +188,17 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
     const summaryPromises = cleanedExaResearchResults.map(async (result) => {
       const summarizeExaResearchResultsPrompt =
         ResearchPrompts.PROMPT_SummarizeSERP_SearchResults([result]);
-      const summaryResponse = await this.deepseekService.generate(
+      const summaryResponse = await this.groqService.generate(
         summarizeExaResearchResultsPrompt,
         {
-          model: DeepseekModel.DEEPSEEK_R1,
+          model: GroqModel.GPT_OSS_120B_MODEL,
           maxTokens: 8096,
         },
       );
 
       return await parseJsonWithFallback<RESPONSE_SummarizeSERP_SearchResults>(
         summaryResponse.content,
-        this.deepseekService,
+        this.groqService,
         {
           errorContext: 'SERP summary',
           maxTokens: 8096,
@@ -263,7 +239,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
     const parsedOptimizeSERP_SearchResultsResult =
       await parseJsonWithFallback<RESPONSE_SummarizeSERP_SearchResults>(
         optimizeSERP_SearchResultsResult.content,
-        this.deepseekService,
+        this.groqService,
         {
           errorContext: 'optimized SERP results',
           maxTokens: 8096,
@@ -293,11 +269,11 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
         postInterview,
         summarizedSERPKnowledgeBase: serpKnowledgeBase,
       });
-    const createScriptDraftResult = await this.antrophicService.generate(
+    const createScriptDraftResult = await this.groqService.generate(
       createScriptDraftPrompt,
       {
-        model: AnthropicModel.CLAUDE_SONNET_4_5,
-        maxTokens: 20480,
+        model: GroqModel.GPT_OSS_120B_MODEL,
+        maxTokens: 8096,
       },
     );
 
@@ -333,11 +309,11 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
           scriptText,
         },
       );
-    const optimizeScriptDraftResult = await this.antrophicService.generate(
+    const optimizeScriptDraftResult = await this.groqService.generate(
       optimizeScriptDraftPrompt,
       {
-        model: AnthropicModel.CLAUDE_SONNET_4_5,
-        maxTokens: 20480,
+        model: GroqModel.GPT_OSS_120B_MODEL,
+        maxTokens: 8096,
       },
     );
 
@@ -366,19 +342,21 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
         postInterview.generatedScriptText,
       );
 
-    const createPostScriptDefinitionResult =
-      await this.antrophicService.generate(createPostScriptDefinitionPrompt, {
-        model: AnthropicModel.CLAUDE_HAIKU_4_5,
-        maxTokens: 20480,
-      });
+    const createPostScriptDefinitionResult = await this.groqService.generate(
+      createPostScriptDefinitionPrompt,
+      {
+        model: GroqModel.GPT_OSS_120B_MODEL,
+        maxTokens: 8096,
+      },
+    );
 
     const parsedCreatePostScriptDefinitionResult =
       await parseJsonWithFallback<ScriptFormatDefinition>(
         createPostScriptDefinitionResult.content,
-        this.deepseekService,
+        this.groqService,
         {
           errorContext: 'script definition',
-          maxTokens: 20480,
+          maxTokens: 8096,
           logger: this.logger,
         },
       );
@@ -511,7 +489,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       // Parse section content blocks as usual (with error correction)
       const sectionContentBlocks = await parseJsonWithFallback<{
         blocks: PostBlock[];
-      }>(sectionContentResult.content, this.deepseekService, {
+      }>(sectionContentResult.content, this.groqService, {
         errorContext: 'section content',
         maxTokens: 8096,
         logger: this.logger,
@@ -568,7 +546,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
         const faqObject = await parseJsonWithFallback<{
           questions: string[];
           answers: string[];
-        }>(faqResult.content, this.deepseekService, {
+        }>(faqResult.content, this.groqService, {
           errorContext: 'FAQ',
           maxTokens: 8096,
           logger: this.logger,
@@ -585,7 +563,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
 
     const introductionBlocks = await parseJsonWithFallback<{
       blocks: PostBlock[];
-    }>(introductionResult.content, this.deepseekService, {
+    }>(introductionResult.content, this.groqService, {
       errorContext: 'introduction',
       maxTokens: 8096,
       logger: this.logger,
@@ -701,9 +679,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
         newContext = await this.STEP_createScriptDraft(context);
         newContext.step = GeneratePostPipelineStep.OPTIMIZE_SCRIPT_DRAFT;
         await this.updateContext(context.pipelineId, newContext);
-        await this.postInterviewsRepository.save(
-          sanitizeMongoDocument(newContext.postInterview),
-        );
+        await this.postInterviewsRepository.save(newContext.postInterview);
         return {
           type: 'PROGRESSED',
         };
@@ -713,9 +689,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
           GeneratePostPipelineStep.CREATE_POST_SCRIPT_DEFINITION;
         await Promise.all([
           this.updateContext(context.pipelineId, newContext),
-          this.postInterviewsRepository.save(
-            sanitizeMongoDocument(newContext.postInterview),
-          ),
+          this.postInterviewsRepository.save(newContext.postInterview),
         ]);
         return {
           type: 'PROGRESSED',
@@ -725,9 +699,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
         newContext.step = GeneratePostPipelineStep.GENERATE_POST_PARTS;
         await Promise.all([
           this.updateContext(context.pipelineId, newContext),
-          this.postInterviewsRepository.save(
-            sanitizeMongoDocument(newContext.postInterview),
-          ),
+          this.postInterviewsRepository.save(newContext.postInterview),
         ]);
         return {
           type: 'PROGRESSED',
@@ -742,10 +714,8 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
 
         await Promise.all([
           this.updateContext(context.pipelineId, newContext),
-          this.postInterviewsRepository.save(
-            sanitizeMongoDocument(newContext.postInterview),
-          ),
-          this.postsRepository.save(sanitizeMongoDocument(newContext.post)),
+          this.postInterviewsRepository.save(newContext.postInterview),
+          this.postsRepository.save(newContext.post),
         ]);
 
         // Updating post usage
