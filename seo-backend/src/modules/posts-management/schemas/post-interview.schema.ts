@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { HydratedDocument, Schema as MongooseSchema } from 'mongoose';
+import { HydratedDocument } from 'mongoose';
 
 import type {
   KnowledgeBaseItem,
@@ -10,7 +10,6 @@ import {
   SearchIntent,
   ToneOfVoice,
 } from '../library/interfaces/post-interview.interface';
-import { Post } from './posts.schema';
 /**
  * Subdocumento para imágenes aportadas por el usuario
  */
@@ -210,8 +209,8 @@ export class PostInterview {
   userId?: string;
 
   /** Referencia al Post generado (cuando se cree) */
-  @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Post' })
-  associatedPostId?: Post;
+  @Prop({ type: String, index: true })
+  associatedPostId?: string;
 
   // ============================================
   // SECCIÓN 5: Generación del conenido

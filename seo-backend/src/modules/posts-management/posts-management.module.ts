@@ -1,7 +1,8 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ImageGenerationModule } from '../image-generation/image-generation.module';
 import { LlmManagerModule } from '../llm-manager/llm-manager.module';
+import { PostsGenerationModule } from '../posts-generation/posts-generation.module';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { UsersModule } from '../users/users.module';
 import { PostsInterviewsController } from './controllers/post-interviews.controller';
@@ -32,6 +33,7 @@ import { PostsManagementService } from './services/posts-management.service';
     UsersModule, // Import UsersModule for license-based authentication
     ImageGenerationModule, // Import ImageGenerationModule to use NanoBananaImageGenerationService
     SubscriptionsModule, // Import SubscriptionsModule to use UsageService and SubscriptionService
+    forwardRef(() => PostsGenerationModule), // Import PostsGenerationModule to use PostGenerationManagementService
   ],
   controllers: [PostsManagementController, PostsInterviewsController],
   providers: [

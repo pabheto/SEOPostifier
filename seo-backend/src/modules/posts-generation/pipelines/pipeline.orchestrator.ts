@@ -6,7 +6,11 @@ import { RedisKeys } from 'src/modules/storage/library/utils/redis-keys.util';
 import { PIPELINE_STEP_QUEUE } from '../library/constants';
 import { PipelineStepExecutionException } from '../library/exceptions';
 import { getPipelineFromId } from '../library/interfaces/pipelines/pipeline-ids.util';
-import { AvailablePipelines } from '../library/interfaces/pipelines/pipeline.interface';
+import {
+  AvailablePipelines,
+  BasePipelineContext,
+  BasePipelineStep,
+} from '../library/interfaces/pipelines/pipeline.interface';
 import { PipelineStepJobData } from '../processors/pipeline.processor';
 import {
   GeneratePost_Pipeline,
@@ -28,6 +32,15 @@ export class PipelineOrchestrator {
     const pipelineContext = await this.redisStorageService.get(pipelineKey);
     return pipelineContext as T;
   }
+  async updateContextForPipeline<T extends BasePipelineContext>(
+    pipelineId: string,
+    context: T,
+  ) {
+    const pipelineKey = RedisKeys.PIPELINE_ID(pipelineId);
+    await this.redisStorageService.set(pipelineKey, {
+      ...context,
+    });
+  }
 
   async executeStepForPipelineId(pipelineId: string) {
     const pipelineType = getPipelineFromId(pipelineId);
@@ -46,6 +59,27 @@ export class PipelineOrchestrator {
     }
 
     throw new Error(`Unknown pipeline type: ${pipelineType as string}`);
+  }
+
+  async markPipelineAsCompleted(pipelineId: string) {
+    const pipelineContext =
+      await this.getContextForPipeline<BasePipelineContext>(pipelineId);
+    pipelineContext.step = BasePipelineStep.COMPLETED;
+    await this.updateContextForPipeline(pipelineId, pipelineContext);
+  }
+
+  async markPipelineAsCancelled(pipelineId: string) {
+    const pipelineContext =
+      await this.getContextForPipeline<BasePipelineContext>(pipelineId);
+    pipelineContext.step = BasePipelineStep.CANCELLED;
+    await this.updateContextForPipeline(pipelineId, pipelineContext);
+  }
+
+  async markPipelineAsFailed(pipelineId: string) {
+    const pipelineContext =
+      await this.getContextForPipeline<BasePipelineContext>(pipelineId);
+    pipelineContext.step = BasePipelineStep.FAILED;
+    await this.updateContextForPipeline(pipelineId, pipelineContext);
   }
 
   async enqueuePipelineStep(

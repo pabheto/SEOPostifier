@@ -40,7 +40,7 @@ export class PostInterviewsService {
   async getPostInterviewById(
     interviewId: string,
     userId?: string,
-  ): Promise<PostInterviewDocument> {
+  ): Promise<PostInterview> {
     const query: { interviewId: string; userId?: string } = { interviewId };
     if (userId) {
       query.userId = userId;
@@ -52,49 +52,6 @@ export class PostInterviewsService {
         `Post interview not found with interviewId: ${interviewId}`,
       );
     }
-    return postInterview;
-  }
-
-  async generateAndUpdateScriptText(
-    postInterview: PostInterviewDocument,
-  ): Promise<PostInterviewDocument> {
-    /* const scriptText = await PostScriptsGenerator.createScriptTextFromInterview(
-      postInterview,
-      this.groqService,
-    );
-
-    postInterview.generatedScriptText = scriptText;
-    postInterview.status = InterviewStatus.SCRIPT_TEXT_GENERATED;
-    await postInterview.save(); */
-
-    return postInterview;
-  }
-
-  async generateAndUpdateScriptDefinition(
-    postInterview: PostInterviewDocument,
-  ): Promise<PostInterviewDocument> {
-    /* if (
-      !postInterview.generatedScriptText ||
-      (postInterview.status !== InterviewStatus.SCRIPT_TEXT_GENERATED &&
-        postInterview.status !== InterviewStatus.SCRIPT_DEFINITION_GENERATED)
-    ) {
-      throw new BadRequestException('Script text not generated');
-    }
-
-    const scriptDefinitionObject =
-      await PostScriptsGenerator.createScriptDefinitionFromText(
-        postInterview.generatedScriptText,
-        postInterview.minWordCount || 500,
-        postInterview.maxWordCount || 2000,
-        postInterview.needsFaqSection || false,
-        this.groqService,
-      );
-
-    postInterview.generatedScriptDefinition = scriptDefinitionObject;
-    postInterview.status = InterviewStatus.SCRIPT_DEFINITION_GENERATED;
-    await postInterview.save();
-
-    return postInterview; */
     return postInterview;
   }
 

@@ -13,6 +13,23 @@ export class PostsRepository {
     @InjectModel(Post.name) private readonly postModel: Model<PostDocument>,
   ) {}
 
+  async save(post: Post): Promise<PostDocument> {
+    const postId = post.postId;
+
+    return this.postModel
+      .findOneAndUpdate(
+        { postId },
+        { $set: { ...post, postId } },
+        {
+          upsert: true,
+          new: true,
+          setDefaultsOnInsert: true,
+          runValidators: true,
+        },
+      )
+      .exec();
+  }
+
   async findAllPaginated(
     options: PaginationOptions,
     filters?: Record<string, any>,
@@ -45,7 +62,12 @@ export class PostsRepository {
   }
 
   async findById(postId: string): Promise<PostDocument | null> {
-    const result = await this.postModel.findById(postId).lean().exec();
+    const result = await this.postModel
+      .findOne({
+        postId: postId,
+      })
+      .lean()
+      .exec();
     return result as PostDocument | null;
   }
 }

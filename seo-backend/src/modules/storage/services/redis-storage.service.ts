@@ -57,7 +57,10 @@ export class RedisStorageService {
     const deserializedCache = this.deserialize<TValue>(cache.value);
     const now = Date.now();
 
-    if (deserializedCache.value === undefined || deserializedCache.value === null) {
+    if (
+      deserializedCache.value === undefined ||
+      deserializedCache.value === null
+    ) {
       return (await refresh()).value;
     }
 
@@ -100,9 +103,7 @@ export class RedisStorageService {
     const now = Date.now();
     const data: PossibleStaleCache<TValue> = {
       value,
-      staleAt: options?.staleTimeInMs
-        ? now + options.staleTimeInMs
-        : undefined,
+      staleAt: options?.staleTimeInMs ? now + options.staleTimeInMs : undefined,
       maxStaleAt: options?.maxStaleTimeInMs
         ? now + options.maxStaleTimeInMs
         : undefined,
@@ -359,5 +360,3 @@ export class RedisStorageService {
     return deserialize(serializedData);
   }
 }
-
-

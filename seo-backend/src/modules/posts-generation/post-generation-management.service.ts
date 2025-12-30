@@ -1,7 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PostInterview } from '../posts-management/schemas/post-interview.schema';
 import { buildPipelineId } from './library/interfaces/pipelines/pipeline-ids.util';
-import { AvailablePipelines } from './library/interfaces/pipelines/pipeline.interface';
+import {
+  PipelineHighLevelStatus,
+  PipelineVerbosedStatus,
+} from './library/interfaces/pipelines/pipeline-status.interface';
+import {
+  AvailablePipelines,
+  BasePipelineStep,
+} from './library/interfaces/pipelines/pipeline.interface';
 import {
   GeneratePost_Pipeline,
   GeneratePostPipeline_Context,
@@ -15,7 +22,7 @@ export class PostGenerationManagementService {
     private readonly generatePostPipeline: GeneratePost_Pipeline,
   ) {}
 
-  async getGenerationContext(postInterview: PostInterview) {
+  async getGenerationContext_PostInterview(postInterview: PostInterview) {
     const pipelineId = buildPipelineId(
       AvailablePipelines.GENERATE_POST_PIPELINE,
       postInterview.interviewId,
@@ -26,9 +33,9 @@ export class PostGenerationManagementService {
     );
   }
 
-  async generatePostFromInterview(postInterview: PostInterview) {
+  async scheduleGeneration_PostInterview(postInterview: PostInterview) {
     const existingGenerationContext =
-      await this.getGenerationContext(postInterview);
+      await this.getGenerationContext_PostInterview(postInterview);
     if (existingGenerationContext) {
       throw new Error("There's already a creation pipeline for this interview");
     }
@@ -36,5 +43,46 @@ export class PostGenerationManagementService {
     const pipelineId =
       await this.generatePostPipeline.initialize(postInterview);
     await this.pipelineOrchestrator.enqueuePipelineStep(pipelineId);
+  }
+
+  async getGenerationStatus_PostInterview(
+    postInterview: PostInterview,
+  ): Promise<PipelineVerbosedStatus> {
+    const generationContext =
+      await this.getGenerationContext_PostInterview(postInterview);
+
+    if (!generationContext) {
+      return {
+        status: PipelineHighLevelStatus.NOT_STARTED,
+        statusLabel: 'Not started',
+      };
+    }
+
+    if (generationContext.step === BasePipelineStep.COMPLETED) {
+      return {
+        status: PipelineHighLevelStatus.COMPLETED,
+        progress: 100,
+        statusLabel: 'Completed',
+      };
+    }
+
+    if (generationContext.step === BasePipelineStep.CANCELLED) {
+      return {
+        status: PipelineHighLevelStatus.CANCELLED,
+        statusLabel: 'Cancelled',
+      };
+    }
+
+    if (generationContext.step === BasePipelineStep.FAILED) {
+      return {
+        status: PipelineHighLevelStatus.FAILED,
+        statusLabel: 'Failed',
+      };
+    }
+
+    return {
+      status: PipelineHighLevelStatus.IN_PROGRESS,
+      statusLabel: 'In progress',
+    };
   }
 }

@@ -91,6 +91,7 @@ OUTPUT JSON STRUCTURE:
   static readonly PROMPT_SummarizeSERP_SearchResults = (
     searchResults: SERP_SearchResult[],
   ): LLMPrompt => {
+    const today = new Date().toISOString().split('T')[0];
     const systemPrompt = `
   You are a deterministic information extractor and classifier.
   
@@ -103,6 +104,7 @@ OUTPUT JSON STRUCTURE:
   - NEVER infer, assume, generalize, or extrapolate
   - NEVER invent facts, statistics, or claims
   - NEVER reference page content directly, we want to extract facts knowledge, not "this page says that"
+  - AVOID bringing outdated information, use the most recent information available. Today's date is ${today}.
     
   FACT EXTRACTION RULES:
   - Extract ONLY facts explicitly stated in the content
@@ -116,6 +118,7 @@ OUTPUT JSON STRUCTURE:
     - "This article explains | states | mentions"
     - "According to"
   - Facts must read as if they could appear verbatim in an SEO article
+  - Only bring statistical data when it is explicitly requested with the search intent, always try to answer the query intent
   
   CONTEXT SNIPPET RULES:
   - Extract 2–4 context snippets per result

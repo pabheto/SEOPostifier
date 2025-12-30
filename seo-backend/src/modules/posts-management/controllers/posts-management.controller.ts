@@ -17,6 +17,7 @@ import type { AuthenticatedUser } from 'src/modules/users/auth';
 import { CurrentUser } from 'src/modules/users/auth';
 import { RequireLicense } from '../../users/decorators/require-license.decorator';
 import { GeneratePostFromInterviewDto } from '../dto/generate-post-from-interview.dto';
+import { GetInterviewByIdDto } from '../dto/get-interview-by-id.dto';
 import { GetPostByIdDto } from '../dto/get-post-by-id.dto';
 import { PostInterviewsService } from '../services/posts-interviews.service';
 import { PostsManagementService } from '../services/posts-management.service';
@@ -31,7 +32,7 @@ export class PostsManagementController {
     private readonly postInterviewsService: PostInterviewsService,
   ) {}
 
-  @Post('generate')
+  @Post('generate-from-interview')
   @HttpCode(201)
   @ApiOperation({ summary: 'Generate a post from an interview' })
   @ApiResponse({
@@ -66,6 +67,44 @@ export class PostsManagementController {
       );
 
     return { post };
+  }
+
+  @Get('interview/:interviewId/generation-status')
+  @HttpCode(200)
+  @ApiOperation({
+    summary: 'Check the generation status of a post by interview ID',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Generation status retrieved successfully',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Validation error - invalid interview ID',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - invalid or missing license key',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Interview not found',
+  })
+  async checkGenerationStatus(
+    @Param() dto: GetInterviewByIdDto,
+    @CurrentUser() user: AuthenticatedUser,
+  ) {
+    const postInterview = await this.postInterviewsService.getPostInterviewById(
+      dto.interviewId,
+      user.id,
+    );
+
+    const status =
+      await this.postsManagementService.checkGenerationStatusOfPost(
+        postInterview,
+      );
+
+    return { status };
   }
 
   @Get('list')

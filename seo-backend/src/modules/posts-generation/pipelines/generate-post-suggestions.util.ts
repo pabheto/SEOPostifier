@@ -26,12 +26,10 @@ export class GeneratePostSuggestions_Util {
       );
 
     const generateArchitectureSuggestionsResult = await groqService.generate(
-      '',
+      generateArchitectureSuggestionsPrompt,
       {
         model: GroqModel.GPT_OSS_120B_MODEL,
         maxTokens: 8192,
-        systemPrompt: generateArchitectureSuggestionsPrompt.systemPrompts,
-        userPrompt: generateArchitectureSuggestionsPrompt.userPrompts,
       },
     );
 
@@ -48,17 +46,14 @@ export class GeneratePostSuggestions_Util {
       ) as { suggestions: any[] };
     } catch (parseError) {
       // If JSON parsing fails, request a fix from the LLM
-      const { systemPrompts: fixSystemPrompts, userPrompts: fixUserPrompts } =
-        FormattingPrompts.FIX_JSON_PROMPT(
-          generateArchitectureSuggestionsResult.content,
-          parseError instanceof Error ? parseError.message : String(parseError),
-        );
+      const fixJsonPrompt = FormattingPrompts.FIX_JSON_PROMPT(
+        generateArchitectureSuggestionsResult.content,
+        parseError instanceof Error ? parseError.message : String(parseError),
+      );
 
-      const fixedJsonResult = await groqService.generate('', {
-        model: GroqModel.GPT_OSS_120B_MODEL,
+      const fixedJsonResult = await groqService.generate(fixJsonPrompt, {
+        model: GroqModel.GROQ_COMPOUND,
         maxTokens: 8192,
-        systemPrompt: fixSystemPrompts,
-        userPrompt: fixUserPrompts,
       });
 
       try {

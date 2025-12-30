@@ -9,7 +9,6 @@ import type { AuthenticatedUser } from 'src/modules/users/auth';
 import { CurrentUser } from 'src/modules/users/auth';
 import { RequireLicense } from '../../users/decorators/require-license.decorator';
 import { CreatePostInterviewDto } from '../dto/create-post-interview.dto';
-import { GeneratePostFromInterviewDto } from '../dto/generate-post-from-interview.dto';
 import { GetInterviewByIdDto } from '../dto/get-interview-by-id.dto';
 import { UpdatePostInterviewDto } from '../dto/update-post-interview.dto';
 import { PostInterviewsService } from '../services/posts-interviews.service';
@@ -50,114 +49,6 @@ export class PostsInterviewsController {
       createPostInterviewDto,
     );
     return interview;
-  }
-
-  @Post('generate-script-text')
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Generate script text for an interview' })
-  @ApiResponse({
-    status: 200,
-    description: 'Script text generated successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Validation error - invalid interview ID',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - invalid or missing license key',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Interview not found',
-  })
-  async generateScriptText(
-    @Body() dto: GetInterviewByIdDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    const postInterview = await this.postInterviewsService.getPostInterviewById(
-      dto.interviewId,
-      user.id,
-    );
-
-    const updatedInterview =
-      await this.postInterviewsService.generateAndUpdateScriptText(
-        postInterview,
-      );
-
-    return { interview: updatedInterview };
-  }
-
-  @Post('generate-script-definition')
-  @HttpCode(200)
-  @ApiOperation({ summary: 'Generate script definition for an interview' })
-  @ApiResponse({
-    status: 200,
-    description: 'Script definition generated successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Validation error - invalid interview ID',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - invalid or missing license key',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Interview not found',
-  })
-  async generateScriptDefinition(
-    @Body() dto: GetInterviewByIdDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    const postInterview = await this.postInterviewsService.getPostInterviewById(
-      dto.interviewId,
-      user.id,
-    );
-
-    const updatedInterview =
-      await this.postInterviewsService.generateAndUpdateScriptDefinition(
-        postInterview,
-      );
-
-    return { interview: updatedInterview };
-  }
-
-  @Post('generate-post')
-  @HttpCode(201)
-  @ApiOperation({ summary: 'Generate a post from an interview' })
-  @ApiResponse({
-    status: 201,
-    description: 'Post generated successfully',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Validation error - invalid interview ID',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized - invalid or missing license key',
-  })
-  @ApiResponse({
-    status: 404,
-    description: 'Interview not found',
-  })
-  async generatePostFromInterview(
-    @Body() generatePostDto: GeneratePostFromInterviewDto,
-    @CurrentUser() user: AuthenticatedUser,
-  ) {
-    const postInterview = await this.postInterviewsService.getPostInterviewById(
-      generatePostDto.interviewId,
-      user.id,
-    );
-
-    const post =
-      await this.postsManagementService.createPostDraftFromInterview(
-        postInterview,
-      );
-
-    return { post };
   }
 
   @Get('get-interviews-list')

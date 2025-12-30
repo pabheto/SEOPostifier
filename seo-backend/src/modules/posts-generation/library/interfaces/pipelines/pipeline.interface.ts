@@ -32,6 +32,7 @@ export abstract class Pipeline<TContext extends BasePipelineContext<string>> {
   ) {}
 
   protected async updateContext(pipelineId: string, context: TContext) {
+    console.log('Updating context for pipeline', pipelineId, context);
     await this.redisStorageService.set(RedisKeys.PIPELINE_ID(pipelineId), {
       ...context,
     });
