@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import cleanWebContent from 'src/library/parsing/clean-webpage-text.util';
-import { safeJsonParse } from 'src/library/parsing/parse-json.util';
+import { parseJsonWithFallback } from 'src/library/parsing/parse-json-with-fallback.util';
 import { executeWithRateLimit } from 'src/library/rate-limit.util';
 import {
   AspectRatio,
@@ -17,10 +17,7 @@ import {
 } from 'src/modules/llm-manager/deep-seek.service';
 import { ExaService } from 'src/modules/llm-manager/exa.service';
 import { GroqModel, GroqService } from 'src/modules/llm-manager/groq.service';
-import {
-  OpenaiModel,
-  OpenaiService,
-} from 'src/modules/llm-manager/openai.service';
+import { OpenaiService } from 'src/modules/llm-manager/openai.service';
 import { countPostUsage } from 'src/modules/posts-management/library/accounting/post-accounting';
 import {
   InterviewStatus,
@@ -37,25 +34,39 @@ import { PostInterview } from 'src/modules/posts-management/schemas/post-intervi
 import { Post } from 'src/modules/posts-management/schemas/posts.schema';
 import { RedisStorageService } from 'src/modules/storage';
 import { UsageService } from 'src/modules/subscriptions/usage.service';
-import { buildPipelineId } from '../library/interfaces/pipelines/pipeline-ids.util';
+import {
+  SERP_ResearchPlan,
+  SERP_SearchResult,
+} from '../library/interfaces/serp.interfaces';
+import { buildPipelineId } from '../library/pipelines/pipeline-ids.util';
+import { PipelineHighLevelStatus } from '../library/pipelines/pipeline-status.interface';
 import {
   AvailablePipelines,
   BasePipelineContext,
   BasePipelineStep,
   Pipeline,
   PipelineStepOutcome,
-} from '../library/interfaces/pipelines/pipeline.interface';
-import {
-  SERP_ResearchPlan,
-  SERP_SearchResult,
-} from '../library/interfaces/serp.interfaces';
-import { FormattingPrompts } from '../library/prompting/formatting.prompts';
+} from '../library/pipelines/pipeline.interface';
 import { PostGenerationPrompts } from '../library/prompting/post-generation.prompts';
 import {
   ResearchPrompts,
   RESPONSE_SummarizeSERP_SearchResults,
 } from '../library/prompting/research.prompts';
 import { ScriptGenerationPrompts } from '../library/prompting/script-generation.prompts';
+
+/**
+ * Helper function to sanitize MongoDB documents that have been serialized/deserialized
+ * Removes MongoDB-specific fields that can cause CastErrors when saving
+ */
+function sanitizeMongoDocument<T>(doc: T): T {
+  if (!doc || typeof doc !== 'object') return doc;
+
+  const sanitized = { ...doc } as any;
+  delete sanitized._id;
+  delete sanitized.__v;
+
+  return sanitized as T;
+}
 
 export enum GeneratePostPipelineStep {
   CREATE_SERP_RESEARCH_PLAN = 'CREATE_SERP_RESEARCH_PLAN',
@@ -111,6 +122,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       startedAt: new Date(),
       step: BasePipelineStep.INIT,
       postInterview,
+      status: PipelineHighLevelStatus.IN_PROGRESS,
     });
 
     return pipelineId;
@@ -124,17 +136,20 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       ResearchPrompts.PROMPT_CreateResearchPlanForSerpQueries(postInterview);
 
     // Using OpenAI GPT 5.2 mini
-    const researchPlanForSerpQueriesResult = await this.openaiService.generate(
-      researchPlanForSerpQueriesPrompt,
-      {
-        model: OpenaiModel.GPT_52_MINI,
+    const researchPlanForSerpQueriesResult =
+      await this.deepseekService.generate(researchPlanForSerpQueriesPrompt, {
+        model: DeepseekModel.DEEPSEEK_CHAT,
         maxTokens: 8092,
-      },
-    );
+      });
 
-    // TODO: Implement fallbacks here
-    const parsedResult = safeJsonParse<SERP_ResearchPlan>(
+    const parsedResult = await parseJsonWithFallback<SERP_ResearchPlan>(
       researchPlanForSerpQueriesResult.content,
+      this.deepseekService,
+      {
+        errorContext: 'research plan',
+        maxTokens: 8092,
+        logger: this.logger,
+      },
     );
 
     const updatedContext: GeneratePostPipeline_Context = {
@@ -183,7 +198,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
     context.exaResearchResults = exaResearchResults;
 
     const cleanedExaResearchResults: SERP_SearchResult[] = [];
-    // Clean each individual search result so batching uses per-URL content
+    // Clean each individual search result
     for (const { searchResults } of exaResearchResults) {
       for (const searchResult of searchResults) {
         cleanedExaResearchResults.push({
@@ -193,42 +208,10 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       }
     }
 
-    // Sort results by content length (shortest first) for better batching
-    cleanedExaResearchResults.sort(
-      (a, b) => a.content.length - b.content.length,
-    );
-
-    // Batching if web content in short, maximum, 10k chars per batch
-    const batchedExaResearchResults: SERP_SearchResult[][] = [];
-    let currentBatch: SERP_SearchResult[] = [];
-    let currentBatchLength = 0;
-
-    for (const result of cleanedExaResearchResults) {
-      const resultContentLength = result.content.length;
-
-      // If adding this result would exceed 10k chars, start a new batch
-      if (
-        currentBatchLength + resultContentLength > 10000 &&
-        currentBatch.length > 0
-      ) {
-        batchedExaResearchResults.push(currentBatch);
-        currentBatch = [result];
-        currentBatchLength = resultContentLength;
-      } else {
-        currentBatch.push(result);
-        currentBatchLength += resultContentLength;
-      }
-    }
-
-    // Add the last batch if it has content
-    if (currentBatch.length > 0) {
-      batchedExaResearchResults.push(currentBatch);
-    }
-
-    // Process each batch in parallel
-    const batchPromises = batchedExaResearchResults.map(async (batch) => {
+    // Process each search result individually
+    const summaryPromises = cleanedExaResearchResults.map(async (result) => {
       const summarizeExaResearchResultsPrompt =
-        ResearchPrompts.PROMPT_SummarizeSERP_SearchResults(batch);
+        ResearchPrompts.PROMPT_SummarizeSERP_SearchResults([result]);
       const summaryResponse = await this.deepseekService.generate(
         summarizeExaResearchResultsPrompt,
         {
@@ -237,19 +220,22 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
         },
       );
 
-      // TODO: Implement fallbacks
-      const parsedSummaryResponse =
-        safeJsonParse<RESPONSE_SummarizeSERP_SearchResults>(
-          summaryResponse.content,
-        );
-      return parsedSummaryResponse;
+      return await parseJsonWithFallback<RESPONSE_SummarizeSERP_SearchResults>(
+        summaryResponse.content,
+        this.deepseekService,
+        {
+          errorContext: 'SERP summary',
+          maxTokens: 8096,
+          logger: this.logger,
+        },
+      );
     });
 
-    const batchResults = await Promise.all(batchPromises);
+    const summaryResults = await Promise.all(summaryPromises);
     const summarizedSERPResults: RESPONSE_SummarizeSERP_SearchResults = [];
 
-    for (const batchResult of batchResults) {
-      summarizedSERPResults.push(...batchResult);
+    for (const summaryResult of summaryResults) {
+      summarizedSERPResults.push(...summaryResult);
     }
 
     context.serpKnowledgeBase = summarizedSERPResults;
@@ -274,10 +260,15 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       },
     );
 
-    // TODO: Implement fallbacks
     const parsedOptimizeSERP_SearchResultsResult =
-      safeJsonParse<RESPONSE_SummarizeSERP_SearchResults>(
+      await parseJsonWithFallback<RESPONSE_SummarizeSERP_SearchResults>(
         optimizeSERP_SearchResultsResult.content,
+        this.deepseekService,
+        {
+          errorContext: 'optimized SERP results',
+          maxTokens: 8096,
+          logger: this.logger,
+        },
       );
 
     const updatedContext: GeneratePostPipeline_Context = {
@@ -381,33 +372,16 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
         maxTokens: 20480,
       });
 
-    let parsedCreatePostScriptDefinitionResult: ScriptFormatDefinition;
-    try {
-      parsedCreatePostScriptDefinitionResult =
-        safeJsonParse<ScriptFormatDefinition>(
-          createPostScriptDefinitionResult.content,
-        );
-    } catch (parseError) {
-      // Fallback: Use FIX_JSON_PROMPT to repair the malformed JSON
-      const fixPrompt = FormattingPrompts.FIX_JSON_PROMPT(
+    const parsedCreatePostScriptDefinitionResult =
+      await parseJsonWithFallback<ScriptFormatDefinition>(
         createPostScriptDefinitionResult.content,
-        parseError instanceof Error ? parseError.message : String(parseError),
+        this.deepseekService,
+        {
+          errorContext: 'script definition',
+          maxTokens: 20480,
+          logger: this.logger,
+        },
       );
-
-      const fixedJsonResult = await this.antrophicService.generate(fixPrompt, {
-        model: AnthropicModel.CLAUDE_HAIKU_4_5,
-        maxTokens: 20480,
-      });
-
-      try {
-        parsedCreatePostScriptDefinitionResult =
-          safeJsonParse<ScriptFormatDefinition>(fixedJsonResult.content);
-      } catch (retryParseError) {
-        throw new BadRequestException(
-          `Failed to parse script definition JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
-        );
-      }
-    }
 
     postInterview.generatedScriptDefinition =
       parsedCreatePostScriptDefinitionResult;
@@ -535,30 +509,13 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       ) as PostBlock[];
 
       // Parse section content blocks as usual (with error correction)
-      let sectionContentBlocks: { blocks: PostBlock[] };
-      try {
-        sectionContentBlocks = safeJsonParse<{ blocks: PostBlock[] }>(
-          sectionContentResult.content,
-        );
-      } catch (parseError) {
-        const fixPrompt = FormattingPrompts.FIX_JSON_PROMPT(
-          sectionContentResult.content,
-          parseError instanceof Error ? parseError.message : String(parseError),
-        );
-        const fixedJsonResult = await this.groqService.generate(fixPrompt, {
-          model: GroqModel.GPT_OSS_120B_MODEL,
-          maxTokens: 8096,
-        });
-        try {
-          sectionContentBlocks = safeJsonParse<{ blocks: PostBlock[] }>(
-            fixedJsonResult.content,
-          );
-        } catch (retryParseError) {
-          throw new BadRequestException(
-            `Failed to parse section content JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
-          );
-        }
-      }
+      const sectionContentBlocks = await parseJsonWithFallback<{
+        blocks: PostBlock[];
+      }>(sectionContentResult.content, this.deepseekService, {
+        errorContext: 'section content',
+        maxTokens: 8096,
+        logger: this.logger,
+      });
 
       // Build the blocks for the whole section
       const blocksForSection: PostBlock[] = [
@@ -608,37 +565,14 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
           maxTokens: 8096,
         });
 
-        let faqObject: { questions: string[]; answers: string[] };
-        try {
-          faqObject = safeJsonParse<{
-            questions: string[];
-            answers: string[];
-          }>(faqResult.content);
-        } catch (parseError) {
-          // If JSON parsing fails, request a fix from the LLM
-          const fixPrompt = FormattingPrompts.FIX_JSON_PROMPT(
-            faqResult.content,
-            parseError instanceof Error
-              ? parseError.message
-              : String(parseError),
-          );
-
-          const fixedJsonResult = await this.groqService.generate(fixPrompt, {
-            model: GroqModel.GPT_OSS_120B_MODEL,
-            maxTokens: 8096,
-          });
-
-          try {
-            faqObject = safeJsonParse<{
-              questions: string[];
-              answers: string[];
-            }>(fixedJsonResult.content);
-          } catch (retryParseError) {
-            throw new BadRequestException(
-              `Failed to parse FAQ JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
-            );
-          }
-        }
+        const faqObject = await parseJsonWithFallback<{
+          questions: string[];
+          answers: string[];
+        }>(faqResult.content, this.deepseekService, {
+          errorContext: 'FAQ',
+          maxTokens: 8096,
+          logger: this.logger,
+        });
         return faqObject;
       })();
     }
@@ -649,32 +583,13 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
 
     const blocks: PostBlock[] = [];
 
-    let introductionBlocks: { blocks: PostBlock[] };
-    try {
-      introductionBlocks = safeJsonParse<{ blocks: PostBlock[] }>(
-        introductionResult.content,
-      );
-    } catch (parseError) {
-      const fixPrompt = FormattingPrompts.FIX_JSON_PROMPT(
-        introductionResult.content,
-        parseError instanceof Error ? parseError.message : String(parseError),
-      );
-
-      const fixedJsonResult = await this.groqService.generate(fixPrompt, {
-        model: GroqModel.GPT_OSS_120B_MODEL,
-        maxTokens: 8096,
-      });
-
-      try {
-        introductionBlocks = safeJsonParse<{ blocks: PostBlock[] }>(
-          fixedJsonResult.content,
-        );
-      } catch (retryParseError) {
-        throw new BadRequestException(
-          `Failed to parse introduction JSON after fix attempt: ${retryParseError instanceof Error ? retryParseError.message : String(retryParseError)}`,
-        );
-      }
-    }
+    const introductionBlocks = await parseJsonWithFallback<{
+      blocks: PostBlock[];
+    }>(introductionResult.content, this.deepseekService, {
+      errorContext: 'introduction',
+      maxTokens: 8096,
+      logger: this.logger,
+    });
     blocks.push(...introductionBlocks.blocks);
 
     // Add all section blocks in order
@@ -735,12 +650,19 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
     if (
       context.step === BasePipelineStep.COMPLETED ||
       context.step === BasePipelineStep.CANCELLED ||
-      context.step === BasePipelineStep.FAILED
+      context.step === BasePipelineStep.FAILED ||
+      context.status === PipelineHighLevelStatus.FAILED ||
+      context.status === PipelineHighLevelStatus.CANCELLED ||
+      context.status === PipelineHighLevelStatus.COMPLETED
     ) {
       return {
         type: 'TERMINAL',
       };
     }
+
+    this.logger.debug(
+      `Running step ${context.step} for pipeline ${context.pipelineId}`,
+    );
 
     let newContext: GeneratePostPipeline_Context;
     switch (context.step) {
@@ -779,6 +701,9 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
         newContext = await this.STEP_createScriptDraft(context);
         newContext.step = GeneratePostPipelineStep.OPTIMIZE_SCRIPT_DRAFT;
         await this.updateContext(context.pipelineId, newContext);
+        await this.postInterviewsRepository.save(
+          sanitizeMongoDocument(newContext.postInterview),
+        );
         return {
           type: 'PROGRESSED',
         };
@@ -788,7 +713,9 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
           GeneratePostPipelineStep.CREATE_POST_SCRIPT_DEFINITION;
         await Promise.all([
           this.updateContext(context.pipelineId, newContext),
-          this.postInterviewsRepository.save(newContext.postInterview),
+          this.postInterviewsRepository.save(
+            sanitizeMongoDocument(newContext.postInterview),
+          ),
         ]);
         return {
           type: 'PROGRESSED',
@@ -798,7 +725,9 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
         newContext.step = GeneratePostPipelineStep.GENERATE_POST_PARTS;
         await Promise.all([
           this.updateContext(context.pipelineId, newContext),
-          this.postInterviewsRepository.save(newContext.postInterview),
+          this.postInterviewsRepository.save(
+            sanitizeMongoDocument(newContext.postInterview),
+          ),
         ]);
         return {
           type: 'PROGRESSED',
@@ -813,8 +742,10 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
 
         await Promise.all([
           this.updateContext(context.pipelineId, newContext),
-          this.postInterviewsRepository.save(newContext.postInterview),
-          this.postsRepository.save(newContext.post),
+          this.postInterviewsRepository.save(
+            sanitizeMongoDocument(newContext.postInterview),
+          ),
+          this.postsRepository.save(sanitizeMongoDocument(newContext.post)),
         ]);
 
         // Updating post usage

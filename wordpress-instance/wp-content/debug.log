@@ -1,0 +1,10 @@
+[29-Dec-2025 15:46:19 UTC] === Autoblogger API Request ===
+[29-Dec-2025 15:46:19 UTC] Backend URL: http://localhost:4000/
+[29-Dec-2025 15:46:19 UTC] Request URL: http://localhost:4000/posts-interviews/get-interviews-list
+[29-Dec-2025 15:46:19 UTC] Method: GET
+[29-Dec-2025 15:46:19 UTC] Timeout: 30 seconds
+[29-Dec-2025 15:46:19 UTC] PHP max_execution_time: 600
+[29-Dec-2025 15:46:19 UTC] PHP memory_limit: 512M
+[29-Dec-2025 15:46:19 UTC] Request completed in 0.01 seconds
+[29-Dec-2025 15:46:19 UTC] Response code: 200
+[29-Dec-2025 15:46:19 UTC] ==============================

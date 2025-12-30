@@ -4,14 +4,14 @@ import { Model } from 'mongoose';
 import { UsageExceededException } from 'src/library/exceptions/usage.exceptions';
 import { NanoBananaImageGenerationService } from 'src/modules/image-generation/services/nano-banana-image-generation.service';
 import { GroqService } from 'src/modules/llm-manager/groq.service';
+import { PipelineVerbosedStatus } from 'src/modules/posts-generation/library/pipelines/pipeline-status.interface';
 import { PostGenerationManagementService } from 'src/modules/posts-generation/post-generation-management.service';
 import { AVAILABLE_PLANS } from 'src/modules/subscriptions/plans/plans.definition';
 import { SubscriptionService } from 'src/modules/subscriptions/subscription.service';
 import { UsageService } from 'src/modules/subscriptions/usage.service';
-import { PostInterviewDocument } from '../schemas/post-interview.schema';
+import { PostInterview } from '../schemas/post-interview.schema';
 import { Post, PostDocument } from '../schemas/posts.schema';
 import { PostInterviewsService } from './posts-interviews.service';
-import { PipelineVerbosedStatus } from 'src/modules/posts-generation/library/interfaces/pipelines/pipeline-status.interface';
 
 @Injectable()
 export class PostsManagementService {
@@ -28,7 +28,7 @@ export class PostsManagementService {
     private readonly postGenerationManagementService: PostGenerationManagementService,
   ) {}
 
-  async createPostDraftFromInterview(postInterview: PostInterviewDocument) {
+  async createPostDraftFromInterview(postInterview: PostInterview) {
     const currentCycleUserUsage =
       await this.usageService.getUsageForCurrentBillingPeriod(
         postInterview.userId as string,
@@ -54,7 +54,7 @@ export class PostsManagementService {
   }
 
   async checkGenerationStatusOfPost(
-    postInterview: PostInterviewDocument,
+    postInterview: PostInterview,
   ): Promise<PipelineVerbosedStatus> {
     const generationStatus =
       await this.postGenerationManagementService.getGenerationStatus_PostInterview(

@@ -5,8 +5,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { LlmManagerModule } from 'src/modules/llm-manager/llm-manager.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { LoggerModule } from './library/logging/logger.module';
 import { LoggerMiddleware } from './middleware/logger.middleware';
 import { AdministrationModule } from './modules/administration/administration.module';
+import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { QueueBoardModule } from './modules/bull-board/bull-board.module';
 import { ImageGenerationModule } from './modules/image-generation/image-generation.module';
 import { LicensesModule } from './modules/licenses/licenses.module';
 import { PostsGenerationModule } from './modules/posts-generation/posts-generation.module';
@@ -14,7 +17,6 @@ import { PostsManagementModule } from './modules/posts-management/posts-manageme
 import { StorageModule } from './modules/storage';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
 import { UsersModule } from './modules/users/users.module';
-import { AnalyticsModule } from './modules/analytics/analytics.module';
 
 @Module({
   imports: [
@@ -42,6 +44,9 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
       },
     }),
 
+    // Logger module (must be imported before other modules to ensure logging is available)
+    LoggerModule,
+
     ImageGenerationModule,
     LlmManagerModule,
     PostsManagementModule,
@@ -52,6 +57,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     AdministrationModule,
     PostsGenerationModule,
     AnalyticsModule,
+    QueueBoardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

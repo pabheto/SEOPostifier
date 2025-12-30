@@ -31,6 +31,8 @@ class Autoblogger_AJAX_Handlers {
         add_action('wp_ajax_autoblogger_generate_script_definition', array(__CLASS__, 'generate_script_definition'));
         add_action('wp_ajax_autoblogger_generate_suggestions', array(__CLASS__, 'generate_suggestions'));
         add_action('wp_ajax_autoblogger_generate_post', array(__CLASS__, 'generate_post'));
+        add_action('wp_ajax_autoblogger_generate_post_from_interview', array(__CLASS__, 'generate_post_from_interview'));
+        add_action('wp_ajax_autoblogger_get_generation_status', array(__CLASS__, 'get_generation_status'));
         add_action('wp_ajax_autoblogger_get_post', array(__CLASS__, 'get_post'));
         add_action('wp_ajax_autoblogger_create_wp_draft', array(__CLASS__, 'create_wp_draft'));
         add_action('wp_ajax_autoblogger_get_blog_links', array(__CLASS__, 'get_blog_links'));
@@ -571,7 +573,82 @@ class Autoblogger_AJAX_Handlers {
     }
 
     /**
-     * Generate Post (AJAX handler)
+     * Generate Post from Interview (NEW - Async) (AJAX handler)
+     */
+    public static function generate_post_from_interview() {
+        check_ajax_referer('autoblogger_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        if (!Autoblogger_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
+            return;
+        }
+
+        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field(wp_unslash($_POST['interview_id'])) : '';
+
+        if (empty($interview_id)) {
+            wp_send_json_error(array('message' => 'Interview ID is required'));
+            return;
+        }
+
+        $response = Autoblogger_API_Client::generate_post_from_interview($interview_id);
+        $result = Autoblogger_API_Client::parse_response($response);
+
+        if ($result['success']) {
+            wp_send_json_success(array(
+                'message' => 'Post generation started successfully',
+                'data' => $result['data']
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => 'Failed to start post generation: ' . $result['message']
+            ));
+        }
+    }
+
+    /**
+     * Get Generation Status (AJAX handler)
+     */
+    public static function get_generation_status() {
+        check_ajax_referer('autoblogger_nonce', 'nonce');
+
+        if (!current_user_can('manage_options')) {
+            wp_send_json_error(array('message' => 'Unauthorized'));
+            return;
+        }
+
+        if (!Autoblogger_Settings::is_activated()) {
+            wp_send_json_error(array('message' => 'Plugin is not activated. Please activate your license key.'));
+            return;
+        }
+
+        $interview_id = isset($_POST['interview_id']) ? sanitize_text_field(wp_unslash($_POST['interview_id'])) : '';
+
+        if (empty($interview_id)) {
+            wp_send_json_error(array('message' => 'Interview ID is required'));
+            return;
+        }
+
+        $response = Autoblogger_API_Client::get_generation_status($interview_id);
+        $result = Autoblogger_API_Client::parse_response($response);
+
+        if ($result['success']) {
+            wp_send_json_success(array(
+                'status' => $result['data']['status']
+            ));
+        } else {
+            wp_send_json_error(array(
+                'message' => 'Failed to get generation status: ' . $result['message']
+            ));
+        }
+    }
+
+    /**
+     * Generate Post (LEGACY - AJAX handler - will be removed)
      */
     public static function generate_post() {
         check_ajax_referer('autoblogger_nonce', 'nonce');

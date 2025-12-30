@@ -2,10 +2,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { CustomLoggerService } from './library/logging/logger.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true, // Enable raw body for webhook signature verification
+    logger: new CustomLoggerService('Bootstrap'),
   });
 
   // Enable global validation pipe
@@ -62,6 +64,9 @@ async function bootstrap() {
   console.log(`🚀 SEO Backend is running on: http://localhost:${port}`);
   console.log(
     `📚 API Documentation available at: http://localhost:${port}/api`,
+  );
+  console.log(
+    `📊 BullMQ Admin Dashboard available at: http://localhost:${port}/admin/queues`,
   );
 }
 bootstrap()

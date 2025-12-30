@@ -5,7 +5,7 @@ import { PIPELINE_STEP_QUEUE } from '../library/constants';
 import {
   BasePipelineContext,
   PipelineStepOutcome,
-} from '../library/interfaces/pipelines/pipeline.interface';
+} from '../library/pipelines/pipeline.interface';
 import { PipelineOrchestrator } from '../pipelines/pipeline.orchestrator';
 
 export interface PipelineStepJobData {
@@ -41,8 +41,15 @@ export class PipelineProcessor extends WorkerHost {
           );
         } catch (error) {
           // TODO: Implement a retry mechanism here
-          this.logger.error('Error executing pipeline step ' + error);
-          break;
+          this.logger.error(`Error executing pipeline step ` + error);
+
+          await this.pipelineOrchestrator.markPipelineAsFailed(
+            job.data.pipelineId,
+          );
+
+          return {
+            type: 'TERMINAL',
+          };
         }
 
         if (outcome.type === 'PROGRESSED') {

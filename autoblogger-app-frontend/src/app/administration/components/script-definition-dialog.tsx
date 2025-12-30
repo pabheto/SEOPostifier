@@ -137,46 +137,49 @@ export function ScriptDefinitionDialog({
                           </div>
                         )}
                       </div>
-                      {(section.links.internal.length > 0 ||
-                        section.links.external.length > 0) && (
+                      {section.links && section.links.length > 0 && (
                         <div className="mt-3 space-y-2">
-                          {section.links.internal.length > 0 && (
+                          {section.links.some(
+                            (link) => link.type === "internal"
+                          ) && (
                             <div>
                               <span className="font-medium text-sm">
                                 Internal Links:{" "}
                               </span>
                               <div className="flex flex-wrap gap-1 mt-1">
-                                {section.links.internal.map(
-                                  (link, linkIndex) => (
+                                {section.links
+                                  .filter((link) => link.type === "internal")
+                                  .map((link, linkIndex) => (
                                     <Badge
                                       key={linkIndex}
                                       variant="outline"
                                       className="text-xs"
                                     >
-                                      {link}
+                                      {link.url} - {link.description}
                                     </Badge>
-                                  )
-                                )}
+                                  ))}
                               </div>
                             </div>
                           )}
-                          {section.links.external.length > 0 && (
+                          {section.links.some(
+                            (link) => link.type === "external"
+                          ) && (
                             <div>
                               <span className="font-medium text-sm">
                                 External Links:{" "}
                               </span>
                               <div className="flex flex-wrap gap-1 mt-1">
-                                {section.links.external.map(
-                                  (link, linkIndex) => (
+                                {section.links
+                                  .filter((link) => link.type === "external")
+                                  .map((link, linkIndex) => (
                                     <Badge
                                       key={linkIndex}
                                       variant="outline"
                                       className="text-xs"
                                     >
-                                      {link}
+                                      {link.url} - {link.description}
                                     </Badge>
-                                  )
-                                )}
+                                  ))}
                               </div>
                             </div>
                           )}

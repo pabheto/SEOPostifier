@@ -414,52 +414,28 @@ $mode = $autoblogger_is_edit_mode ? 'edit' : 'create';
         <!-- Generation Progress Container -->
         <div id="generation-progress-container" style="display: none; margin-top: 30px;">
             <div class="card">
-                <h2><?php esc_html_e('Generating Your Post', 'autoblogger'); ?></h2>
+                <h2 id="progress-title"><?php esc_html_e('Generating Your Post', 'autoblogger'); ?></h2>
                 
-                <div class="autoblogger-progress-steps">
-                    <div class="progress-step" id="step-script-text">
-                        <div class="step-icon">
-                            <span class="dashicons dashicons-admin-page"></span>
-                        </div>
-                        <div class="step-content">
-                            <h3><?php esc_html_e('Generating Script Text', 'autoblogger'); ?></h3>
-                            <p class="step-description"><?php esc_html_e('Creating the structured content outline', 'autoblogger'); ?></p>
-                            <div class="step-status"><?php esc_html_e('Pending...', 'autoblogger'); ?></div>
+                <!-- Progress Bar -->
+                <div class="autoblogger-progress-bar-container" style="margin: 30px 0;">
+                    <div class="autoblogger-progress-bar-wrapper" style="width: 100%; height: 30px; background: #f0f0f0; border-radius: 15px; overflow: hidden; position: relative;">
+                        <div id="progress-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #2271b1 0%, #135e96 100%); transition: width 0.3s ease; display: flex; align-items: center; justify-content: flex-end; padding-right: 10px;">
+                            <span id="progress-percentage" style="color: white; font-weight: bold; font-size: 14px; display: none;"></span>
                         </div>
                     </div>
-                    
-                    <div class="progress-step" id="step-script-definition">
-                        <div class="step-icon">
-                            <span class="dashicons dashicons-editor-table"></span>
-                        </div>
-                        <div class="step-content">
-                            <h3><?php esc_html_e('Generating Script Definition', 'autoblogger'); ?></h3>
-                            <p class="step-description"><?php esc_html_e('Defining sections and structure', 'autoblogger'); ?></p>
-                            <div class="step-status"><?php esc_html_e('Pending...', 'autoblogger'); ?></div>
-                        </div>
-                    </div>
-                    
-                    <div class="progress-step" id="step-post">
-                        <div class="step-icon">
-                            <span class="dashicons dashicons-edit-large"></span>
-                        </div>
-                        <div class="step-content">
-                            <h3><?php esc_html_e('Generating Post Content', 'autoblogger'); ?></h3>
-                            <p class="step-description"><?php esc_html_e('Writing the complete post with AI', 'autoblogger'); ?></p>
-                            <div class="step-status"><?php esc_html_e('Pending...', 'autoblogger'); ?></div>
-                        </div>
-                    </div>
-                    
-                    <div class="progress-step" id="step-wordpress">
-                        <div class="step-icon">
-                            <span class="dashicons dashicons-wordpress"></span>
-                        </div>
-                        <div class="step-content">
-                            <h3><?php esc_html_e('Creating WordPress Draft', 'autoblogger'); ?></h3>
-                            <p class="step-description"><?php esc_html_e('Publishing to WordPress editor', 'autoblogger'); ?></p>
-                            <div class="step-status"><?php esc_html_e('Pending...', 'autoblogger'); ?></div>
-                        </div>
-                    </div>
+                    <p id="progress-status-label" style="margin-top: 15px; font-size: 15px; color: #555; text-align: center; min-height: 24px;">
+                        <?php esc_html_e('Initializing...', 'autoblogger'); ?>
+                    </p>
+                </div>
+
+                <!-- Status Messages Container -->
+                <div id="status-messages-container" style="margin-top: 20px;"></div>
+
+                <!-- Action Buttons Container (for error states) -->
+                <div id="action-buttons-container" style="display: none; margin-top: 30px; text-align: center;">
+                    <a href="?page=autoblogger&tab=scripts" class="button button-primary button-large">
+                        <?php esc_html_e('← Return to My Drafts', 'autoblogger'); ?>
+                    </a>
                 </div>
             </div>
         </div>
@@ -1123,166 +1099,245 @@ jQuery(document).ready(function($) {
         }
         
         function continueWithGeneration(interviewIdToUse) {
-            console.log('=== continueWithGeneration ===');
+            console.log('=== continueWithGeneration (NEW SYSTEM) ===');
+            console.log('Interview ID:', interviewIdToUse);
             
-            // Update progress: Step 1 - Script Text
-            $('#step-script-text').addClass('active');
-            $('#step-script-text .step-status').text('<?php esc_html_e('In Progress...', 'autoblogger'); ?>');
-            
-            // Step 1: Generate script text
-                    $.ajax({
-                        url: autobloggerData.ajaxUrl,
-                        type: 'POST',
-                                    timeout: 180000,
-                                    data: {
-                                        action: 'autoblogger_generate_script_text',
-                                        nonce: autobloggerData.nonce,
-                                        interview_id: interviewIdToUse
-                                    },
-                                    success: function(genResponse) {
-                                        if (genResponse.success) {
-                                            console.log('Script text generated');
-                                            
-                                            // Complete step 1
-                                            $('#step-script-text').removeClass('active').addClass('completed');
-                                            $('#step-script-text .step-status').html('<?php esc_html_e('✓ Completed', 'autoblogger'); ?>');
-                                            
-                                            // Start step 2
-                                            $('#step-script-definition').addClass('active');
-                                            $('#step-script-definition .step-status').text('<?php esc_html_e('In Progress...', 'autoblogger'); ?>');
-                                            
-                                            // Step 2: Generate script definition
-                                $.ajax({
-                                    url: autobloggerData.ajaxUrl,
-                                    type: 'POST',
-                                                    timeout: 180000,
-                                                    data: {
-                                                        action: 'autoblogger_generate_script_definition',
-                                                        nonce: autobloggerData.nonce,
-                                                        interview_id: interviewIdToUse
-                                                    },
-                                                    success: function(defResponse) {
-                                                        if (defResponse.success) {
-                                                            console.log('Script definition generated');
-                                                            
-                                                            // Complete step 2
-                                                            $('#step-script-definition').removeClass('active').addClass('completed');
-                                                            $('#step-script-definition .step-status').html('<?php esc_html_e('✓ Completed', 'autoblogger'); ?>');
-                                                            
-                                                            // Start step 3
-                                                            $('#step-post').addClass('active');
-                                                            $('#step-post .step-status').text('<?php esc_html_e('In Progress...', 'autoblogger'); ?>');
-                                                            
-                                                            // Step 3: Generate post
-                                            $.ajax({
-                                                url: autobloggerData.ajaxUrl,
-                                                type: 'POST',
-                                                                timeout: 300000,
-                                                                data: {
-                                                                    action: 'autoblogger_generate_post',
-                                                                    nonce: autobloggerData.nonce,
-                                                                    interview_id: interviewIdToUse
-                                                                },
-                                                                success: function(postResponse) {
-                                                                    if (postResponse.success) {
-                                                                        console.log('Post generated');
-                                                                        const postId = postResponse.data.post._id || postResponse.data.post.id;
-                                                                        
-                                                                        // Complete step 3
-                                                                        $('#step-post').removeClass('active').addClass('completed');
-                                                                        $('#step-post .step-status').html('<?php esc_html_e('✓ Completed', 'autoblogger'); ?>');
-                                                                        
-                                                                        // Start step 4
-                                                                        $('#step-wordpress').addClass('active');
-                                                                        $('#step-wordpress .step-status').text('<?php esc_html_e('In Progress...', 'autoblogger'); ?>');
-                                                                        
-                                                                        // Step 4: Create WordPress draft
-                                                        $.ajax({
-                                                            url: autobloggerData.ajaxUrl,
-                                                            type: 'POST',
-                                                            data: {
-                                                                action: 'autoblogger_create_wp_draft',
-                                                                nonce: autobloggerData.nonce,
-                                                                post_id: postId
-                                                                            },
-                                                                            success: function(draftResponse) {
-                                                                                if (draftResponse.success) {
-                                                                                    console.log('WordPress draft created');
-                                                                                    
-                                                                                    // Complete step 4
-                                                                                    $('#step-wordpress').removeClass('active').addClass('completed');
-                                                                                    $('#step-wordpress .step-status').html('<?php esc_html_e('✓ Completed', 'autoblogger'); ?>');
-                                                                                    
-                                                                                    // Add success message
-                                                                                    $('#generation-progress-container .card').append(
-                                                                                        '<div class="notice notice-success inline" style="margin-top: 30px;"><p>' +
-                                                                                        '<?php esc_html_e('WordPress draft created successfully! Redirecting to editor...', 'autoblogger'); ?></p></div>'
-                                                                                    );
-                                                                                    
-                                                                                    setTimeout(function() {
-                                                                                        window.location.href = draftResponse.data.edit_url;
-                                                                                    }, 1500);
-                                                                                } else {
-                                                                                    $('#step-wordpress .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
-                                                                                    $('#generation-progress-container .card').append(
-                                                                                        '<div class="notice notice-warning inline" style="margin-top: 30px;"><p><?php esc_html_e('Post generated but draft creation failed: ', 'autoblogger'); ?>' + 
-                                                                                        (draftResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
-                                                                                    );
-                                                                                }
-                                                                            },
-                                                                            error: function() {
-                                                                                $('#step-wordpress .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
-                                                                                $('#generation-progress-container .card').append(
-                                                                                    '<div class="notice notice-warning inline" style="margin-top: 30px;"><p><?php esc_html_e('Post generated but draft creation failed. Please try creating manually.', 'autoblogger'); ?></p></div>'
-                                                                                );
-                                                                            }
-                                                                        });
-                                                                    } else {
-                                                                        $('#step-post .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
-                                                                        $('#generation-progress-container .card').append(
-                                                                            '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate post: ', 'autoblogger'); ?>' + 
-                                                                            (postResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
-                                                                        );
-                                                                    }
-                                                                },
-                                                                error: function() {
-                                                                    $('#step-post .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
-                                                                    $('#generation-progress-container .card').append(
-                                                                        '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate post. Please try again.', 'autoblogger'); ?></p></div>'
-                                                                    );
-                                                                }
-                                                            });
-                                                        } else {
-                                                            $('#step-script-definition .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
-                                                            $('#generation-progress-container .card').append(
-                                                                '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate script definition: ', 'autoblogger'); ?>' + 
-                                                                (defResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
-                                                            );
-                                                        }
-                                                    },
-                                                    error: function() {
-                                                        $('#step-script-definition .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
-                                                        $('#generation-progress-container .card').append(
-                                                            '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate script definition. Please try again.', 'autoblogger'); ?></p></div>'
-                                                        );
-                                                    }
-                                                });
-                                            } else {
-                                                $('#step-script-text .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
-                                                $('#generation-progress-container .card').append(
-                                                    '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate script text: ', 'autoblogger'); ?>' + 
-                                                    (genResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>'
-                                                );
-                                            }
-                                        },
-                                        error: function() {
-                                            $('#step-script-text .step-status').html('<?php esc_html_e('✗ Failed', 'autoblogger'); ?>');
-                                            $('#generation-progress-container .card').append(
-                                                '<div class="notice notice-error inline" style="margin-top: 30px;"><p><?php esc_html_e('Failed to generate script text. Please try again.', 'autoblogger'); ?></p></div>'
-                                            );
-                                        }
-                    });
+            // Start the generation process with a single call
+            $.ajax({
+                url: autobloggerData.ajaxUrl,
+                type: 'POST',
+                timeout: 30000,
+                data: {
+                    action: 'autoblogger_generate_post_from_interview',
+                    nonce: autobloggerData.nonce,
+                    interview_id: interviewIdToUse
+                },
+                success: function(response) {
+                    console.log('Generation started:', response);
+                    if (response.success) {
+                        // Start polling for status
+                        startStatusPolling(interviewIdToUse);
+                    } else {
+                        showError('<?php esc_html_e('Failed to start generation: ', 'autoblogger'); ?>' + 
+                            (response.data && response.data.message ? response.data.message : '<?php esc_html_e('Unknown error', 'autoblogger'); ?>'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Failed to start generation:', error);
+                    showError('<?php esc_html_e('Failed to start generation. Please try again.', 'autoblogger'); ?>');
+                }
+            });
         } // End continueWithGeneration function
+        
+        // Status polling function
+        let pollingInterval = null;
+        let pollingStartTime = null;
+        const MAX_POLLING_TIME = 15 * 60 * 1000; // 15 minutes in milliseconds
+        const POLLING_INTERVAL = 3000; // 3 seconds
+        
+        function startStatusPolling(interviewId) {
+            console.log('=== Starting status polling ===');
+            pollingStartTime = Date.now();
+            
+            // Clear any existing interval
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+            
+            // Poll immediately, then every 3 seconds
+            pollGenerationStatus(interviewId);
+            pollingInterval = setInterval(function() {
+                pollGenerationStatus(interviewId);
+            }, POLLING_INTERVAL);
+        }
+        
+        function stopStatusPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+        
+        function pollGenerationStatus(interviewId) {
+            // Check if we've exceeded maximum polling time
+            const elapsedTime = Date.now() - pollingStartTime;
+            if (elapsedTime > MAX_POLLING_TIME) {
+                console.log('Max polling time exceeded');
+                stopStatusPolling();
+                showError('<?php esc_html_e('Generation timeout: The process is taking longer than expected. Please check back later or contact support.', 'autoblogger'); ?>');
+                return;
+            }
+            
+            $.ajax({
+                url: autobloggerData.ajaxUrl,
+                type: 'POST',
+                timeout: 10000,
+                data: {
+                    action: 'autoblogger_get_generation_status',
+                    nonce: autobloggerData.nonce,
+                    interview_id: interviewId
+                },
+                success: function(response) {
+                    if (response.success && response.data && response.data.status) {
+                        const statusData = response.data.status;
+                        console.log('Status update:', statusData);
+                        
+                        updateProgressUI(statusData);
+                        
+                        // Check if generation is complete
+                        if (statusData.status === 'COMPLETED') {
+                            stopStatusPolling();
+                            handleGenerationComplete(interviewId);
+                        } else if (statusData.status === 'FAILED') {
+                            stopStatusPolling();
+                            handleGenerationFailed(statusData);
+                        } else if (statusData.status === 'CANCELLED') {
+                            stopStatusPolling();
+                            handleGenerationCancelled(statusData);
+                        }
+                        // Continue polling for IN_PROGRESS or NOT_STARTED
+                    } else {
+                        console.error('Invalid status response:', response);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Status polling error:', error);
+                    // Don't stop polling on error, just log it
+                }
+            });
+        }
+        
+        function updateProgressUI(statusData) {
+            const progress = statusData.progress || 0;
+            const statusLabel = statusData.statusLabel || '<?php esc_html_e('Processing...', 'autoblogger'); ?>';
+            const status = statusData.status;
+            
+            // Update progress bar
+            $('#progress-bar-fill').css('width', progress + '%');
+            
+            // Show/hide percentage based on progress
+            if (progress > 0) {
+                $('#progress-percentage').text(Math.round(progress) + '%').show();
+            }
+            
+            // Update status label
+            $('#progress-status-label').text(statusLabel);
+            
+            // Update progress bar color based on status
+            if (status === 'FAILED') {
+                $('#progress-bar-fill').css('background', 'linear-gradient(90deg, #dc3232 0%, #a02020 100%)');
+            } else if (status === 'CANCELLED') {
+                $('#progress-bar-fill').css('background', 'linear-gradient(90deg, #dba617 0%, #a97c0f 100%)');
+            } else if (status === 'COMPLETED') {
+                $('#progress-bar-fill').css('background', 'linear-gradient(90deg, #46b450 0%, #2e7d32 100%)');
+            }
+        }
+        
+        function handleGenerationComplete(interviewId) {
+            console.log('=== Generation Complete ===');
+            
+            // Update UI
+            $('#progress-bar-fill').css('width', '100%');
+            $('#progress-percentage').text('100%').show();
+            $('#progress-status-label').text('<?php esc_html_e('Generation completed! Fetching post...', 'autoblogger'); ?>');
+            
+            // Get the generated post and create WordPress draft
+            $.ajax({
+                url: autobloggerData.ajaxUrl,
+                type: 'POST',
+                data: {
+                    action: 'autoblogger_get_interview',
+                    nonce: autobloggerData.nonce,
+                    interview_id: interviewId
+                },
+                success: function(response) {
+                    if (response.success && response.data && response.data.interview && response.data.interview.postId) {
+                        const postId = response.data.interview.postId;
+                        console.log('Post ID:', postId);
+                        
+                        // Create WordPress draft
+                        $('#progress-status-label').text('<?php esc_html_e('Creating WordPress draft...', 'autoblogger'); ?>');
+                        
+                        $.ajax({
+                            url: autobloggerData.ajaxUrl,
+                            type: 'POST',
+                            data: {
+                                action: 'autoblogger_create_wp_draft',
+                                nonce: autobloggerData.nonce,
+                                post_id: postId
+                            },
+                            success: function(draftResponse) {
+                                if (draftResponse.success) {
+                                    console.log('WordPress draft created');
+                                    
+                                    $('#progress-status-label').html(
+                                        '<span style="color: #46b450; font-weight: bold;">' +
+                                        '<?php esc_html_e('✓ WordPress draft created successfully! Redirecting to editor...', 'autoblogger'); ?>' +
+                                        '</span>'
+                                    );
+                                    
+                                    setTimeout(function() {
+                                        window.location.href = draftResponse.data.edit_url;
+                                    }, 1500);
+                                } else {
+                                    showError('<?php esc_html_e('Post generated but draft creation failed: ', 'autoblogger'); ?>' + 
+                                        (draftResponse.data && draftResponse.data.message ? draftResponse.data.message : '<?php esc_html_e('Unknown error', 'autoblogger'); ?>'));
+                                }
+                            },
+                            error: function() {
+                                showError('<?php esc_html_e('Post generated but failed to create WordPress draft. Please try creating manually from the drafts list.', 'autoblogger'); ?>');
+                            }
+                        });
+                    } else {
+                        showError('<?php esc_html_e('Post generated but could not retrieve post ID. Please check your drafts list.', 'autoblogger'); ?>');
+                    }
+                },
+                error: function() {
+                    showError('<?php esc_html_e('Post generated but failed to retrieve details. Please check your drafts list.', 'autoblogger'); ?>');
+                }
+            });
+        }
+        
+        function handleGenerationFailed(statusData) {
+            console.log('=== Generation Failed ===', statusData);
+            
+            const errorMessage = statusData.statusLabel || '<?php esc_html_e('The generation process failed. Please try again.', 'autoblogger'); ?>';
+            
+            $('#progress-title').text('<?php esc_html_e('Generation Failed', 'autoblogger'); ?>');
+            $('#progress-status-label').html(
+                '<span style="color: #dc3232; font-weight: bold;">✗ ' + errorMessage + '</span>'
+            );
+            
+            showError(errorMessage);
+        }
+        
+        function handleGenerationCancelled(statusData) {
+            console.log('=== Generation Cancelled ===', statusData);
+            
+            const message = statusData.statusLabel || '<?php esc_html_e('The generation process was cancelled.', 'autoblogger'); ?>';
+            
+            $('#progress-title').text('<?php esc_html_e('Generation Cancelled', 'autoblogger'); ?>');
+            $('#progress-status-label').html(
+                '<span style="color: #dba617; font-weight: bold;">⊘ ' + message + '</span>'
+            );
+            
+            $('#status-messages-container').html(
+                '<div class="notice notice-warning inline"><p>' + message + '</p></div>'
+            );
+            
+            // Show return home button
+            $('#action-buttons-container').fadeIn(300);
+        }
+        
+        function showError(message) {
+            $('#progress-title').text('<?php esc_html_e('Generation Error', 'autoblogger'); ?>');
+            $('#status-messages-container').html(
+                '<div class="notice notice-error inline"><p>' + message + '</p></div>'
+            );
+            
+            // Show return home button
+            $('#action-buttons-container').fadeIn(300);
+        }
         
         return false;
     } // End handleFormSubmit function

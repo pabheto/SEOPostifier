@@ -100,7 +100,23 @@ class Autoblogger_API_Client {
     }
 
     /**
-     * Generate post from interview
+     * Generate post from interview (new system - async)
+     */
+    public static function generate_post_from_interview($interview_id) {
+        return self::request('/posts/generate-from-interview', 'POST', array(
+            'interviewId' => $interview_id
+        ), 30);
+    }
+
+    /**
+     * Get generation status for interview
+     */
+    public static function get_generation_status($interview_id) {
+        return self::request('/posts/interview/' . $interview_id . '/generation-status', 'GET', null, 10);
+    }
+
+    /**
+     * Generate post from interview (LEGACY - will be removed)
      */
     public static function generate_post($interview_id) {
         return self::request('/posts/generate', 'POST', array(

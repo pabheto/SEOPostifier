@@ -13,10 +13,10 @@ export enum DeepseekModel {
 export class DeepseekService {
   private readonly openai: OpenAI;
   constructor(private readonly configService: ConfigService) {
-    const apiKey = this.configService.get<string>('OPENAI_API_KEY');
+    const apiKey = this.configService.get<string>('DEEPSEEK_API_KEY');
 
     if (!apiKey) {
-      throw new Error('OPENAI_API_KEY not found in environment variables');
+      throw new Error('DEEPSEEK_API_KEY not found in environment variables');
     }
 
     this.openai = new OpenAI({ baseURL: 'https://api.deepseek.com', apiKey });

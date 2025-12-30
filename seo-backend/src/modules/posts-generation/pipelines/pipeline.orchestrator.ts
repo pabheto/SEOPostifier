@@ -5,12 +5,13 @@ import { RedisStorageService } from 'src/modules/storage';
 import { RedisKeys } from 'src/modules/storage/library/utils/redis-keys.util';
 import { PIPELINE_STEP_QUEUE } from '../library/constants';
 import { PipelineStepExecutionException } from '../library/exceptions';
-import { getPipelineFromId } from '../library/interfaces/pipelines/pipeline-ids.util';
+import { getPipelineFromId } from '../library/pipelines/pipeline-ids.util';
+import { PipelineHighLevelStatus } from '../library/pipelines/pipeline-status.interface';
 import {
   AvailablePipelines,
   BasePipelineContext,
   BasePipelineStep,
-} from '../library/interfaces/pipelines/pipeline.interface';
+} from '../library/pipelines/pipeline.interface';
 import { PipelineStepJobData } from '../processors/pipeline.processor';
 import {
   GeneratePost_Pipeline,
@@ -54,7 +55,12 @@ export class PipelineOrchestrator {
         return this.generatePostPipeline.runOnce(pipelineContext);
       }
     } catch (error) {
-      this.logger.error(error, 'Error executing pipeline step');
+      const pipelineContext =
+        await this.getContextForPipeline<BasePipelineContext>(pipelineId);
+      this.logger.error(
+        error,
+        `Error executing pipeline step ${pipelineContext.step}`,
+      );
       throw new PipelineStepExecutionException((error as Error).message);
     }
 
@@ -64,22 +70,33 @@ export class PipelineOrchestrator {
   async markPipelineAsCompleted(pipelineId: string) {
     const pipelineContext =
       await this.getContextForPipeline<BasePipelineContext>(pipelineId);
-    pipelineContext.step = BasePipelineStep.COMPLETED;
+    pipelineContext.status = PipelineHighLevelStatus.COMPLETED;
     await this.updateContextForPipeline(pipelineId, pipelineContext);
   }
 
   async markPipelineAsCancelled(pipelineId: string) {
     const pipelineContext =
       await this.getContextForPipeline<BasePipelineContext>(pipelineId);
-    pipelineContext.step = BasePipelineStep.CANCELLED;
+    pipelineContext.status = PipelineHighLevelStatus.CANCELLED;
     await this.updateContextForPipeline(pipelineId, pipelineContext);
   }
 
-  async markPipelineAsFailed(pipelineId: string) {
+  async markPipelineAsFailed(pipelineId: string, errorMessage?: string) {
     const pipelineContext =
       await this.getContextForPipeline<BasePipelineContext>(pipelineId);
-    pipelineContext.step = BasePipelineStep.FAILED;
+    pipelineContext.status = PipelineHighLevelStatus.FAILED;
+    pipelineContext.lastError = errorMessage;
     await this.updateContextForPipeline(pipelineId, pipelineContext);
+  }
+
+  async restartAndEnqueuePipelineFromBeginning(pipelineId: string) {
+    const pipelineContext =
+      await this.getContextForPipeline<BasePipelineContext>(pipelineId);
+    pipelineContext.status = PipelineHighLevelStatus.NOT_STARTED;
+    pipelineContext.step = BasePipelineStep.INIT;
+
+    await this.updateContextForPipeline(pipelineId, pipelineContext);
+    await this.enqueuePipelineStep(pipelineId);
   }
 
   async enqueuePipelineStep(

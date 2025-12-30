@@ -1,61 +1,41 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
 import { NextFunction, Request, Response } from 'express';
+import { CustomLoggerService } from 'src/library/logging/logger.service';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
+  private logger = new CustomLoggerService('HTTP');
+
   use(req: Request, res: Response, next: NextFunction) {
-    const { method, originalUrl, body, query } = req;
+    const { method, originalUrl } = req;
     const startTime = Date.now();
 
     // Log incoming request
-    console.log('\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-    console.log(`📥 REQUEST: ${method} ${originalUrl}`);
-    console.log(`⏰ Time: ${new Date().toISOString()}`);
-
-    if (query && Object.keys(query).length > 0) {
-      console.log(`🔍 Query: ${this.trimContent(JSON.stringify(query))}`);
-    }
-
-    if (body && Object.keys(body).length > 0) {
-      console.log(`📦 Body: ${this.trimContent(JSON.stringify(body))}`);
-    }
+    this.logger.log(`📥 ${method} ${originalUrl}`);
 
     // Store original methods
     const originalSend = res.send;
     const originalJson = res.json;
 
     // Override res.send
-    res.send = function (data: any) {
+    res.send = (data: any): Response => {
       res.send = originalSend;
-      LoggerMiddleware.logResponse(
-        res.statusCode,
-        data,
-        startTime,
-        method,
-        originalUrl,
-      );
-      return originalSend.call(this, data);
+      this.logResponse(res.statusCode, startTime, method, originalUrl);
+      return originalSend.call(res, data) as Response;
     };
 
     // Override res.json
-    res.json = function (data: any) {
+    res.json = (data: any): Response => {
       res.json = originalJson;
-      LoggerMiddleware.logResponse(
-        res.statusCode,
-        data,
-        startTime,
-        method,
-        originalUrl,
-      );
-      return originalJson.call(this, data);
+      this.logResponse(res.statusCode, startTime, method, originalUrl);
+      return originalJson.call(res, data) as Response;
     };
 
     next();
   }
 
-  private static logResponse(
+  private logResponse(
     statusCode: number,
-    data: any,
     startTime: number,
     method: string,
     url: string,
@@ -64,28 +44,12 @@ export class LoggerMiddleware implements NestMiddleware {
     const statusEmoji =
       statusCode >= 400 ? '❌' : statusCode >= 300 ? '↩️' : '✅';
 
-    console.log(`${statusEmoji} RESPONSE: ${method} ${url}`);
-    console.log(`📊 Status: ${statusCode} | ⚡ Duration: ${duration}ms`);
+    const message = `${statusEmoji} ${method} ${url} - ${statusCode} (${duration}ms)`;
 
-    if (data) {
-      const content = typeof data === 'string' ? data : JSON.stringify(data);
-      console.log(`📤 Data: ${LoggerMiddleware.trimContentStatic(content)}`);
+    if (statusCode >= 400) {
+      this.logger.error(message);
+    } else {
+      this.logger.log(message);
     }
-
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-  }
-
-  private trimContent(content: string, maxLength: number = 300): string {
-    return LoggerMiddleware.trimContentStatic(content, maxLength);
-  }
-
-  private static trimContentStatic(
-    content: string,
-    maxLength: number = 300,
-  ): string {
-    if (content.length <= maxLength) {
-      return content;
-    }
-    return content.substring(0, maxLength) + '... [truncated]';
   }
 }

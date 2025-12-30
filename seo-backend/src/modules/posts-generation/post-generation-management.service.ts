@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PostInterview } from '../posts-management/schemas/post-interview.schema';
-import { buildPipelineId } from './library/interfaces/pipelines/pipeline-ids.util';
+import { buildPipelineId } from './library/pipelines/pipeline-ids.util';
 import {
   PipelineHighLevelStatus,
   PipelineVerbosedStatus,
-} from './library/interfaces/pipelines/pipeline-status.interface';
+} from './library/pipelines/pipeline-status.interface';
 import {
   AvailablePipelines,
   BasePipelineStep,
-} from './library/interfaces/pipelines/pipeline.interface';
+} from './library/pipelines/pipeline.interface';
 import {
   GeneratePost_Pipeline,
   GeneratePostPipeline_Context,
@@ -36,8 +36,13 @@ export class PostGenerationManagementService {
   async scheduleGeneration_PostInterview(postInterview: PostInterview) {
     const existingGenerationContext =
       await this.getGenerationContext_PostInterview(postInterview);
-    if (existingGenerationContext) {
+    /* if (existingGenerationContext) {
       throw new Error("There's already a creation pipeline for this interview");
+    } */
+    if (existingGenerationContext) {
+      return this.pipelineOrchestrator.restartAndEnqueuePipelineFromBeginning(
+        existingGenerationContext.pipelineId,
+      );
     }
 
     const pipelineId =

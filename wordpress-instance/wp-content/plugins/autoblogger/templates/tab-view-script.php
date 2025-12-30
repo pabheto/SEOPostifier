@@ -844,107 +844,33 @@ jQuery(document).ready(function($) {
             success: function(response) {
                 if (response.success) {
                     currentInterview = response.data.interview;
-                    $status.html('<div class="notice notice-info inline"><p><?php esc_html_e('Settings updated. Generating script text...', 'autoblogger'); ?></p></div>');
-                    $button.text('<?php esc_html_e('Generating Script Text...', 'autoblogger'); ?>');
+                    $status.html('<div class="notice notice-info inline"><p><?php esc_html_e('Settings updated. Starting generation...', 'autoblogger'); ?></p></div>');
+                    $button.text('<?php esc_html_e('Starting Generation...', 'autoblogger'); ?>');
                     
-                    // Step 1: Generate script text
+                    // Start the new generation process
                     $.ajax({
                         url: autobloggerData.ajaxUrl,
                         type: 'POST',
-                        timeout: 180000,
+                        timeout: 30000,
                         data: {
-                            action: 'autoblogger_generate_script_text',
+                            action: 'autoblogger_generate_post_from_interview',
                             nonce: autobloggerData.nonce,
                             interview_id: interviewId
                         },
                         success: function(genResponse) {
                             if (genResponse.success) {
-                                $status.html('<div class="notice notice-info inline"><p><?php esc_html_e('Script text generated. Generating script definition...', 'autoblogger'); ?></p></div>');
-                                $button.text('<?php esc_html_e('Generating Script Definition...', 'autoblogger'); ?>');
+                                $status.html('<div class="notice notice-info inline"><p><?php esc_html_e('Generation started. Monitoring progress...', 'autoblogger'); ?></p></div>');
+                                $button.text('<?php esc_html_e('Generating...', 'autoblogger'); ?>');
                                 
-                                // Step 2: Generate script definition
-                                $.ajax({
-                                    url: autobloggerData.ajaxUrl,
-                                    type: 'POST',
-                                    timeout: 180000,
-                                    data: {
-                                        action: 'autoblogger_generate_script_definition',
-                                        nonce: autobloggerData.nonce,
-                                        interview_id: interviewId
-                                    },
-                                    success: function(defResponse) {
-                                        if (defResponse.success) {
-                                            $status.html('<div class="notice notice-info inline"><p><?php esc_html_e('Script definition generated. Generating post...', 'autoblogger'); ?></p></div>');
-                                            $button.text('<?php esc_html_e('Generating Post...', 'autoblogger'); ?>');
-                                            
-                                            // Step 3: Generate post
-                                            $.ajax({
-                                                url: autobloggerData.ajaxUrl,
-                                                type: 'POST',
-                                                timeout: 300000,
-                                                data: {
-                                                    action: 'autoblogger_generate_post',
-                                                    nonce: autobloggerData.nonce,
-                                                    interview_id: interviewId
-                                                },
-                                                success: function(postResponse) {
-                                                    if (postResponse.success) {
-                                                        const postId = postResponse.data.post._id || postResponse.data.post.id;
-                                                        $status.html('<div class="notice notice-info inline"><p><?php esc_html_e('Post generated. Creating WordPress draft...', 'autoblogger'); ?></p></div>');
-                                                        $button.text('<?php esc_html_e('Creating WordPress Draft...', 'autoblogger'); ?>');
-                                                        
-                                                        // Step 4: Create WordPress draft
-                                                        $.ajax({
-                                                            url: autobloggerData.ajaxUrl,
-                                                            type: 'POST',
-                                                            data: {
-                                                                action: 'autoblogger_create_wp_draft',
-                                                                nonce: autobloggerData.nonce,
-                                                                post_id: postId
-                                                            },
-                                                            success: function(draftResponse) {
-                                                                if (draftResponse.success) {
-                                                                    $status.html('<div class="notice notice-success inline"><p><?php esc_html_e('Settings updated and WordPress draft re-created successfully! Redirecting...', 'autoblogger'); ?></p></div>');
-                                                                    setTimeout(function() {
-                                                                        window.location.href = draftResponse.data.edit_url;
-                                                                    }, 1000);
-                                                                } else {
-                                                                    $status.html('<div class="notice notice-warning inline"><p><?php esc_html_e('Post generated but draft creation failed: ', 'autoblogger'); ?>' + (draftResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>');
-                                                                    $button.prop('disabled', false).text(originalText);
-                                                                }
-                                                            },
-                                                            error: function() {
-                                                                $status.html('<div class="notice notice-warning inline"><p><?php esc_html_e('Post generated but draft creation failed. Please try creating manually.', 'autoblogger'); ?></p></div>');
-                                                                $button.prop('disabled', false).text(originalText);
-                                                            }
-                                                        });
-                                                    } else {
-                                                        $status.html('<div class="notice notice-error inline"><p><?php esc_html_e('Failed to generate post: ', 'autoblogger'); ?>' + (postResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>');
-                                                        $button.prop('disabled', false).text(originalText);
-                                                    }
-                                                },
-                                                error: function() {
-                                                    $status.html('<div class="notice notice-error inline"><p><?php esc_html_e('Failed to generate post. Please try again.', 'autoblogger'); ?></p></div>');
-                                                    $button.prop('disabled', false).text(originalText);
-                                                }
-                                            });
-                                        } else {
-                                            $status.html('<div class="notice notice-error inline"><p><?php esc_html_e('Failed to generate script definition: ', 'autoblogger'); ?>' + (defResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>');
-                                            $button.prop('disabled', false).text(originalText);
-                                        }
-                                    },
-                                    error: function() {
-                                        $status.html('<div class="notice notice-error inline"><p><?php esc_html_e('Failed to generate script definition. Please try again.', 'autoblogger'); ?></p></div>');
-                                        $button.prop('disabled', false).text(originalText);
-                                    }
-                                });
+                                // Start polling for status
+                                startViewScriptPolling(interviewId, $status, $button, originalText);
                             } else {
-                                $status.html('<div class="notice notice-error inline"><p><?php esc_html_e('Failed to generate script text: ', 'autoblogger'); ?>' + (genResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>');
+                                $status.html('<div class="notice notice-error inline"><p><?php esc_html_e('Failed to start generation: ', 'autoblogger'); ?>' + (genResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>');
                                 $button.prop('disabled', false).text(originalText);
                             }
                         },
                         error: function() {
-                            $status.html('<div class="notice notice-error inline"><p><?php esc_html_e('Failed to generate script text. Please try again.', 'autoblogger'); ?></p></div>');
+                            $status.html('<div class="notice notice-error inline"><p><?php esc_html_e('Failed to start generation. Please try again.', 'autoblogger'); ?></p></div>');
                             $button.prop('disabled', false).text(originalText);
                         }
                     });
@@ -1044,6 +970,155 @@ jQuery(document).ready(function($) {
             }
         });
     });
+
+    // Polling functions for view script page
+    let viewScriptPollingInterval = null;
+    let viewScriptPollingStartTime = null;
+    const VIEW_SCRIPT_MAX_POLLING_TIME = 15 * 60 * 1000; // 15 minutes
+    const VIEW_SCRIPT_POLLING_INTERVAL = 3000; // 3 seconds
+    
+    function startViewScriptPolling(interviewId, $status, $button, originalText) {
+        console.log('=== Starting view script polling ===');
+        viewScriptPollingStartTime = Date.now();
+        
+        // Clear any existing interval
+        if (viewScriptPollingInterval) {
+            clearInterval(viewScriptPollingInterval);
+        }
+        
+        // Poll immediately, then every 3 seconds
+        pollViewScriptStatus(interviewId, $status, $button, originalText);
+        viewScriptPollingInterval = setInterval(function() {
+            pollViewScriptStatus(interviewId, $status, $button, originalText);
+        }, VIEW_SCRIPT_POLLING_INTERVAL);
+    }
+    
+    function stopViewScriptPolling() {
+        if (viewScriptPollingInterval) {
+            clearInterval(viewScriptPollingInterval);
+            viewScriptPollingInterval = null;
+        }
+    }
+    
+    function pollViewScriptStatus(interviewId, $status, $button, originalText) {
+        // Check if we've exceeded maximum polling time
+        const elapsedTime = Date.now() - viewScriptPollingStartTime;
+        if (elapsedTime > VIEW_SCRIPT_MAX_POLLING_TIME) {
+            console.log('Max polling time exceeded');
+            stopViewScriptPolling();
+            $status.html('<div class="notice notice-error inline"><p><?php esc_html_e('Generation timeout: The process is taking longer than expected. Please try again later.', 'autoblogger'); ?></p></div>');
+            $button.prop('disabled', false).text(originalText);
+            return;
+        }
+        
+        $.ajax({
+            url: autobloggerData.ajaxUrl,
+            type: 'POST',
+            timeout: 10000,
+            data: {
+                action: 'autoblogger_get_generation_status',
+                nonce: autobloggerData.nonce,
+                interview_id: interviewId
+            },
+            success: function(response) {
+                if (response.success && response.data && response.data.status) {
+                    const statusData = response.data.status;
+                    console.log('Status update:', statusData);
+                    
+                    const progress = statusData.progress || 0;
+                    const statusLabel = statusData.statusLabel || '<?php esc_html_e('Processing...', 'autoblogger'); ?>';
+                    const status = statusData.status;
+                    
+                    // Update status display
+                    let progressText = '';
+                    if (progress > 0) {
+                        progressText = ' (' + Math.round(progress) + '%)';
+                    }
+                    $status.html('<div class="notice notice-info inline"><p>' + statusLabel + progressText + '</p></div>');
+                    $button.text('<?php esc_html_e('Generating...', 'autoblogger'); ?>' + progressText);
+                    
+                    // Check if generation is complete
+                    if (status === 'COMPLETED') {
+                        stopViewScriptPolling();
+                        handleViewScriptComplete(interviewId, $status, $button, originalText);
+                    } else if (status === 'FAILED') {
+                        stopViewScriptPolling();
+                        $status.html('<div class="notice notice-error inline"><p><?php esc_html_e('Generation failed: ', 'autoblogger'); ?>' + statusLabel + '</p></div>');
+                        $button.prop('disabled', false).text(originalText);
+                    } else if (status === 'CANCELLED') {
+                        stopViewScriptPolling();
+                        $status.html('<div class="notice notice-warning inline"><p><?php esc_html_e('Generation was cancelled: ', 'autoblogger'); ?>' + statusLabel + '</p></div>');
+                        $button.prop('disabled', false).text(originalText);
+                    }
+                    // Continue polling for IN_PROGRESS or NOT_STARTED
+                } else {
+                    console.error('Invalid status response:', response);
+                }
+            },
+            error: function(xhr, status, error) {
+                console.error('Status polling error:', error);
+                // Don't stop polling on error, just log it
+            }
+        });
+    }
+    
+    function handleViewScriptComplete(interviewId, $status, $button, originalText) {
+        console.log('=== View Script Generation Complete ===');
+        
+        $status.html('<div class="notice notice-success inline"><p><?php esc_html_e('Generation completed! Fetching post...', 'autoblogger'); ?></p></div>');
+        
+        // Get the generated post and create WordPress draft
+        $.ajax({
+            url: autobloggerData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'autoblogger_get_interview',
+                nonce: autobloggerData.nonce,
+                interview_id: interviewId
+            },
+            success: function(response) {
+                if (response.success && response.data && response.data.interview && response.data.interview.postId) {
+                    const postId = response.data.interview.postId;
+                    console.log('Post ID:', postId);
+                    
+                    // Create WordPress draft
+                    $status.html('<div class="notice notice-success inline"><p><?php esc_html_e('Creating WordPress draft...', 'autoblogger'); ?></p></div>');
+                    
+                    $.ajax({
+                        url: autobloggerData.ajaxUrl,
+                        type: 'POST',
+                        data: {
+                            action: 'autoblogger_create_wp_draft',
+                            nonce: autobloggerData.nonce,
+                            post_id: postId
+                        },
+                        success: function(draftResponse) {
+                            if (draftResponse.success) {
+                                $status.html('<div class="notice notice-success inline"><p><?php esc_html_e('WordPress draft created successfully! Redirecting...', 'autoblogger'); ?></p></div>');
+                                setTimeout(function() {
+                                    window.location.href = draftResponse.data.edit_url;
+                                }, 1000);
+                            } else {
+                                $status.html('<div class="notice notice-warning inline"><p><?php esc_html_e('Post generated but draft creation failed: ', 'autoblogger'); ?>' + (draftResponse.data.message || '<?php esc_html_e('Unknown error', 'autoblogger'); ?>') + '</p></div>');
+                                $button.prop('disabled', false).text(originalText);
+                            }
+                        },
+                        error: function() {
+                            $status.html('<div class="notice notice-warning inline"><p><?php esc_html_e('Post generated but failed to create WordPress draft.', 'autoblogger'); ?></p></div>');
+                            $button.prop('disabled', false).text(originalText);
+                        }
+                    });
+                } else {
+                    $status.html('<div class="notice notice-warning inline"><p><?php esc_html_e('Post generated but could not retrieve post ID. Please check the drafts list.', 'autoblogger'); ?></p></div>');
+                    $button.prop('disabled', false).text(originalText);
+                }
+            },
+            error: function() {
+                $status.html('<div class="notice notice-warning inline"><p><?php esc_html_e('Post generated but failed to retrieve details. Please check the drafts list.', 'autoblogger'); ?></p></div>');
+                $button.prop('disabled', false).text(originalText);
+            }
+        });
+    }
 
     // Load interview on page load
     loadInterview();

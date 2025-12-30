@@ -1,5 +1,6 @@
 import { RedisStorageService } from 'src/modules/storage';
 import { RedisKeys } from 'src/modules/storage/library/utils/redis-keys.util';
+import { PipelineHighLevelStatus } from './pipeline-status.interface';
 
 export enum AvailablePipelines {
   GENERATE_POST_PIPELINE = 'GENERATE_POST_PIPELINE',
@@ -23,6 +24,8 @@ export interface BasePipelineContext<S extends string = BasePipelineStep> {
   pipelineId: string;
   startedAt: Date;
   step: S;
+  status: PipelineHighLevelStatus;
+  lastError?: string;
 }
 
 export abstract class Pipeline<TContext extends BasePipelineContext<string>> {

@@ -70,6 +70,12 @@ export function useUpdateUserRole() {
   });
 }
 
+export interface LinkMention {
+  url: string;
+  description: string;
+  type: "internal" | "external";
+}
+
 export interface ScriptSection {
   id: string;
   level: "h1" | "h2" | "h3" | "h4";
@@ -84,10 +90,7 @@ export interface ScriptSection {
     alt?: string;
   }>;
   requiresDeepResearch?: boolean;
-  links: {
-    internal: string[];
-    external: string[];
-  };
+  links: LinkMention[];
 }
 
 export interface ScriptFormatDefinition {

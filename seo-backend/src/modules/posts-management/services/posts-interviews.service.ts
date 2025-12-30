@@ -42,19 +42,20 @@ export class PostInterviewsService {
   async getPostInterviewById(
     interviewId: string,
     userId?: string,
-  ): Promise<PostInterviewDocument> {
-    const postInterview =
+  ): Promise<PostInterview> {
+    const postInterviewDocument =
       await this.postInterviewsRepository.findByIdWithUserId(
         interviewId,
         userId,
       );
 
-    if (!postInterview) {
+    if (!postInterviewDocument) {
       throw new NotFoundException(
         `Post interview not found with interviewId: ${interviewId}`,
       );
     }
-    return postInterview;
+
+    return postInterviewDocument.toObject();
   }
 
   async getInterviewsList(userId: string): Promise<PostInterviewDocument[]> {
@@ -65,12 +66,13 @@ export class PostInterviewsService {
   async updatePostInterview(
     updatePostInterviewDto: UpdatePostInterviewDto,
   ): Promise<PostInterviewDocument> {
+    // Verify the interview exists
     const postInterview = await this.getPostInterviewById(
       updatePostInterviewDto.interviewId,
     );
 
     // Update only provided fields
-    const updateData: Partial<PostInterview> = {};
+    const updateData: Partial<PostInterview> = { ...postInterview };
     const fieldsToUpdate = [
       'mainKeyword',
       'secondaryKeywords',
@@ -95,6 +97,7 @@ export class PostInterviewsService {
       'blogInternalLinksMeta',
     ];
 
+    let hasChanges = false;
     for (const field of fieldsToUpdate) {
       if (
         updatePostInterviewDto[field as keyof UpdatePostInterviewDto] !==
@@ -103,23 +106,23 @@ export class PostInterviewsService {
         updateData[field as keyof PostInterview] = updatePostInterviewDto[
           field as keyof UpdatePostInterviewDto
         ] as never;
+        hasChanges = true;
       }
     }
 
     // Reset status to draft if parameters changed (so user needs to regenerate)
-    if (Object.keys(updateData).length > 0) {
+    if (hasChanges) {
       updateData.status = InterviewStatus.DRAFT;
       // Clear generated content if parameters changed
-      postInterview.generatedScriptText = undefined;
-      postInterview.generatedScriptDefinition = undefined;
-      postInterview.associatedPostId = undefined;
+      updateData.generatedScriptText = undefined;
+      updateData.generatedScriptDefinition = undefined;
+      updateData.associatedPostId = undefined;
     }
 
-    Object.assign(postInterview, updateData);
-    return postInterview.save();
+    return this.postInterviewsRepository.save(updateData as PostInterview);
   }
 
-  async generateSuggestionsFromInterview(postInterview: PostInterviewDocument) {
+  async generateSuggestionsFromInterview(postInterview: PostInterview) {
     const suggestions =
       await GeneratePostSuggestions_Util.createSugerencesFromInterview(
         this.groqService,
