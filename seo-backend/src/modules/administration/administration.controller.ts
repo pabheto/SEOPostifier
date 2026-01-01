@@ -82,4 +82,14 @@ export class AdministrationController {
   getPostContentByInterviewId(@Param('interviewId') interviewId: string) {
     return this.administrationService.getPostContentByInterviewId(interviewId);
   }
+
+  @Get('post-interviews/:interviewId/pipeline-context')
+  @ApiOperation({
+    summary: 'Get pipeline context by interview ID (Admin only)',
+  })
+  getPipelineContextByInterviewId(@Param('interviewId') interviewId: string) {
+    return this.administrationService.getPipelineContextByInterviewId(
+      interviewId,
+    );
+  }
 }

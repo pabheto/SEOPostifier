@@ -148,6 +148,7 @@ export class ScriptGenerationPrompts {
         - Real-world facts/statistics derived from the knowledge base (if available)
       - Outline what the reader will learn
       - YOU GIVE THE INSTRUCTIONS FOR THE INTRODUCTION, NOT THE INTRODUCTION ITSELF.
+
     
     - **Introduction word count**:
       - ${
@@ -389,6 +390,7 @@ type ScriptFormatDefinition = {
     slug: string;
     tags: string[];
     introductionLengthRange?: [number, number];
+    images?: IUserImage[];
   };
   body: {
     sections: ScriptSection[];

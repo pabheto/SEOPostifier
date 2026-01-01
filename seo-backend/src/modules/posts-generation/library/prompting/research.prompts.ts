@@ -72,6 +72,7 @@ REQUIREMENTS:
 
 OUTPUT JSON STRUCTURE:
 {
+  "country": "string", // example "ES"
   "researchQueries": [
     {
       "intent": "definition | official_docs | best_practices | how_to | statistics | comparisons | common_mistakes | use_cases | case_studies",

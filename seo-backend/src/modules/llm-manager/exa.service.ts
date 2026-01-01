@@ -21,15 +21,19 @@ export class ExaService {
   async search({
     query,
     numResults = 10,
+    country = 'ES',
   }: {
     query: string;
     numResults: number;
+    country?: string;
   }) {
     const results = await this.exa.search(query, {
       numResults,
+      userLocation: country,
+      type: 'fast',
       contents: {
         text: true,
-        context: { maxCharacters: 10000, maxSnippets: 10 },
+        context: { maxCharacters: 20000 },
       },
     });
     return results;

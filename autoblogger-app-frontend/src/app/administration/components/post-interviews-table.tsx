@@ -31,6 +31,7 @@ import {
 } from "@/queries/administration";
 import {
   ChevronDown,
+  Code,
   Eye,
   FileCode,
   FileText,
@@ -39,6 +40,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { InterviewParamsDialog } from "./interview-params-dialog";
+import { PipelineContextDialog } from "./pipeline-context-dialog";
 import { PostContentDialog } from "./post-content-dialog";
 import { ScriptDefinitionDialog } from "./script-definition-dialog";
 import { ScriptTextDialog } from "./script-text-dialog";
@@ -47,6 +49,7 @@ type DialogType =
   | "post"
   | "scriptDefinition"
   | "scriptText"
+  | "pipelineContext"
   | "interviewParams"
   | null;
 
@@ -176,6 +179,15 @@ export function PostInterviewsTable() {
                             <DropdownMenuItem
                               onClick={() => {
                                 setSelectedInterview(interview);
+                                setOpenDialog("pipelineContext");
+                              }}
+                            >
+                              <Code className="h-4 w-4 mr-2" />
+                              View Pipeline Context
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedInterview(interview);
                                 setOpenDialog("interviewParams");
                               }}
                             >
@@ -249,6 +261,18 @@ export function PostInterviewsTable() {
               interviewId={selectedInterview.interviewId}
               scriptText={selectedInterview.generatedScriptText}
               open={openDialog === "scriptText"}
+              onOpenChange={(open) => {
+                if (!open) {
+                  setSelectedInterview(null);
+                  setOpenDialog(null);
+                }
+              }}
+            />
+          )}
+          {openDialog === "pipelineContext" && (
+            <PipelineContextDialog
+              interviewId={selectedInterview.interviewId}
+              open={openDialog === "pipelineContext"}
               onOpenChange={(open) => {
                 if (!open) {
                   setSelectedInterview(null);

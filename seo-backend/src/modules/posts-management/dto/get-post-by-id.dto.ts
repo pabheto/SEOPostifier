@@ -10,5 +10,3 @@ export class GetPostByIdDto {
   @IsString({ message: 'postId must be a string' })
   postId: string;
 }
-
-

@@ -29,8 +29,10 @@ export function ScriptDefinitionDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-[95vw] w-full max-h-[95vh] sm:max-w-7xl">
         <DialogHeader>
-          <DialogTitle>Script Definition</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="break-words whitespace-normal">
+            Script Definition
+          </DialogTitle>
+          <DialogDescription className="break-words whitespace-normal">
             Review the script definition for interview {interviewId}
           </DialogDescription>
         </DialogHeader>
@@ -44,55 +46,69 @@ export function ScriptDefinitionDialog({
               </p>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-6 break-words">
               {/* Index Summary */}
               <div className="border-b pb-4">
-                <h2 className="text-xl font-semibold mb-2">Index Summary</h2>
-                <p className="text-muted-foreground">
+                <h2 className="text-xl font-semibold mb-2 break-words whitespace-normal">
+                  Index Summary
+                </h2>
+                <p className="text-muted-foreground break-words whitespace-normal">
                   {scriptDefinition.indexSummary}
                 </p>
               </div>
 
               {/* Head Section */}
               <div className="border-b pb-4">
-                <h2 className="text-xl font-semibold mb-4">Head</h2>
+                <h2 className="text-xl font-semibold mb-4 break-words whitespace-normal">
+                  Head
+                </h2>
                 <div className="space-y-3">
                   <div>
-                    <h3 className="font-medium mb-1">H1 Title</h3>
-                    <p className="text-muted-foreground">
+                    <h3 className="font-medium mb-1 break-words whitespace-normal">
+                      H1 Title
+                    </h3>
+                    <p className="text-muted-foreground break-words whitespace-normal">
                       {scriptDefinition.head.h1}
                     </p>
                   </div>
                   <div>
-                    <h3 className="font-medium mb-1">Slug</h3>
-                    <p className="text-muted-foreground font-mono text-sm">
+                    <h3 className="font-medium mb-1 break-words whitespace-normal">
+                      Slug
+                    </h3>
+                    <p className="text-muted-foreground font-mono text-sm break-all">
                       {scriptDefinition.head.slug}
                     </p>
                   </div>
                   <div>
-                    <h3 className="font-medium mb-1">Tags</h3>
+                    <h3 className="font-medium mb-1 break-words whitespace-normal">
+                      Tags
+                    </h3>
                     <div className="flex flex-wrap gap-2">
                       {scriptDefinition.head.tags.map((tag, index) => (
-                        <Badge key={index} variant="outline">
+                        <Badge
+                          key={index}
+                          variant="outline"
+                          className="break-words max-w-full whitespace-normal"
+                        >
                           {tag}
                         </Badge>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <h3 className="font-medium mb-1">
+                    <h3 className="font-medium mb-1 break-words whitespace-normal">
                       Introduction Description
                     </h3>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground break-words whitespace-normal">
                       {scriptDefinition.head.introductionDescription}
                     </p>
                   </div>
                   {scriptDefinition.head.introductionLengthRange && (
                     <div>
-                      <h3 className="font-medium mb-1">
+                      <h3 className="font-medium mb-1 break-words whitespace-normal">
                         Introduction Length Range
                       </h3>
-                      <p className="text-muted-foreground">
+                      <p className="text-muted-foreground break-words whitespace-normal">
                         {scriptDefinition.head.introductionLengthRange[0]} -{" "}
                         {scriptDefinition.head.introductionLengthRange[1]} words
                       </p>
@@ -103,22 +119,24 @@ export function ScriptDefinitionDialog({
 
               {/* Body Sections */}
               <div className="border-b pb-4">
-                <h2 className="text-xl font-semibold mb-4">Body Sections</h2>
+                <h2 className="text-xl font-semibold mb-4 break-words whitespace-normal">
+                  Body Sections
+                </h2>
                 <div className="space-y-6">
                   {scriptDefinition.body.sections.map((section, index) => (
                     <div
                       key={section.id || index}
                       className="border rounded-lg p-4"
                     >
-                      <div className="flex items-center gap-2 mb-2">
-                        <Badge variant="secondary">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <Badge variant="secondary" className="shrink-0">
                           {section.level.toUpperCase()}
                         </Badge>
-                        <h3 className="text-lg font-semibold">
+                        <h3 className="text-lg font-semibold break-words whitespace-normal flex-1 min-w-0">
                           {section.title}
                         </h3>
                       </div>
-                      <p className="text-muted-foreground mb-3">
+                      <p className="text-muted-foreground mb-3 break-words whitespace-normal">
                         {section.description}
                       </p>
                       <div className="grid grid-cols-2 gap-4 text-sm">
@@ -143,7 +161,7 @@ export function ScriptDefinitionDialog({
                             (link) => link.type === "internal"
                           ) && (
                             <div>
-                              <span className="font-medium text-sm">
+                              <span className="font-medium text-sm break-words">
                                 Internal Links:{" "}
                               </span>
                               <div className="flex flex-wrap gap-1 mt-1">
@@ -153,7 +171,7 @@ export function ScriptDefinitionDialog({
                                     <Badge
                                       key={linkIndex}
                                       variant="outline"
-                                      className="text-xs"
+                                      className="text-xs break-all max-w-full whitespace-normal"
                                     >
                                       {link.url} - {link.description}
                                     </Badge>
@@ -165,7 +183,7 @@ export function ScriptDefinitionDialog({
                             (link) => link.type === "external"
                           ) && (
                             <div>
-                              <span className="font-medium text-sm">
+                              <span className="font-medium text-sm break-words">
                                 External Links:{" "}
                               </span>
                               <div className="flex flex-wrap gap-1 mt-1">
@@ -175,7 +193,7 @@ export function ScriptDefinitionDialog({
                                     <Badge
                                       key={linkIndex}
                                       variant="outline"
-                                      className="text-xs"
+                                      className="text-xs break-all max-w-full whitespace-normal"
                                     >
                                       {link.url} - {link.description}
                                     </Badge>
@@ -201,13 +219,15 @@ export function ScriptDefinitionDialog({
               {/* FAQ Section */}
               {scriptDefinition.faq && (
                 <div>
-                  <h2 className="text-xl font-semibold mb-4">FAQ Section</h2>
+                  <h2 className="text-xl font-semibold mb-4 break-words whitespace-normal">
+                    FAQ Section
+                  </h2>
                   <div className="border rounded-lg p-4">
-                    <p className="text-muted-foreground mb-3">
+                    <p className="text-muted-foreground mb-3 break-words whitespace-normal">
                       {scriptDefinition.faq.description}
                     </p>
                     {scriptDefinition.faq.lengthRange && (
-                      <div className="text-sm">
+                      <div className="text-sm break-words">
                         <span className="font-medium">Length Range: </span>
                         <span className="text-muted-foreground">
                           {scriptDefinition.faq.lengthRange[0]} -{" "}

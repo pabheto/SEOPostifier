@@ -101,6 +101,13 @@ export interface ScriptFormatDefinition {
     slug: string;
     tags: string[];
     introductionLengthRange?: [number, number];
+    images?: Array<{
+      sourceType: string;
+      sourceValue?: string;
+      title?: string;
+      description?: string;
+      alt?: string;
+    }>;
   };
   body: {
     sections: ScriptSection[];
@@ -202,6 +209,32 @@ export function usePostContent(interviewId: string | null) {
 
       if (!response.ok) {
         throw new Error("Failed to fetch post content");
+      }
+
+      return response.json();
+    },
+    enabled: !!interviewId,
+  });
+}
+
+export function usePipelineContext(interviewId: string | null) {
+  return useQuery<any>({
+    queryKey: ["administration", "pipeline-context", interviewId],
+    queryFn: async () => {
+      if (!interviewId) {
+        throw new Error("Interview ID is required");
+      }
+
+      const headers = await getAuthHeaders();
+      const response = await fetch(
+        `${API_BASE_URL}/administration/post-interviews/${interviewId}/pipeline-context`,
+        {
+          headers,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch pipeline context");
       }
 
       return response.json();

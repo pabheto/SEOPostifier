@@ -60,6 +60,7 @@ export type ScriptFormatDefinition = {
     slug: string;
     tags: string[];
     introductionLengthRange?: [number, number];
+    images?: IUserImage[];
   };
   body: {
     sections: ScriptSection[];

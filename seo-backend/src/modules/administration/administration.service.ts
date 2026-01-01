@@ -1,6 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { buildPipelineId } from '../posts-generation/library/pipelines/pipeline-ids.util';
+import { AvailablePipelines } from '../posts-generation/library/pipelines/pipeline.interface';
+import { GeneratePostPipeline_Context } from '../posts-generation/pipelines/generate-post.pipeline';
+import { PipelineOrchestrator } from '../posts-generation/pipelines/pipeline.orchestrator';
 import {
   PostInterviewsRepository,
   type PaginatedResult,
@@ -14,6 +18,7 @@ export class AdministrationService {
     @InjectModel(User.name) private readonly userModel: Model<User>,
     private readonly postInterviewsRepository: PostInterviewsRepository,
     private readonly postsRepository: PostsRepository,
+    private readonly pipelineOrchestrator: PipelineOrchestrator,
   ) {}
 
   async getAllUsers() {
@@ -124,5 +129,16 @@ export class AdministrationService {
       createdAt: post.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: post.updatedAt?.toISOString() || new Date().toISOString(),
     };
+  }
+
+  async getPipelineContextByInterviewId(interviewId: string) {
+    const pipelineId = buildPipelineId(
+      AvailablePipelines.GENERATE_POST_PIPELINE,
+      interviewId,
+    );
+
+    return await this.pipelineOrchestrator.getContextForPipeline<GeneratePostPipeline_Context>(
+      pipelineId,
+    );
   }
 }

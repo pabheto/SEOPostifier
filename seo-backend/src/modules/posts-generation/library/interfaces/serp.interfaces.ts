@@ -5,6 +5,7 @@ export type SERP_ResearchQuery = {
 };
 
 export type SERP_ResearchPlan = {
+  country?: string;
   researchQueries: SERP_ResearchQuery[];
 };
 export type SERP_SearchResult = {

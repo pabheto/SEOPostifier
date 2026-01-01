@@ -151,6 +151,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
         const exaResults = await this.exaService.search({
           query: query.query,
           numResults: 2,
+          country: serpResearchPlan.country,
         });
 
         const searchResults: SERP_SearchResult[] = exaResults.results.map(
