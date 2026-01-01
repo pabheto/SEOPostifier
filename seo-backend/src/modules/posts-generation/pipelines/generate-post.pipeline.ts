@@ -207,11 +207,24 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       );
     });
 
-    const summaryResults = await Promise.all(summaryPromises);
+    const summaryResults = await Promise.allSettled(summaryPromises);
     const summarizedSERPResults: RESPONSE_SummarizeSERP_SearchResults = [];
 
     for (const summaryResult of summaryResults) {
-      summarizedSERPResults.push(...summaryResult);
+      if (summaryResult.status === 'fulfilled') {
+        summarizedSERPResults.push(...summaryResult.value);
+        continue;
+      }
+
+      this.logger.warn(
+        `Failed to summarize SERP result: ${
+          summaryResult.reason?.message ?? summaryResult.reason
+        }`,
+      );
+    }
+
+    if (!summarizedSERPResults.length) {
+      throw new BadRequestException('Failed to summarize SERP results');
     }
 
     context.serpKnowledgeBase = summarizedSERPResults;

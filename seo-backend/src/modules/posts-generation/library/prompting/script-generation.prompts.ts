@@ -104,7 +104,7 @@ export class ScriptGenerationPrompts {
     
     You MUST NOT:
     - Invent facts, statistics, studies, or sources
-    - Mention fictitious brands, tools, products, or companies
+    - Mention fictitious brands, tools, products, names or companies
     - Add explanations, comments, or meta notes
     - Create links that are not explicitly present in the knowledge base
     
@@ -127,46 +127,7 @@ export class ScriptGenerationPrompts {
     3. Uses a correct and logical heading hierarchy (H1 → H2 → H3 → H4)
     4. Distributes word counts accurately to match the target length:
        **${postInterview.minWordCount} – ${postInterview.maxWordCount} words**
-    5. Explicitly integrates **up-to-date information** from the provided SERP knowledge base (if present)
     
-    ---
-    
-   ${
-     summarizedSERPKnowledgeBase &&
-     `## CRITICAL: KNOWLEDGE BASE USAGE RULES (SERP)
-    You MUST actively use it to enrich the SEO script.
-    
-    Each knowledge base item contains:
-    - \`url\`: the ONLY valid source for linking
-    - \`metadata.facts\`: atomic, citation-ready facts
-    - \`metadata.contextSnippets\`: short explanatory context
-    - \`metadata.usage.primary\`: intended use (definition, statistics, how_to, etc.)
-    - \`metadata.usage.citationRequired\`: whether factual claims must be attributed
-    
-    ### How to use the knowledge base correctly:
-    
-    - Use **facts** to guide:
-      - Definitions
-      - Statistics
-      - Guidelines
-      - Comparisons
-      - Best practices
-    - Use **contextSnippets** to:
-      - Inform introductions
-      - Support explanations
-      - Shape examples and reasoning
-    - Decide **where links belong** based on:
-      - Section intent
-      - Metadata usage type
-    - Only suggest links using this format:
-      \`[link content description](exact-url-from-knowledge-base)\`
-    - If no relevant knowledge base item exists for a section:
-      - Do NOT invent data
-      - Keep the section high-level and explanatory
-    
-    If the knowledge base contradicts common assumptions, ALWAYS defer to the knowledge base.
-    `
-   }
     ---
     
     ## OUTPUT FORMAT (MARKDOWN ONLY)
@@ -209,6 +170,7 @@ export class ScriptGenerationPrompts {
     - Heading level (H2 / H3 / H4)
     - 1–2 line summary
     - Exact estimated word count
+    - DO NOT INCLUDE AN INTRODUCTION SECTION AS THERE'S ALREADY ONE
     
     Ensure the **sum of all sections + introduction + FAQ** matches the target range.
     Use EXACTLY this structure for EACH section:
@@ -255,19 +217,26 @@ export class ScriptGenerationPrompts {
     }
     
     ---
+
+    ## THINKING CREATIVE GUIDANCE
+    You are writting with not updated context
+    Your draft will be sent later to a specialist writer with full context
+    For that, in each section, you have to specify the knowledge summary that you want to fit in that part
     
-    ## FINAL INSTRUCTION
     
-    Produce the **FULL SEO SCRIPT** in **${postInterview.language}**, using **pure Markdown**.
-    
+    ## SYSTEM INSTRUCTIONS
     This is a **production system**.
     No comments. No explanations. No filler. No invented information.
     If something cannot be supported by the knowledge base, keep it generic and factual.
+
+    
     
     `,
       ],
       userPrompts: [
         `
+    Produce the **FULL SEO SCRIPT** in **${postInterview.language}**, using **pure Markdown**.
+
     Today's date: ${todaysDateFormatted}. Don't hallucinate dates.
     Generate the complete SEO script for my post:
 
@@ -305,19 +274,19 @@ export class ScriptGenerationPrompts {
         Your goal is to optimize a script to make sure it matches the user requirements.
         You MUST respect the original structure.
         Your tasks:
-        - You are NOT writting the final post, you are optimizing the given script, that will be later given to a writter
-        - Make sure that the planification of the script sections is correct to match the word count requirement of ${postInterview.minWordCount} - ${postInterview.maxWordCount} words.
-        - Incorporate external and internal link mentions to support the affirmations ONLY if can be done naturally with the current content structure.
-        - Make sure that the keyword usage is correct and natural, matching the keyword density target of ${postInterview.keywordDensityTarget}.
-        - Remove content redundancies and make sure that the script is clear and concise following EEAT principles.
-        - Incorporate image mentions to support the affirmations ONLY if can be done naturally with the current content structure.
 
-        CRITICAL RULES:
-        - NEVER invent URLs, slugs, or internal links.
-        - Only use links explicitly present in the provided knowledge base or internal links meta.
-        - If no relevant link exists, do not add a link.
+        ** External data and links incorporation: **
+        Include facts from the knowledge base that supports the authority of the content of the post.
+        Make sure to add up to ${postInterview.externalLinksToIncludeAutomatically} external links automatically from the knowledge base along the 
+        different sections of the script to create valuable backlinks.
+        Bring data that creates authority and trustworthiness to the content.
 
-        ## IMAGE INCORPORATION: This is the format for the incorporations in the script sections  
+        ** Word count validation **
+        - Make sure that the planification of the script sections is correct to match the word count requirement of ${postInterview.minWordCount} - ${postInterview.maxWordCount} words, including the introduction and the FAQ.
+
+        ** Image Incorporation: **
+        - Make sure to add up to ${postInterview.imagesConfig.aiImagesCount} AI images to the script sections to support the content.
+This is the format for the incorporations in the script sections  
         When an image should be placed in a section, include it in the section's description using this format:
         
         #### User images
@@ -335,25 +304,30 @@ export class ScriptGenerationPrompts {
         alt: "SEO-friendly alt text in ${postInterview.language}"
         \`\`\`
 
-        ## LINK INCORPORATION: This is the format to add link references to the script section
-        - **Link Usage**: Integrate links that sound natural with the section. DON'T CREATE INTERNAL LINKS THAT ARE NOT MENTIONED IN THE PARAMETERS.
-      FOR THE LINK USAGE, ALWAYS ALWAYS USE THIS FORMAT: use the format [link content description](slug-or-url) and give an explanation on how to use the link in the section.
+        
+        Example: 
+        - Make sure that the keyword usage is correct and natural, matching the keyword density target of ${postInterview.keywordDensityTarget}.
+        - Remove content redundancies and make sure that the script is clear and concise following EEAT principles.
+        - Incorporate image mentions to support the affirmations ONLY if can be done naturally with the current content structure.
+
+        CRITICAL RULES:
+        - You are NOT writting the final post, you are optimizing the given script, that will be later given to a writter
+        - NEVER invent URLs, slugs, or internal links.
+        - Only use links explicitly present in the provided knowledge base or internal links meta.
+        - If no relevant link exists, do not add a link.
 
         This is the user requirements:
         Word count: ${postInterview.minWordCount} - ${postInterview.maxWordCount} words.
         Keyword density target: ${postInterview.keywordDensityTarget}.
         User description: ${postInterview.userDescription}.
         ${postInterview.mentionsBrand ? `Mentions brand: ${postInterview.brandName}, description: ${postInterview.brandDescription}` : ''}
-        Images config: 
+        Images config:
         ${postInterview.imagesConfig.aiImagesCount && `You must use up to ${postInterview.imagesConfig.aiImagesCount} AI images.`}
         ${postInterview.imagesConfig.userImages.length > 0 && `You must use user images: ${postInterview.imagesConfig.userImages.map((image) => `Source: ${image.sourceType}:${image.sourceValue} — Alt: ${image.suggestedAlt || 'none'} — Notes: ${image.notes || 'none'}`).join(', ')}`}
 
         Links config: 
         ${postInterview.externalLinksToIncludeAutomatically !== undefined && postInterview.externalLinksToIncludeAutomatically !== null && postInterview.externalLinksToIncludeAutomatically > 0 && `You should include up to ${postInterview.externalLinksToIncludeAutomatically} external links automatically from the knowledge base.`}
         ${postInterview.includeInternalLinksAutomatically && `You can link internal links if the topic is relevant to the current post.`}
-
-
-
         `,
       ],
       userPrompts: [
@@ -456,6 +430,7 @@ Important instructions:
      - If NOT specified: defaults are H2: 200-300, H3/H4: 150-250, Core: 400-500 max
      - DO NOT recalculate - script designer has planned this, only do it if you see a significant inconsistency between the total sum of the word counts and the user requirements.
    - description: Clear explanation of section content (guidelines for writer/AI). Include all planned points from script.
+   DO NOT EXCLUDE INFORMATION FROM THE SECTION DESCRIPTION, THIS IS THE DATA THE WRITER WILL USE TO CREATE THE SECTION, IT SHOULD BE VERBOSED
      **IMPORTANT**: If description contains image blocks (\`\`\`user-image or \`\`\`ai-image), extract to images array and remove block syntax from description
    - images (optional):
      - Extract image blocks from section description if present

@@ -65,7 +65,7 @@ ${postInterview.secondaryKeywords && `- Secondary keywords: ${postInterview.seco
 - Post description / angle: ${postInterview.userDescription}
 
 REQUIREMENTS:
-- Generate 5–8 research queries total
+- Generate 3–6 research queries total
 - Each query must serve a DISTINCT information need
 - Queries must be suitable for discovering authoritative sources
 - Avoid redundancy between queries

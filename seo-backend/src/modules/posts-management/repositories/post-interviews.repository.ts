@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
@@ -22,12 +22,16 @@ export interface PaginatedResult<T> {
 
 @Injectable()
 export class PostInterviewsRepository {
+  private readonly logger = new Logger(PostInterviewsRepository.name);
   constructor(
     @InjectModel(PostInterview.name)
     private readonly postInterviewModel: Model<PostInterviewDocument>,
   ) {}
 
   async save(postInterview: PostInterview): Promise<PostInterviewDocument> {
+    this.logger.debug(
+      `Saving post interview with user id ${postInterview.userId}`,
+    );
     const interviewId = postInterview.interviewId ?? randomUUID();
 
     return this.postInterviewModel

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { PostInterview } from '../posts-management/schemas/post-interview.schema';
 import { buildPipelineId } from './library/pipelines/pipeline-ids.util';
 import {
@@ -17,6 +17,7 @@ import { PipelineOrchestrator } from './pipelines/pipeline.orchestrator';
 
 @Injectable()
 export class PostGenerationManagementService {
+  private readonly logger = new Logger(PostGenerationManagementService.name);
   constructor(
     private readonly pipelineOrchestrator: PipelineOrchestrator,
     private readonly generatePostPipeline: GeneratePost_Pipeline,
@@ -44,6 +45,10 @@ export class PostGenerationManagementService {
         existingGenerationContext.pipelineId,
       );
     }
+
+    await this.logger.log(
+      `Scheduling generation for post interview ${postInterview.interviewId} with user id ${postInterview.userId}`,
+    );
 
     const pipelineId =
       await this.generatePostPipeline.initialize(postInterview);
