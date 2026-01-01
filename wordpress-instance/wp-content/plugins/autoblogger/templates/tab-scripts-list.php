@@ -94,7 +94,7 @@ jQuery(document).ready(function($) {
                             html += '<td>' + (interview.language || '-') + '</td>';
                             html += '<td>' + status + '</td>';
                             html += '<td>';
-                            html += '<a href="?page=autoblogger&tab=view-script&interviewId=' + interview.interviewId + '" class="button button-small"><?php echo esc_js(__('View', 'autoblogger')); ?></a>';
+                            html += '<a href="?page=autoblogger&tab=edit-script&interviewId=' + interview.interviewId + '" class="button button-small"><?php echo esc_js(__('Edit & Generate', 'autoblogger')); ?></a>';
                             if (hasPost) {
                                 html += ' <button type="button" class="button button-small button-primary create-wp-draft-btn" data-post-id="' + postId + '" style="margin-left: 5px;"><?php echo esc_js(__('Create WP Draft', 'autoblogger')); ?></button>';
                             }

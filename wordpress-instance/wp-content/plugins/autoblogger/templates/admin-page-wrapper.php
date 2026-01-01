@@ -13,7 +13,7 @@ if (!defined('ABSPATH')) {
     <h1><?php echo esc_html(get_admin_page_title()); ?></h1>
 
     <!-- Tabs Navigation -->
-    <?php if ($current_tab !== 'create-script' && $current_tab !== 'edit-script' && $current_tab !== 'view-script'): ?>
+    <?php if ($current_tab !== 'create-script' && $current_tab !== 'edit-script'): ?>
     <nav class="nav-tab-wrapper wp-clearfix" style="margin-bottom: 20px;">
         <a href="?page=autoblogger&tab=scripts" 
            class="nav-tab <?php echo $current_tab === 'scripts' ? 'nav-tab-active' : ''; ?>">
@@ -38,7 +38,19 @@ if (!defined('ABSPATH')) {
                 include AUTOBLOGGER_PLUGIN_DIR . 'templates/tab-create-script.php';
                 break;
             case 'view-script':
-                include AUTOBLOGGER_PLUGIN_DIR . 'templates/tab-view-script.php';
+                // Redirect view-script to edit-script for unified experience
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- GET parameter for navigation redirect
+                $interview_id = isset($_GET['interviewId']) ? sanitize_text_field(wp_unslash($_GET['interviewId'])) : '';
+                if (!empty($interview_id)) {
+                    // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Admin redirect to same plugin page
+                    wp_redirect(admin_url('admin.php?page=autoblogger&tab=edit-script&interviewId=' . urlencode($interview_id)));
+                    exit;
+                } else {
+                    // If no interview ID, go to scripts list
+                    // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- Admin redirect to same plugin page
+                    wp_redirect(admin_url('admin.php?page=autoblogger&tab=scripts'));
+                    exit;
+                }
                 break;
             case 'scripts':
             default:

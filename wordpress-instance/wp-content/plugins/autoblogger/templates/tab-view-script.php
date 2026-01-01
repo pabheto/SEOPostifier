@@ -1077,8 +1077,8 @@ jQuery(document).ready(function($) {
                 interview_id: interviewId
             },
             success: function(response) {
-                if (response.success && response.data && response.data.interview && response.data.interview.postId) {
-                    const postId = response.data.interview.postId;
+                if (response.success && response.data && response.data.interview && response.data.interview.associatedPostId) {
+                    const postId = response.data.interview.associatedPostId;
                     console.log('Post ID:', postId);
                     
                     // Create WordPress draft

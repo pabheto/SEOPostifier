@@ -840,15 +840,32 @@ jQuery(document).ready(function($) {
                 }
             });
         } else {
-            // Edit mode - proceed directly
-            formData.interviewId = interviewId;
+            // Edit mode - show suggestions first, then proceed
+            console.log('=== EDIT MODE - Starting suggestion flow ===');
             
-            // Hide form and show progress
+            // Hide form and show suggestions step
             $('#create-script-form').fadeOut(300, function() {
-                $('#generation-progress-container').fadeIn(300).addClass('fade-in');
+                $('#suggestions-step-container').fadeIn(300).addClass('fade-in');
             });
             
-            proceedWithFullCreation(formData, interviewId);
+            // Use existing interview for suggestions
+            showSuggestionsStep(interviewId, formData, function(selectedSuggestion) {
+                // Update formData with selected suggestion if not auto
+                if (selectedSuggestion && selectedSuggestion !== 'auto') {
+                    const originalDescription = formData.userDescription || '';
+                    const template = '\n\nTemplate:\n\n- Post title: ' + selectedSuggestion.title + '\n\n- Post description format: ' + selectedSuggestion.description;
+                    formData.userDescription = originalDescription + template;
+                }
+                
+                // Hide suggestions and show progress
+                $('#suggestions-step-container').fadeOut(300, function() {
+                    $('#generation-progress-container').fadeIn(300).addClass('fade-in');
+                });
+                
+                // Update the interview with full data
+                formData.interviewId = interviewId;
+                proceedWithFullCreation(formData, interviewId);
+            });
         }
         
         function proceedWithFullCreation(formData, interviewId) {
@@ -1250,10 +1267,10 @@ jQuery(document).ready(function($) {
                     nonce: autobloggerData.nonce,
                     interview_id: interviewId
                 },
-                success: function(response) {
-                    if (response.success && response.data && response.data.interview && response.data.interview.postId) {
-                        const postId = response.data.interview.postId;
-                        console.log('Post ID:', postId);
+            success: function(response) {
+                if (response.success && response.data && response.data.interview && response.data.interview.associatedPostId) {
+                    const postId = response.data.interview.associatedPostId;
+                    console.log('Post ID:', postId);
                         
                         // Create WordPress draft
                         $('#progress-status-label').text('<?php esc_html_e('Creating WordPress draft...', 'autoblogger'); ?>');
@@ -1288,9 +1305,10 @@ jQuery(document).ready(function($) {
                                 showError('<?php esc_html_e('Post generated but failed to create WordPress draft. Please try creating manually from the drafts list.', 'autoblogger'); ?>');
                             }
                         });
-                    } else {
-                        showError('<?php esc_html_e('Post generated but could not retrieve post ID. Please check your drafts list.', 'autoblogger'); ?>');
-                    }
+                } else {
+                    console.error('Interview data:', response.data);
+                    showError('<?php esc_html_e('Post generated but could not retrieve post ID. The post may still be available in your drafts list.', 'autoblogger'); ?>');
+                }
                 },
                 error: function() {
                     showError('<?php esc_html_e('Post generated but failed to retrieve details. Please check your drafts list.', 'autoblogger'); ?>');
@@ -1425,5 +1443,123 @@ jQuery(document).ready(function($) {
             }
         });
     });
+    
+    // Load interview data if in edit mode
+    if (mode === 'edit' && interviewId) {
+        console.log('Edit mode detected, loading interview:', interviewId);
+        
+        $.ajax({
+            url: autobloggerData.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'autoblogger_get_interview',
+                nonce: autobloggerData.nonce,
+                interview_id: interviewId
+            },
+            success: function(response) {
+                if (response.success && response.data && response.data.interview) {
+                    const interview = response.data.interview;
+                    console.log('Interview loaded:', interview);
+                    
+                    // Populate form fields
+                    $('#main-keyword').val(interview.mainKeyword || '');
+                    $('#secondary-keywords').val(Array.isArray(interview.secondaryKeywords) ? interview.secondaryKeywords.join(', ') : '');
+                    $('#keyword-density').val(interview.keywordDensityTarget || 0.015);
+                    $('#user-description').val(interview.userDescription || '');
+                    $('#language').val(interview.language || 'es');
+                    $('#search-intent').val(interview.searchIntent || 'informational');
+                    $('#target-audience').val(interview.targetAudience || 'General audience');
+                    $('#tone-of-voice').val(interview.toneOfVoice || 'friendly');
+                    $('#min-word-count').val(interview.minWordCount || '2000');
+                    $('#max-word-count').val(interview.maxWordCount || '2500');
+                    $('#needs-faq').prop('checked', interview.needsFaqSection !== false);
+                    $('#mentions-brand').prop('checked', interview.mentionsBrand === true).trigger('change');
+                    $('#brand-name').val(interview.brandName || '');
+                    $('#brand-description').val(interview.brandDescription || '');
+                    
+                    // Handle internal links mode
+                    if (interview.internalLinksMode) {
+                        $('#internal-links-mode').val(interview.internalLinksMode);
+                    } else if (interview.includeInternalLinks === false) {
+                        $('#internal-links-mode').val('disabled');
+                    } else if (interview.includeInternalLinksAutomatically === true) {
+                        $('#internal-links-mode').val('auto');
+                    } else if (interview.internalLinksToUse && interview.internalLinksToUse.length > 0) {
+                        $('#internal-links-mode').val('custom');
+                    } else {
+                        $('#internal-links-mode').val('auto');
+                    }
+                    $('#internal-links-mode').trigger('change');
+                    $('#internal-links-to-use').val(Array.isArray(interview.internalLinksToUse) ? interview.internalLinksToUse.join('\n') : '');
+                    
+                    // Handle external links research mode
+                    if (interview.externalLinksResearchMode) {
+                        $('#external-links-research-mode').val(interview.externalLinksResearchMode);
+                    } else if (interview.externalLinksToIncludeAutomatically === -1 || interview.includeExternalLinks === true) {
+                        $('#external-links-research-mode').val('auto');
+                    } else {
+                        $('#external-links-research-mode').val('disabled');
+                    }
+                    
+                    // Handle custom external links
+                    if (interview.useCustomExternalLinks || (interview.externalLinksToUse && interview.externalLinksToUse.length > 0)) {
+                        $('#use-custom-external-links').prop('checked', true).trigger('change');
+                    }
+                    $('#external-links-to-use').val(Array.isArray(interview.externalLinksToUse) ? interview.externalLinksToUse.join('\n') : '');
+                    $('#notes-for-writer').val(interview.notesForWriter || '');
+                    
+                    // Populate image configuration
+                    const imagesConfig = interview.imagesConfig || {};
+                    const aiImagesCount = imagesConfig.aiImagesCount || -1;
+                    
+                    if (aiImagesCount === -1) {
+                        $('#ai-images-mode').val('auto');
+                    } else if (aiImagesCount === 0) {
+                        $('#ai-images-mode').val('disabled');
+                    } else {
+                        $('#ai-images-mode').val('custom');
+                        $('#ai-images-count').val(aiImagesCount);
+                    }
+                    $('#ai-images-mode').trigger('change');
+                    
+                    if (imagesConfig.aiImagesUserDescriptions && imagesConfig.aiImagesUserDescriptions.length > 0) {
+                        $('#use-custom-ai-descriptions').prop('checked', true).trigger('change');
+                        setTimeout(function() {
+                            imagesConfig.aiImagesUserDescriptions.forEach(function(desc, index) {
+                                $('.ai-image-description[data-index="' + index + '"]').val(desc || '');
+                            });
+                        }, 100);
+                    }
+                    
+                    // Populate user images
+                    $('#user-images-list').empty();
+                    userImageCounter = 0;
+                    if (imagesConfig.useUserImages && Array.isArray(imagesConfig.userImages)) {
+                        imagesConfig.userImages.forEach(function(userImage) {
+                            if (userImage.sourceValue) {
+                                $('#add-user-image').trigger('click');
+                                const $lastItem = $('#user-images-list .user-image-item').last();
+                                $lastItem.find('.user-image-source-type').val(userImage.sourceType || '');
+                                $lastItem.find('.user-image-source-value').val(userImage.sourceValue || '');
+                                $lastItem.find('.user-image-alt').val(userImage.suggestedAlt || '');
+                                if (userImage.notes) {
+                                    const notesParts = userImage.notes.split('\n\nUsage: ');
+                                    $lastItem.find('.user-image-description').val(notesParts[0] || '');
+                                    if (notesParts[1]) {
+                                        $lastItem.find('.user-image-notes').val(notesParts[1] || '');
+                                    }
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    alert('<?php esc_html_e('Failed to load interview data.', 'autoblogger'); ?>');
+                }
+            },
+            error: function() {
+                alert('<?php esc_html_e('Failed to load interview data. Please try again.', 'autoblogger'); ?>');
+            }
+        });
+    }
 });
 </script>
