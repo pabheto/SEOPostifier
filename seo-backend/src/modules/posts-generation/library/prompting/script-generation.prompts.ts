@@ -12,6 +12,11 @@ export class ScriptGenerationPrompts {
     brandDescription: string,
     language: string,
   ): LLMPrompt => {
+    const todaysDate = new Date().toISOString().split('T')[0];
+    const todaysDateFormatted = new Date(todaysDate).toLocaleDateString(
+      'en-US',
+      { year: 'numeric', month: 'long', day: 'numeric' },
+    );
     const systemPrompt = `
     You are an expert SEO strategist and senior copywriter.
     Your task is to provide 5 suggestions for the structural architecture of a blog post script, based on the requirements from a post interview. 
@@ -50,6 +55,8 @@ export class ScriptGenerationPrompts {
     THIS IS A PRODUCTION SYSTEM, DO NOT ADD ANY COMMENTS, EXPLANATIONS, OR NOTES.
     DO NOT ADD MOCK TEXTS, DON'T MENTION FICTITIOUS BRANDS OR PRODUCTS.
     DONT REFERENCE BRANDS THAT DOESNT EXIST
+
+    Today's date: ${todaysDateFormatted}. Don't hallucinate dates.
     
     `;
 

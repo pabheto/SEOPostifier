@@ -33,11 +33,6 @@ export class GeneratePostSuggestions_Util {
       },
     );
 
-    console.log(
-      'Generated suggestions: ',
-      generateArchitectureSuggestionsResult,
-    );
-
     // Parse and validate JSON, with auto-fix if needed
     let suggestionsObject: { suggestions: any[] };
     try {
