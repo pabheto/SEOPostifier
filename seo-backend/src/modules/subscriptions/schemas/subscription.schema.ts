@@ -5,7 +5,7 @@ import { PlanIdentifier } from '../plans/plans.definition';
 @Schema({ timestamps: true })
 export class UserSubscription extends Document {
   @Prop({ type: String, required: true, unique: true, index: true })
-  userId: string;
+  appUserId: string;
 
   @Prop({ required: true })
   plan: PlanIdentifier;

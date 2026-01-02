@@ -240,9 +240,9 @@ export class SubscriptionsController {
 
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as any;
-        const userId = subscription.metadata?.userId;
-        if (userId) {
-          await this.subscriptionService.cancelSubscription(userId);
+        const appUserId = subscription.metadata?.appUserId;
+        if (appUserId) {
+          await this.subscriptionService.cancelSubscription(appUserId);
         }
         break;
       }

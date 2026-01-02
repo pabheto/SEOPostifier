@@ -64,7 +64,7 @@ export class StripeService {
    * Create a Stripe checkout session
    */
   async createCheckoutSession(
-    userId: string,
+    appUserId: string,
     userEmail: string,
     plan: PlanIdentifier,
     billingPeriod: BillingPeriod,
@@ -99,13 +99,13 @@ export class StripeService {
         success_url: successUrl,
         cancel_url: cancelUrl,
         metadata: {
-          userId,
+          appUserId,
           plan,
           billingPeriod,
         },
         subscription_data: {
           metadata: {
-            userId,
+            appUserId,
             plan,
             billingPeriod,
           },
@@ -113,7 +113,7 @@ export class StripeService {
       });
 
       this.logger.log(
-        `Created checkout session ${session.id} for user ${userId} and plan ${plan}`,
+        `Created checkout session ${session.id} for user ${appUserId} and plan ${plan}`,
       );
 
       return session;

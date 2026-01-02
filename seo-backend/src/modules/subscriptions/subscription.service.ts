@@ -18,10 +18,10 @@ export class SubscriptionService {
   ) {}
 
   async getSubscriptionForUser(
-    userId: string,
+    appUserId: string,
   ): Promise<UserSubscription | null> {
     const subscription = await this.subscriptionModel
-      .findOne({ userId })
+      .findOne({ appUserId })
       .exec();
     if (!subscription) {
       return null;
@@ -29,9 +29,11 @@ export class SubscriptionService {
     return subscription as UserSubscription;
   }
 
-  async createSubscriptionForUser(userId: string): Promise<UserSubscription> {
+  async createSubscriptionForUser(
+    appUserId: string,
+  ): Promise<UserSubscription> {
     const subscription = await this.subscriptionModel.create({
-      userId,
+      appUserId,
       plan: PlanIdentifier.FREE,
       billingPeriodStart: new Date(Date.now()),
       billingPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -40,19 +42,19 @@ export class SubscriptionService {
   }
 
   async getOrCreateSubscriptionForUser(
-    userId: string,
+    appUserId: string,
   ): Promise<UserSubscription> {
     const subscription = await this.subscriptionModel
-      .findOne({ userId })
+      .findOne({ appUserId })
       .exec();
     if (!subscription) {
-      return this.createSubscriptionForUser(userId);
+      return this.createSubscriptionForUser(appUserId);
     }
     return subscription as UserSubscription;
   }
 
-  async changePlanForUserSubscription(userId: string, plan: PlanIdentifier) {
-    const subscription = await this.getOrCreateSubscriptionForUser(userId);
+  async changePlanForUserSubscription(appUserId: string, plan: PlanIdentifier) {
+    const subscription = await this.getOrCreateSubscriptionForUser(appUserId);
     if (!subscription) {
       throw new Error('Subscription not found');
     }
@@ -67,8 +69,8 @@ export class SubscriptionService {
   async updateSubscriptionFromStripe(
     stripeSubscription: Stripe.Subscription,
   ): Promise<UserSubscription> {
-    const userId = stripeSubscription.metadata?.userId;
-    if (!userId) {
+    const appUserId = stripeSubscription.metadata?.appUserId;
+    if (!appUserId) {
       throw new Error('User ID not found in Stripe subscription metadata');
     }
 
@@ -109,7 +111,9 @@ export class SubscriptionService {
     );
 
     // Find or create subscription
-    let subscription = await this.subscriptionModel.findOne({ userId }).exec();
+    let subscription = await this.subscriptionModel
+      .findOne({ appUserId })
+      .exec();
 
     if (subscription) {
       subscription.plan = plan;
@@ -122,7 +126,7 @@ export class SubscriptionService {
       await subscription.save();
     } else {
       subscription = await this.subscriptionModel.create({
-        userId,
+        appUserId,
         plan,
         stripeCustomerId: stripeSubscription.customer as string,
         stripeSubscriptionId: stripeSubscription.id,
@@ -134,7 +138,7 @@ export class SubscriptionService {
     }
 
     this.logger.log(
-      `Updated subscription for user ${userId} from Stripe webhook`,
+      `Updated subscription for user ${appUserId} from Stripe webhook`,
     );
 
     return subscription as UserSubscription;
@@ -144,10 +148,10 @@ export class SubscriptionService {
    * Update subscription when customer is created/updated
    */
   async updateSubscriptionCustomerId(
-    userId: string,
+    appUserId: string,
     customerId: string,
   ): Promise<UserSubscription> {
-    const subscription = await this.getOrCreateSubscriptionForUser(userId);
+    const subscription = await this.getOrCreateSubscriptionForUser(appUserId);
     subscription.stripeCustomerId = customerId;
     await subscription.save();
     return subscription;
@@ -156,9 +160,9 @@ export class SubscriptionService {
   /**
    * Cancel subscription (mark as canceled in database)
    */
-  async cancelSubscription(userId: string): Promise<UserSubscription> {
+  async cancelSubscription(appUserId: string): Promise<UserSubscription> {
     const subscription = await this.subscriptionModel
-      .findOne({ userId })
+      .findOne({ appUserId })
       .exec();
 
     if (!subscription) {
