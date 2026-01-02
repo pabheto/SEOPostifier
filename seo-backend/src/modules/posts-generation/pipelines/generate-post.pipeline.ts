@@ -406,7 +406,9 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       postInterview.targetAudience,
       postInterview.toneOfVoice,
       postInterview.language,
-      postInterview.generatedScriptDefinition.head.introductionLengthRange,
+      postInterview.generatedScriptDefinition.head.introductionLengthRange ?? [
+        200, 400,
+      ],
     );
 
     const introductionPromise = this.groqService.generate(introPrompt, {
