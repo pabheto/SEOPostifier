@@ -30,7 +30,10 @@ import {
   SERP_SearchResult,
 } from '../library/interfaces/serp.interfaces';
 import { buildPipelineId } from '../library/pipelines/pipeline-ids.util';
-import { PipelineHighLevelStatus } from '../library/pipelines/pipeline-status.interface';
+import {
+  PipelineHighLevelStatus,
+  PipelineVerbosedStatus,
+} from '../library/pipelines/pipeline-status.interface';
 import {
   AvailablePipelines,
   BasePipelineContext,
@@ -754,5 +757,96 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       default:
         throw new Error(`Unhandled step: ${context.step as string}`);
     }
+  }
+
+  async getGenerationStatus(
+    context: GeneratePostPipeline_Context,
+  ): Promise<PipelineVerbosedStatus> {
+    if (!context) {
+      return {
+        status: PipelineHighLevelStatus.NOT_STARTED,
+        statusLabel: 'Not started',
+      };
+    }
+
+    if (context.step === GeneratePostPipelineStep.CREATE_SERP_RESEARCH_PLAN) {
+      return {
+        status: PipelineHighLevelStatus.IN_PROGRESS,
+        progress: 10,
+        statusLabel: 'Creating SERP research plan',
+      };
+    }
+
+    if (
+      context.step ===
+      GeneratePostPipelineStep.GATHER_AND_SUMMARIZE_EXA_RESEARCH_RESULTS
+    ) {
+      return {
+        status: PipelineHighLevelStatus.IN_PROGRESS,
+        progress: 15,
+        statusLabel: 'Studying the web to gather information',
+      };
+    }
+
+    if (context.step === GeneratePostPipelineStep.CREATE_SCRIPT_DRAFT) {
+      return {
+        status: PipelineHighLevelStatus.IN_PROGRESS,
+        progress: 20,
+        statusLabel: 'Creating script draft',
+      };
+    }
+
+    if (context.step === GeneratePostPipelineStep.OPTIMIZE_SCRIPT_DRAFT) {
+      return {
+        status: PipelineHighLevelStatus.IN_PROGRESS,
+        progress: 25,
+        statusLabel: 'Optimizing script draft',
+      };
+    }
+
+    if (
+      context.step === GeneratePostPipelineStep.CREATE_POST_SCRIPT_DEFINITION
+    ) {
+      return {
+        status: PipelineHighLevelStatus.IN_PROGRESS,
+        progress: 50,
+        statusLabel: 'Creating post script definition',
+      };
+    }
+
+    if (context.step === GeneratePostPipelineStep.GENERATE_POST_PARTS) {
+      return {
+        status: PipelineHighLevelStatus.IN_PROGRESS,
+        progress: 70,
+        statusLabel: 'Generating post parts',
+      };
+    }
+
+    if (context.step === BasePipelineStep.COMPLETED) {
+      return {
+        status: PipelineHighLevelStatus.COMPLETED,
+        progress: 100,
+        statusLabel: 'Completed',
+      };
+    }
+
+    if (context.step === BasePipelineStep.CANCELLED) {
+      return {
+        status: PipelineHighLevelStatus.CANCELLED,
+        statusLabel: 'Cancelled',
+      };
+    }
+
+    if (context.step === BasePipelineStep.FAILED) {
+      return {
+        status: PipelineHighLevelStatus.FAILED,
+        statusLabel: 'Failed',
+      };
+    }
+
+    return {
+      status: PipelineHighLevelStatus.IN_PROGRESS,
+      statusLabel: 'In progress',
+    };
   }
 }

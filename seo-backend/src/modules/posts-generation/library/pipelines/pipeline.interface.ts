@@ -1,6 +1,9 @@
 import { RedisStorageService } from 'src/modules/storage';
 import { RedisKeys } from 'src/modules/storage/library/utils/redis-keys.util';
-import { PipelineHighLevelStatus } from './pipeline-status.interface';
+import {
+  PipelineHighLevelStatus,
+  PipelineVerbosedStatus,
+} from './pipeline-status.interface';
 
 export enum AvailablePipelines {
   GENERATE_POST_PIPELINE = 'GENERATE_POST_PIPELINE',
@@ -76,4 +79,8 @@ export abstract class Pipeline<TContext extends BasePipelineContext<string>> {
   }
 
   abstract runOnce(context: TContext): Promise<PipelineStepOutcome>;
+
+  abstract getGenerationStatus(
+    context: TContext,
+  ): Promise<PipelineVerbosedStatus>;
 }

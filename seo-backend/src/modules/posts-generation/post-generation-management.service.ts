@@ -5,10 +5,7 @@ import {
   PipelineHighLevelStatus,
   PipelineVerbosedStatus,
 } from './library/pipelines/pipeline-status.interface';
-import {
-  AvailablePipelines,
-  BasePipelineStep,
-} from './library/pipelines/pipeline.interface';
+import { AvailablePipelines } from './library/pipelines/pipeline.interface';
 import {
   GeneratePost_Pipeline,
   GeneratePostPipeline_Context,
@@ -46,10 +43,6 @@ export class PostGenerationManagementService {
       );
     }
 
-    await this.logger.log(
-      `Scheduling generation for post interview ${postInterview.interviewId} with user id ${postInterview.userId}`,
-    );
-
     const pipelineId =
       await this.generatePostPipeline.initialize(postInterview);
     await this.pipelineOrchestrator.enqueuePipelineStep(pipelineId);
@@ -60,39 +53,14 @@ export class PostGenerationManagementService {
   ): Promise<PipelineVerbosedStatus> {
     const generationContext =
       await this.getGenerationContext_PostInterview(postInterview);
-
     if (!generationContext) {
       return {
         status: PipelineHighLevelStatus.NOT_STARTED,
         statusLabel: 'Not started',
       };
     }
-
-    if (generationContext.step === BasePipelineStep.COMPLETED) {
-      return {
-        status: PipelineHighLevelStatus.COMPLETED,
-        progress: 100,
-        statusLabel: 'Completed',
-      };
-    }
-
-    if (generationContext.step === BasePipelineStep.CANCELLED) {
-      return {
-        status: PipelineHighLevelStatus.CANCELLED,
-        statusLabel: 'Cancelled',
-      };
-    }
-
-    if (generationContext.step === BasePipelineStep.FAILED) {
-      return {
-        status: PipelineHighLevelStatus.FAILED,
-        statusLabel: 'Failed',
-      };
-    }
-
-    return {
-      status: PipelineHighLevelStatus.IN_PROGRESS,
-      statusLabel: 'In progress',
-    };
+    return await this.generatePostPipeline.getGenerationStatus(
+      generationContext,
+    );
   }
 }
