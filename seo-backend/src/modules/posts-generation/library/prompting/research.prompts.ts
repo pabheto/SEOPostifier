@@ -47,6 +47,7 @@ RESEARCH INTENT TYPES (use these exact values):
 - common_mistakes
 - use_cases
 - case_studies
+- commercial // used when you need to find competitors, example: best 10 house brokers in Spain
 
 Generate only the intents that are relevant to the topic.
 Quality > quantity.
@@ -75,7 +76,7 @@ OUTPUT JSON STRUCTURE:
   "country": "string", // example "ES"
   "researchQueries": [
     {
-      "intent": "definition | official_docs | best_practices | how_to | statistics | comparisons | common_mistakes | use_cases | case_studies",
+      "intent": "definition | official_docs | best_practices | how_to | statistics | comparisons | common_mistakes | use_cases | case_studies | commercial",
       "query": "search query text",
       "priority": 1 | 2 | 3
     }
@@ -106,6 +107,12 @@ OUTPUT JSON STRUCTURE:
   - NEVER invent facts, statistics, or claims
   - NEVER reference page content directly, we want to extract facts knowledge, not "this page says that"
   - AVOID bringing outdated information, use the most recent information available. Today's date is ${today}.
+
+  CUSTOM SUMMARY RULES:
+  - If the content is not good to be summarized in the facts and snippets form, you can fill the customSummary field
+  - ONLY or (customSummary) or (facts & snippets).
+  - You use facts for statistical data
+  - You use customSummary for commercial and generical data. Example: The best 5 house brokers in Spain
     
   FACT EXTRACTION RULES:
   - Extract ONLY facts explicitly stated in the content
@@ -173,10 +180,11 @@ OUTPUT JSON STRUCTURE:
       "metadata": {
         "authority": "high | medium",
         "contentType": "official_docs | blog | research | news | reference",
-        "facts": [
+        "customSummary": "string", // optional
+        "facts": [ // optional
           "string"
         ],
-        "contextSnippets": [
+        "contextSnippets": [ // optional
           "string"
         ],
         "usage": {

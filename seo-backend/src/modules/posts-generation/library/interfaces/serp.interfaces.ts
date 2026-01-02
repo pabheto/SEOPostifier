@@ -25,8 +25,9 @@ export type SERP_SearchResultMetadata = {
   // Quality / trustworthiness
   authority: 'high' | 'medium';
   contentType: 'official_docs' | 'blog' | 'research' | 'news' | 'reference';
-  facts: string[]; // 3–6 atomic, citation-ready facts
-  contextSnippets: string[]; // 2–4 snippets, 2–3 sentences, original wording
+  customSummary?: string; // Custom summary of the content, crafted when facts and contextSnippets are not a good format for the type of data
+  facts?: string[]; // 3–6 atomic, citation-ready facts
+  contextSnippets?: string[]; // 2–4 snippets, 2–3 sentences, original wording
   usage: {
     primary: (
       | 'definition'

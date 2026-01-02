@@ -17,10 +17,23 @@ export class PostGenerationPrompts {
     targetAudience: string,
     targetTone: string,
     lang: string,
-    lengthRange?: [number, number],
+    lengthRange: [number, number],
   ): LLMPrompt => {
-    const wordCountInstruction = lengthRange
-      ? `
+    const systemPrompt = `You are an expert SEO copywriter. Write a compelling, SEO-optimized introduction.
+    
+    **Context:**
+    - Title: ${h1}
+    - Description: ${introductionDescription}
+    - Article topics: ${indexSummary}
+    - Tone: ${targetTone}
+    - Audience: ${targetAudience}
+    
+    **Requirements:**
+    - Reflect the purpose and angle from introductionDescription
+    - Stay aligned with h1 topic
+    - Naturally incorporate relevant ideas from tags
+    - Keep tone ${targetTone}, engaging, suitable for ${targetAudience}
+    
     ## CRITICAL WORD COUNT REQUIREMENT
     
     **YOU MUST write EXACTLY ${lengthRange[0]} - ${lengthRange[1]} words total for the introduction.**
@@ -44,33 +57,6 @@ export class PostGenerationPrompts {
     1. Break content into multiple paragraphs of 40-80 words each
     2. Use 120-word paragraphs only for critical, complex explanations that cannot be split
     3. Ensure the total word count of ALL paragraphs combined = ${lengthRange[0]} - ${lengthRange[1]} words
-    `
-      : `
-    ## Word Count Guidance
-    Aim for approximately 200-400 words for the introduction. Be comprehensive but concise.
-    
-    ### Paragraph Structure
-    - Create multiple paragraphs of 40-80 words each
-    - Use 120-word paragraphs only when absolutely necessary
-    - Typically 3-8 paragraphs to reach the target word count
-    `;
-
-    const systemPrompt = `You are an expert SEO copywriter. Write a compelling, SEO-optimized introduction.
-    
-    **Context:**
-    - Title: ${h1}
-    - Description: ${introductionDescription}
-    - Article topics: ${indexSummary}
-    - Tone: ${targetTone}
-    - Audience: ${targetAudience}
-    
-    **Requirements:**
-    - Reflect the purpose and angle from introductionDescription
-    - Stay aligned with h1 topic
-    - Naturally incorporate relevant ideas from tags
-    - Keep tone ${targetTone}, engaging, suitable for ${targetAudience}
-    
-    ${wordCountInstruction}
     
     **Output Format:**
     Return ONLY a JSON object with this structure (no additional text):
@@ -90,7 +76,7 @@ export class PostGenerationPrompts {
     DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
     
     **VALIDATION:**
-    ${lengthRange ? `- Total words across all blocks: ${lengthRange[0]} - ${lengthRange[1]} words` : '- Total words: approximately 200-400 words'}
+    - Total words across all blocks: ${lengthRange[0]} - ${lengthRange[1]} words
     - Each paragraph: 40-80 words (up to 120 if critical)
     - JSON must be valid (double quotes, no trailing commas)
     
@@ -189,8 +175,7 @@ NEVER ADD BACKTICKS, CODEBLOCK FENCES, OR FORMATTING CHARACTERS
 ${section.links.length > 0 ? `- Suggested links must be included in the content as long as they make sense` : ''}
 - JSON must be valid (double quotes, no trailing commas)
 
-DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
-`;
+DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS`;
 
     const userPrompt = `Write the section content following all the specifications provided in the system instructions.`;
 
@@ -206,29 +191,6 @@ DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
     targetTone: string,
     faq: ScriptFAQ,
   ): LLMPrompt => {
-    const wordCountInstruction = faq.lengthRange
-      ? `
-## CRITICAL WORD COUNT REQUIREMENT
-
-**YOU MUST write a FAQ section with EXACTLY ${faq.lengthRange[0]} - ${faq.lengthRange[1]} total words across all questions and answers combined.**
-
-This is a HARD REQUIREMENT. The total word count of all questions and answers must be within this range:
-- Minimum: ${faq.lengthRange[0]} words
-- Maximum: ${faq.lengthRange[1]} words
-
-**How to ensure correct word count:**
-1. Count words in all questions and answers combined
-2. If too short: Expand answers with more detail, examples, or explanations
-3. If too long: Condense answers while keeping key information, or reduce the number of questions
-
-The word count is STRICTLY ENFORCED. Your response will be rejected if it doesn't meet this requirement.
-`
-      : `
-## Word Count Guidance
-
-Aim for approximately 300-600 words total across all questions and answers. Be comprehensive but concise.
-`;
-
     const systemPrompt = `You are an expert SEO copywriter. Write a compelling, SEO-optimized FAQ section.
 
 **Context:**
@@ -241,9 +203,22 @@ Aim for approximately 300-600 words total across all questions and answers. Be c
 - Reflect purpose and angle from description
 - Stay aligned with article topic
 - Naturally incorporate relevant ideas
-- Keep tone ${targetTone}, engaging, suitable for ${targetAudience}
+- Keep tone engaging and suitable for the target audience
 
-${wordCountInstruction}
+## CRITICAL WORD COUNT REQUIREMENT
+
+**YOU MUST write a FAQ section with the specified total word count across all questions and answers combined.**
+
+This is a HARD REQUIREMENT. The total word count of all questions and answers must be within the specified range.
+
+**How to ensure correct word count:**
+1. Count words in all questions and answers combined
+2. If too short: Expand answers with more detail, examples, or explanations
+3. If too long: Condense answers while keeping key information, or reduce the number of questions
+
+The word count is STRICTLY ENFORCED. Your response will be rejected if it doesn't meet this requirement.
+
+If no specific word count is provided, aim for approximately 300-600 words total across all questions and answers. Be comprehensive but concise.
 
 **Output Format:**
 DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
@@ -252,12 +227,10 @@ Return ONLY a JSON object (no additional text, no formatting characters):
   "questions": string[],
   "answers": string[]
 }
-  
 
-**REMINDER: Total words (questions + answers) = ${faq.lengthRange ? `${faq.lengthRange[0]} - ${faq.lengthRange[1]} words` : '300-600 words'}**
+**REMINDER: Follow the word count requirements strictly**
 
-DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
-`;
+DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS`;
 
     const userPrompt = `Generate the FAQ section following all the specifications provided in the system instructions.`;
 

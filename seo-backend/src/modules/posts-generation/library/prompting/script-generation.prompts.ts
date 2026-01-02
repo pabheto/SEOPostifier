@@ -105,6 +105,7 @@ export class ScriptGenerationPrompts {
     You MUST NOT:
     - Invent facts, statistics, studies, or sources
     - Mention fictitious brands, tools, products, names or companies
+    - DO NOT ADD PLACEHOLDERS NEVER NEVER NEVER
     - Add explanations, comments, or meta notes
     - Create links that are not explicitly present in the knowledge base
     
@@ -223,6 +224,7 @@ export class ScriptGenerationPrompts {
     You are writting with not updated context
     Your draft will be sent later to a specialist writer with full context
     For that, in each section, you have to specify the knowledge summary that you want to fit in that part
+    DO NOT ADD PLACEHOLDERS NEVER NEVER NEVER
     
     
     ## SYSTEM INSTRUCTIONS
@@ -280,6 +282,7 @@ export class ScriptGenerationPrompts {
         Include facts from the knowledge base that supports the authority of the content of the post.
         Make sure to add up to ${postInterview.externalLinksToIncludeAutomatically} external links automatically from the knowledge base along the 
         different sections of the script to create valuable backlinks.
+        YOU CAN ONLY USE UP TO ${postInterview.externalLinksToIncludeAutomatically} REFERENCES TO LINKS, SPLIT THEM ALONG SECTIONS PROPERLY.
         Bring data that creates authority and trustworthiness to the content.
 
         ** Word count validation **
@@ -304,7 +307,6 @@ This is the format for the incorporations in the script sections
         description: "Clear prompt for image generation and detailed description. You MUST create natural images, that can't be easily identified as AI generated. Avoid writting ghost texts, complex statistics"
         alt: "SEO-friendly alt text in ${postInterview.language}"
         \`\`\`
-
         
         Example: 
         - Make sure that the keyword usage is correct and natural, matching the keyword density target of ${postInterview.keywordDensityTarget}.
@@ -340,6 +342,8 @@ This is the format for the incorporations in the script sections
         ${JSON.stringify(serpKnowledgeBase, null, 2)}
 
         This is the internal links meta, use this for getting internal links:
+        DO NOT HALLUCIATE ON THEM, BASED ON THEIR TITLES AND DESCRIPTIONS LINK THEM IN SECTIONS PROPERLY
+        ADD A MAXIMUM OF 1 PER SECTION.
         ${postInterview.blogInternalLinksMeta}
         `,
       ],
@@ -412,6 +416,7 @@ Important instructions:
    - "indexSummary" RULES: Summary of the article structure.
      - One line per section: [H2|H3|H4] Title: 30-40 word summary + estimated length
      - Total word count (intro + sections + FAQ) must match user requirements
+     - Include a description of the article main intents and points that we want to have covered
 
 2. "head" RULES
    - h1: Main title (extract from outline or create if missing)
@@ -464,7 +469,7 @@ Important instructions:
    - You may: complete unclear titles, group scattered points, add intro/conclusion if needed
    - Remove redundancies along sections to make sure every paragraph is unique and adds value to the content.
    - Ensure consistent hierarchy: h1 → h2 → h3 → h4
-   - Do minor adjustements on word length of all sections to match the user requirement of the total word count of ${postInterview.minWordCount} - ${postInterview.maxWordCount} words.
+   - Do minor adjustements on word length of all sections to match the user requirement of the total word count of ${postInterview.minWordCount} - ${postInterview.maxWordCount} words between all the sections (faq included)
 
 6. VALIDATION REQUIREMENTS
    - JSON must be valid: double quotes only, no trailing commas
@@ -473,7 +478,6 @@ Important instructions:
 
   THIS IS A PRODUCTION SYSTEM, DO NOT ADD ANY COMMENTS, EXPLANATIONS, OR NOTES.
   DO NOT ADD MOCK TEXTS, DON'T MENTION FICTITIOUS BRANDS OR PRODUCTS.
-
 `;
 
     const userPrompt = `

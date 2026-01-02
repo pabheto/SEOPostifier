@@ -67,6 +67,8 @@ export type GeneratePostPipeline_Context =
     serpKnowledgeBase?: RESPONSE_SummarizeSERP_SearchResults;
     exaResearchResults?: any;
     exaCleanedResearchResults?: any;
+    firstScriptDraft?: string;
+    optimizedScriptDraft?: string;
   };
 
 // Each pipeline step receives context and returns context
@@ -296,6 +298,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
     const updatedContext: GeneratePostPipeline_Context = {
       ...context,
       postInterview,
+      firstScriptDraft: createScriptDraftResult.content,
     };
 
     return updatedContext;
@@ -336,6 +339,7 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
     const updatedContext: GeneratePostPipeline_Context = {
       ...context,
       postInterview,
+      optimizedScriptDraft: optimizeScriptDraftResult.content,
     };
 
     return updatedContext;
