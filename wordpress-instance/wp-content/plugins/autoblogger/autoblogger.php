@@ -5,7 +5,7 @@
  * Description: Automatically generates WordPress posts with SEO optimizations using AI-powered backend. Includes automatic SEO meta integration for Yoast SEO, RankMath, and All in One SEO.
  * Version: 1.0.0
  * Author: Autoblogger
- * Author URI: https://autoblogger.es
+ * Author URI: https://beto.consulting
  * Contributors: pabheto
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
