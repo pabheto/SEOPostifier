@@ -194,6 +194,7 @@ export class ScriptGenerationPrompts {
     Your draft will be sent later to a specialist writer with full context
     For that, in each section, you have to specify the knowledge summary that you want to fit in that part
     DO NOT ADD PLACEHOLDERS NEVER NEVER NEVER
+    DO NOT CREATE STORY TELLING WITH FAKE NAMES
     
     ## SYSTEM INSTRUCTIONS
     This is a **production system**.
