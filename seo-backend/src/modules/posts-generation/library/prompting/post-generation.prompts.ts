@@ -11,6 +11,27 @@ export type FAQResult = {
 };
 
 export class PostGenerationPrompts {
+  private static readonly FORMATTING_RULES = `
+## CRITICAL FORMATTING RULES
+
+**Content Formatting:**
+- Write plain text content suitable for blog publishing
+- DO NOT use markdown formatting (bold, italic, headers, etc.)
+- DO NOT use special characters for styling (*, _, #, etc.)
+- Write naturally flowing paragraphs as they would appear in a published blog post
+
+**Link Formatting (ONLY Exception):**
+- Links MUST be in markdown format: [link text](url)
+- ONLY use links that are explicitly provided in the prompt
+- NEVER create, invent, or hallucinate links that were not provided
+- If no links are provided, do not include any links in the content
+
+**Output Format:**
+- Return ONLY a valid JSON object (no additional text, explanations, or formatting)
+- DO NOT wrap JSON in code blocks, backticks, or any other formatting characters
+- Ensure proper JSON syntax (double quotes, no trailing commas)
+`;
+
   static readonly COPYWRITER_INTRODUCTION_PROMPT = (
     postInterview: PostInterview,
   ): LLMPrompt => {
@@ -64,7 +85,7 @@ export class PostGenerationPrompts {
     }
     --- END OUTPUT FORMAT TEMPLATE ---
     
-    DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
+    ${PostGenerationPrompts.FORMATTING_RULES}
     `;
 
     const userPrompt = `Write the introduction following all the specifications provided in the system instructions.
@@ -94,12 +115,18 @@ export class PostGenerationPrompts {
     const linksSection =
       section.links.length > 0
         ? `
-    **Links to Include:**
-    ${section.links.map((link) => `- [${link.type}]${link.url} - ${link.description}`).join('\n')}
-    - Naturally integrate ALL links throughout the section
-    - Use markdown format: [link text](url)
+    **Links to Include (MANDATORY - Do NOT create any other links):**
+    ${section.links.map((link) => `- [${link.type}] ${link.url} - ${link.description}`).join('\n')}
+    
+    **IMPORTANT:** 
+    - You MUST naturally integrate ALL the links listed above throughout the section
+    - Use ONLY these links - do NOT create, invent, or add any other links
+    - Format as markdown: [link text](url)
+    - Distribute links naturally across paragraphs
     `
-        : '';
+        : `
+    **IMPORTANT:** No links have been provided for this section. Do NOT create or add any links.
+    `;
 
     const systemPrompt = `You are an expert SEO copywriter. Write compelling, SEO-optimized content for this section.
 
@@ -140,7 +167,7 @@ export class PostGenerationPrompts {
     }
     --- END OUTPUT FORMAT TEMPLATE ---
     
-    DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
+    ${PostGenerationPrompts.FORMATTING_RULES}
     `;
 
     const userPrompt = `Write the section content following all the specifications provided in the system instructions.`;
@@ -178,7 +205,7 @@ export class PostGenerationPrompts {
     }
     --- END OUTPUT FORMAT TEMPLATE ---
     
-    DO NOT ADD ANY CODEBLOCK FENCES, BACKTICKS, OR FORMATTING CHARACTERS
+    ${PostGenerationPrompts.FORMATTING_RULES}
     `;
 
     const userPrompt = `Write the FAQ section following all the specifications provided in the system instructions.

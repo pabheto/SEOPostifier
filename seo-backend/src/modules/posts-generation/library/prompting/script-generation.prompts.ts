@@ -57,6 +57,7 @@ export class ScriptGenerationPrompts {
     DONT REFERENCE BRANDS THAT DOESNT EXIST
 
     Today's date: ${todaysDateFormatted}. Don't hallucinate dates.
+    Avoid giving titles for previous years unless is specified by the user.
     
     `;
 
@@ -101,6 +102,8 @@ export class ScriptGenerationPrompts {
 
     The post should cover the user intent ${postInterview.mainKeyword}, you shouldn't create placeholders for generic content
     You have to create a draft that can be used to create a post that covers the search
+    Example: If the intent is to 'best restaurant in Spain', the script should show the best restaurant and not only a guide to find it, and it should have a big clear point for that.
+    A user without expending much attention in the post sections, should be able to know what the post is about and what's the resolution.
 
     ---
     
@@ -285,6 +288,7 @@ This is the format for the incorporations in the script sections
         - NEVER invent URLs, slugs, or internal links.
         - Only use links explicitly present in the provided knowledge base or internal links meta.
         - If no relevant link exists, do not add a link.
+        - Avoid using the AI images to generate analytics or texts
 
         This is the user requirements:
         Word count: ${postInterview.minWordCount} - ${postInterview.maxWordCount} words.

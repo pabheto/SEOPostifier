@@ -182,6 +182,12 @@ export class NanoBananaImageGenerationService {
       '8K resolution quality',
       'no oversaturation or artificial enhancement',
       'lifelike and believable',
+      'absolutely no text, words, letters, or writing of any kind',
+      'no captions, labels, or typography',
+      'completely text-free image',
+      'no signs or billboards with visible text',
+      'no watermarks or text overlays',
+      'no numbers or written characters',
     ].join(', ');
 
     let aspectRatioInstruction = '';
