@@ -69,6 +69,7 @@ export type GeneratePostPipeline_Context =
     serpResearchPlan?: SERP_ResearchPlan;
     serpKnowledgeBase?: RESPONSE_SummarizeSERP_SearchResults;
     exaResearchResults?: any;
+
     exaCleanedResearchResults?: any;
     firstScriptDraft?: string;
     optimizedScriptDraft?: string;
@@ -402,17 +403,8 @@ export class GeneratePost_Pipeline extends Pipeline<GeneratePostPipeline_Context
       throw new BadRequestException('Script definition not generated');
     }
 
-    const introPrompt = PostGenerationPrompts.COPYWRITER_INTRODUCTION_PROMPT(
-      postInterview.generatedScriptDefinition.indexSummary,
-      postInterview.generatedScriptDefinition.head.h1,
-      postInterview.generatedScriptDefinition.head.introductionDescription,
-      postInterview.targetAudience,
-      postInterview.toneOfVoice,
-      postInterview.language,
-      postInterview.generatedScriptDefinition.head.introductionLengthRange ?? [
-        200, 400,
-      ],
-    );
+    const introPrompt =
+      PostGenerationPrompts.COPYWRITER_INTRODUCTION_PROMPT(postInterview);
 
     const introductionPromise = this.groqService.generate(introPrompt, {
       model: GroqModel.GPT_OSS_120B_MODEL,

@@ -59,7 +59,7 @@ define( 'LOGGED_IN_SALT',    '|@hwu$b-& $Ul%MxZ_xyY>Xb[ ivx:5/Y}L6w|y2;y8J)CGE]-
 define( 'NONCE_SALT',        '/Ba6y3Pz9cq99]?y3.}B`i`B:>(yH$a4|NWq`>5z@usO]62FhfmY-Qd9Eq<14yw+' );
 define( 'WP_CACHE_KEY_SALT', 'KIBQ`L(M_ym?!<qM {&WpIWc)gJ5^UjJHds!jC( A2O%~`&bg-A?IoRx=T67u>P&' );
 
-// putenv('SEO_BACKEND_URL=http://localhost:4000/');
+putenv('SEO_BACKEND_URL=http://localhost:4000/');
 
 /**#@-*/
 

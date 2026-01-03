@@ -52,6 +52,8 @@ RESEARCH INTENT TYPES (use these exact values):
 Generate only the intents that are relevant to the topic.
 Quality > quantity.
 
+Create all the queries in the language ${postInterview.language}.
+
 OUTPUT FORMAT:
 Return ONLY valid JSON.
 Do NOT add explanations, comments, or formatting.
@@ -71,14 +73,18 @@ REQUIREMENTS:
 - Queries must be suitable for discovering authoritative sources
 - Avoid redundancy between queries
 
+EXAMPLES:
+- When finding the best 10 house brokers in Spain, the intent should be "commercial" and the query should be "best 10 house brokers in Spain".
+
+
 OUTPUT JSON STRUCTURE:
 {
   "country": "string", // example "ES"
   "researchQueries": [
     {
-      "intent": "definition | official_docs | best_practices | how_to | statistics | comparisons | common_mistakes | use_cases | case_studies | commercial",
+      "intent": "string", // examples: "definition | official_docs | best_practices | how_to | statistics | comparisons | common_mistakes | use_cases | case_studies | commercial",
       "query": "search query text",
-      "priority": 1 | 2 | 3
+      "priority": "1 | 2 | 3" // 1 = high priority, 2 = medium priority, 3 = low priority
     }
   ]
 }
@@ -113,6 +119,8 @@ OUTPUT JSON STRUCTURE:
   - ONLY or (customSummary) or (facts & snippets).
   - You use facts for statistical data
   - You use customSummary for commercial and generical data. Example: The best 5 house brokers in Spain
+  - When bringing commercial data, is important to bring trustful sources, for example, official link of the places
+  - Maximum of 300 words
     
   FACT EXTRACTION RULES:
   - Extract ONLY facts explicitly stated in the content

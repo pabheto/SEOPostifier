@@ -98,7 +98,10 @@ export class ScriptGenerationPrompts {
     Your task is NOT to write the full article, but to produce a **complete, production-ready SEO script (outline/blueprint)** for a long-form blog post.
     
     This SEO script will later be used by a human or AI writer to generate the final article, so it must be **precise, authoritative, and grounded in real-world data**.
-    
+
+    The post should cover the user intent ${postInterview.mainKeyword}, you shouldn't create placeholders for generic content
+    You have to create a draft that can be used to create a post that covers the search
+
     ---
     
     ## GLOBAL OUTPUT RULES
@@ -115,8 +118,6 @@ export class ScriptGenerationPrompts {
     - DO NOT ADD PLACEHOLDERS NEVER NEVER NEVER
     - Add explanations, comments, or meta notes
     - Create links that are not explicitly present in the knowledge base
-    
-    ---
     
     ## YOUR PRIMARY GOAL
     
@@ -140,65 +141,33 @@ export class ScriptGenerationPrompts {
     
     ## OUTPUT FORMAT (MARKDOWN ONLY)
     
-    ### 1. Title & Meta
-    
-    - **H1**: SEO-optimized title that:
-      - Includes the main keyword naturally
-      - Uses power words when appropriate
-      - May include a number if relevant
-      - Reflects real search intent (informational, commercial, problem-solving)
-    
-    - **Introduction description**:
-      - Clearly explain the problem the article solves
-      - Mention the main keyword ONCE
-      - Include:
-        - Micro-storytelling OR
-        - Real-world facts/statistics derived from the knowledge base (if available)
-      - Outline what the reader will learn
-      - YOU GIVE THE INSTRUCTIONS FOR THE INTRODUCTION, NOT THE INTRODUCTION ITSELF.
+    ## FORMATTING RULES
+    Use pure markdown, no code blocks, no backticks, no formatting characters.
+    Comment inside each section but don't create new sections
 
-    
-    - **Introduction word count**:
-      - ${
-        postInterview.minWordCount && postInterview.maxWordCount
-          ? `${Math.round(postInterview.minWordCount * 0.1)} – ${Math.round(postInterview.maxWordCount * 0.1)} words`
-          : '200 – 400 words'
-      }
+    --- BEGIN FORMAT TEMPLATE ---
+    --- Metadata ---
+    Target audience: (Insert target audience)
+    Search intent: (Insert search intent)
+    Objective of the post: (Insert objective of the post)
 
-      - Slug (3–5 words, URL-friendly)
-      - Tags (3–8 relevant keywords)
-    
-    - **Target article length**:
-      - ${postInterview.minWordCount} – ${postInterview.maxWordCount} words
-        
-    ---
-    
-    ### 2. General Structure of the Article sections
-    
-    List ALL sections with:
-    - Heading level (H2 / H3 / H4)
-    - 1–2 line summary
-    - Exact estimated word count
-    - DO NOT INCLUDE AN INTRODUCTION SECTION AS THERE'S ALREADY ONE
-    
-    Ensure the **sum of all sections + introduction + FAQ** matches the target range.
-    Use EXACTLY this structure for EACH section:
-    
-    \`\`\`markdown
-    ## H2 | H3 | H4 – [Heading]
-    - **Purpose**
-    - **Word count**: [MIN] – [MAX] words
-    - **Search intent covered**
-    - **Main points**: Description of the points that the post redactor will have to take into account when creating the section
-    - **Examples / comparisons**
-    - **Keyword usage** (main + secondary if relevant): Specify the number of times the keywords should be used to match the keyword density ${postInterview.keywordDensityTarget}
-    - **Tone notes**
-    \`\`\`
+    --- Introduction ---
+    Title: [Section title] slug: (Insert slug) tags: (Insert tags)
+    **Word count**: (Insert word count)
+    **Description**: (Insert description)
+
+    --- H2 | H3 | H4 ---
+    Title: [Section title] slug: (Insert slug) tags: (Insert tags)
+    **Word count**: (Insert word count)
+    **Search intent**: (Insert search intent)
+    **Main points**: (Insert main points)
+    **Examples / comparisons**: (Insert examples / comparisons)
+    **Keyword usage (main + secondary if relevant)**: Specify the number of times the keywords should be used to match the keyword density ${postInterview.keywordDensityTarget}
 
     ${
       postInterview.needsFaqSection
         ? `
-    - **3. FAQ section**:
+    - *3. FAQ section*:
       - ${postInterview.minWordCount && postInterview.maxWordCount ? `${Math.round(postInterview.minWordCount * 0.075)} – ${Math.round(postInterview.maxWordCount * 0.075)} words` : '300 – 600 words'}
       - Questions must reflect real user queries and SERP intent
       - Create **4–8 FAQs** based on the real search intent and People-Also-Ask patterns.
@@ -206,26 +175,16 @@ export class ScriptGenerationPrompts {
     `
         : ''
     }
-    
-    ---
+
+    --- END FORMAT TEMPLATE --- 
     
     ## WORD COUNT ENFORCEMENT RULES
-    - **Standard sections (H2/H3/H4)**: 150 – 300 words
-    - **Core sections (max 2–3 total)**: 400 – 500 words
-    - Sections exceeding 500 words MUST be split into sub-sections
+    - H2 optimal size is 150 - 300 words, more should require a split into sub-sections (H3)
+    - Include H3 if:
+        H2 exceeding 300 words
+        H2 has more than 3 sub-sections (H3)
+        You are explaining steps, types, advantages / disadvantages and commercial suggestions
     - Paragraph length: 40 – 80 words (120 words max for critical paragraphs only)
-    
-    ${
-      postInterview.needsFaqSection
-        ? `
-    - **FAQ section**:
-      - ${postInterview.minWordCount && postInterview.maxWordCount ? `${Math.round(postInterview.minWordCount * 0.075)} – ${Math.round(postInterview.maxWordCount * 0.075)} words` : '300 – 600 words'}
-      - Questions must reflect real user queries and SERP intent
-    `
-        : ''
-    }
-    
-    ---
 
     ## THINKING CREATIVE GUIDANCE
     You are writting with not updated context
@@ -233,13 +192,10 @@ export class ScriptGenerationPrompts {
     For that, in each section, you have to specify the knowledge summary that you want to fit in that part
     DO NOT ADD PLACEHOLDERS NEVER NEVER NEVER
     
-    
     ## SYSTEM INSTRUCTIONS
     This is a **production system**.
     No comments. No explanations. No filler. No invented information.
     If something cannot be supported by the knowledge base, keep it generic and factual.
-
-    
     
     `,
       ],
@@ -283,22 +239,27 @@ export class ScriptGenerationPrompts {
         You are an expert SEO strategist. 
         Your goal is to optimize a script to make sure it matches the user requirements.
         You MUST respect the original structure.
-        Your tasks:
-
-        ** External data and links incorporation: **
+        
+        # Your tasks:
+        ## External data and links incorporation:
         Include facts from the knowledge base that supports the authority of the content of the post.
         Make sure to add up to ${postInterview.externalLinksToIncludeAutomatically} external links automatically from the knowledge base along the 
-        different sections of the script to create valuable backlinks.
-        YOU CAN ONLY USE UP TO ${postInterview.externalLinksToIncludeAutomatically} REFERENCES TO LINKS, SPLIT THEM ALONG SECTIONS PROPERLY.
+        different sections of the script to create valuable backlinks. Don't exceed this limit and split them along sections properly.
         Bring data that creates authority and trustworthiness to the content.
 
-        ** Word count validation **
-        - Make sure that the planification of the script sections is correct to match the word count requirement of ${postInterview.minWordCount} - ${postInterview.maxWordCount} words, including the introduction and the FAQ.
+        You should links to topics that are going to be discussed in the section, and add the whole page link, not only the main domain.
+        
 
-        ** Image Incorporation: **
-        - Make sure to add up to ${postInterview.imagesConfig.aiImagesCount} AI images to the script sections to support the content.
+        ## Word count validation
+        - Make sure that the planification of the script sections is correct to match the word count requirement of ${postInterview.minWordCount} - ${postInterview.maxWordCount} words, including the introduction and the FAQ.
+        - Make sure that the keyword usage is correct and natural, matching the keyword density target of ${postInterview.keywordDensityTarget}
+
+        ## Image Incorporation:
+        - Make sure to add up to ${postInterview.imagesConfig.aiImagesCount === -1 ? 0 : postInterview.imagesConfig.aiImagesCount} AI images to the script sections to support the content.
 This is the format for the incorporations in the script sections  
         When an image should be placed in a section, include it in the section's description using this format:
+
+        --- BEGIN IMAGE FORMAT TEMPLATE ---
         
         #### User images
         \`\`\`user-image
@@ -307,6 +268,8 @@ This is the format for the incorporations in the script sections
         title: "Short, descriptive title for the image (used as img title attribute)"
         alt: "SEO-friendly alt text in ${postInterview.language}"
         \`\`\`
+
+        or
         
         #### AI images
         \`\`\`ai-image
@@ -314,12 +277,9 @@ This is the format for the incorporations in the script sections
         description: "Clear prompt for image generation and detailed description. You MUST create natural images, that can't be easily identified as AI generated. Avoid writting ghost texts, complex statistics"
         alt: "SEO-friendly alt text in ${postInterview.language}"
         \`\`\`
-        
-        Example: 
-        - Make sure that the keyword usage is correct and natural, matching the keyword density target of ${postInterview.keywordDensityTarget}.
-        - Remove content redundancies and make sure that the script is clear and concise following EEAT principles.
-        - Incorporate image mentions to support the affirmations ONLY if can be done naturally with the current content structure.
 
+        --- END IMAGE FORMAT TEMPLATE ---
+        
         CRITICAL RULES:
         - You are NOT writting the final post, you are optimizing the given script, that will be later given to a writter
         - NEVER invent URLs, slugs, or internal links.
@@ -332,7 +292,7 @@ This is the format for the incorporations in the script sections
         User description: ${postInterview.userDescription}.
         ${postInterview.mentionsBrand ? `Mentions brand: ${postInterview.brandName}, description: ${postInterview.brandDescription}` : ''}
         Images config:
-        ${postInterview.imagesConfig.aiImagesCount && `You must use up to ${postInterview.imagesConfig.aiImagesCount} AI images.`}
+        ${postInterview.imagesConfig.aiImagesCount !== 0 ? `You must use up to ${postInterview.imagesConfig.aiImagesCount === -1 ? 6 : postInterview.imagesConfig.aiImagesCount} AI images.` : ''}
         ${postInterview.imagesConfig.userImages.length > 0 && `You must use user images: ${postInterview.imagesConfig.userImages.map((image) => `Source: ${image.sourceType}:${image.sourceValue} — Alt: ${image.suggestedAlt || 'none'} — Notes: ${image.notes || 'none'}`).join(', ')}`}
 
         Links config: 

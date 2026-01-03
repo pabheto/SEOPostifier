@@ -62,13 +62,13 @@ export class UserImageDto {
 export class ImagesConfigDto {
   @ApiPropertyOptional({
     description: 'Cuántas imágenes debe generar la IA',
-    minimum: 0,
-    default: 0,
+    minimum: -1,
+    default: -1,
   })
   @IsOptional()
   @IsInt()
   @Min(-1)
-  aiImagesCount?: number = 0;
+  aiImagesCount?: number = -1;
 
   @ApiPropertyOptional({
     description: 'Descripciones de las imágenes generadas por la IA',
